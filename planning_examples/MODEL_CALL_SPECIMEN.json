@@ -1,0 +1,92 @@
+{
+  "schema_version": "0.2-planning",
+  "status": "synthetic model_call field specimen; never sent to a model",
+  "replayable_as_measured_model_run": false,
+  "unavailable_reason": "No model artifact, runtime, tokenizer, or invocation exists in this planning session.",
+  "event": {
+    "id": "MC_SPECIMEN",
+    "seq": 1,
+    "timestamp": "2026-09-14T00:00:01Z",
+    "producer": {
+      "kind": "synthetic_fixture"
+    },
+    "kind": "model_call",
+    "record": {
+      "call_id": "MC1",
+      "role": "claims",
+      "model": {
+        "candidate_name": "Qwen3.5-9B",
+        "artifact_digest": null,
+        "quantization": null
+      },
+      "runtime": {
+        "name": "Ollama candidate",
+        "version": null
+      },
+      "chat_template": {
+        "id": null,
+        "hash": null
+      },
+      "prompt_files": [
+        {
+          "role": "claims",
+          "logical_path": "synthetic/claims.txt",
+          "content": "Return a claim object for the exact supplied TOML field. Preserve source scope. Do not infer runtime state.",
+          "content_hash": "sha256:18d81a0af9d600b02642379f0b7b38496cc24cb07fa5dd346829067b9c309e24"
+        }
+      ],
+      "schema_hash": "sha256:c413ddff44d699bc5315ce3b9cee9a4daa6db9845d647b25acb47af7a8b29acb",
+      "options": {
+        "num_ctx": 8192,
+        "temperature": 0,
+        "seed": 42
+      },
+      "exact_serialized_input": "{\"messages\":[{\"content\":\"Return a claim object for the exact supplied TOML field. Preserve source scope. Do not infer runtime state.\",\"role\":\"system\"},{\"content\":\"Source E1: settings.toml\\n[database]\\ndefault = \\\"sqlite\\\"\\n\",\"role\":\"user\"}],\"num_ctx\":8192,\"role\":\"claims\",\"schema\":{\"additionalProperties\":false,\"properties\":{\"field\":{\"type\":\"string\"},\"source\":{\"type\":\"string\"},\"value\":{\"type\":\"string\"}},\"required\":[\"source\",\"field\",\"value\"],\"type\":\"object\"},\"seed\":42,\"temperature\":0}",
+      "input_hash": "sha256:09f73ffb10d15ded2fdeeca1be884231b03a7ba6c02e0108a87c00c763204e5a",
+      "raw_output_before_validation": "{\"source\":\"settings.toml\",\"field\":\"database.default\",\"value\":\"sqlite\"}",
+      "raw_output_hash": "sha256:84f5dfa7738f3c1f690fe809dde4c31db3aea5ecea49c21f6a1f67636ab4d46b",
+      "usage": {
+        "preflight_input_tokens": null,
+        "prompt_eval_count": null,
+        "eval_count": null,
+        "prompt_eval_cached_count": null
+      },
+      "timings": {
+        "load_duration_ns": null,
+        "prompt_eval_duration_ns": null,
+        "eval_duration_ns": null,
+        "total_duration_ns": null
+      },
+      "finish_reason": null,
+      "truncation": {
+        "input_truncated": null,
+        "output_truncated": null,
+        "token_accounting_verified": false
+      },
+      "validation": {
+        "status": "illustrative_object_only",
+        "measured": false
+      }
+    },
+    "budget": {
+      "accounting": "unavailable: invocation never occurred",
+      "model_requests": null,
+      "tool_calls": null,
+      "repair_passes": null,
+      "active_elapsed_ms": null,
+      "human_wait_ms": null
+    }
+  },
+  "enclosing_run_context_example": {
+    "config": {
+      "limits": {
+        "model_requests": 12,
+        "tool_calls": 8,
+        "repair_passes": 2,
+        "active_elapsed_ms": 120000
+      },
+      "profile": "synthetic_model_record_example"
+    },
+    "config_hash": "sha256:bf3fe88c8c74f27baef87c2c303a319043f1d206cb0916f64324407987844219"
+  }
+}

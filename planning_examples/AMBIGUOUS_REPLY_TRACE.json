@@ -1,0 +1,271 @@
+{
+  "schema_version": "0.2-planning",
+  "run_id": "ambiguous-custom-response-01",
+  "status": "synthetic teaching trace; no live model or tool execution",
+  "clock": "scripted UTC timestamps; budget time is scripted, not measured",
+  "measured_latency_ms": null,
+  "replay_capability": {
+    "deterministic_fixture_steps": true,
+    "measured_model_replay": false
+  },
+  "config": {
+    "limits": {
+      "model_requests": 12,
+      "tool_calls": 8,
+      "repair_passes": 2,
+      "active_elapsed_ms": 120000
+    },
+    "mode": "deterministic_synthetic_fixture",
+    "hash_encoding": "UTF-8; structured objects use sorted compact JSON",
+    "model": null
+  },
+  "config_hash": "sha256:5e7ed125198eb0592480b716617e5b0ff016b8b28464d0336c07c9e587fb7683",
+  "source_manifest": {
+    "settings.toml": {
+      "content": "[database]\ndefault = \"sqlite\"\n",
+      "content_hash": "sha256:d8d20ddefd212329eeacb1a08662bd765d05be93cbf7bbe42157b78cb0ff21b0",
+      "display_version": "fixture-v1"
+    }
+  },
+  "events": [
+    {
+      "id": "EV1",
+      "seq": 1,
+      "timestamp": "2026-09-14T00:00:00.010Z",
+      "producer": {
+        "kind": "deterministic_fixture",
+        "rule_id": "ambiguous-database-request-v1"
+      },
+      "kind": "contract",
+      "record": {
+        "id": "C1",
+        "objective": "Identify the database",
+        "scope": {
+          "environment": "unspecified"
+        },
+        "required_results": [
+          "Determine which database scope the user means"
+        ],
+        "tier": "T2"
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 0,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 10,
+        "human_wait_ms": 0
+      }
+    },
+    {
+      "id": "EV2",
+      "seq": 2,
+      "timestamp": "2026-09-14T00:00:00.020Z",
+      "producer": {
+        "kind": "deterministic_fixture",
+        "rule_id": "fixture-rule-v1"
+      },
+      "kind": "decision",
+      "record": {
+        "id": "D1",
+        "type": "clarification",
+        "checkpoint": "contract_scope",
+        "question": "Report the checked-in default or the running backend?",
+        "reason": "File default and runtime behavior are different scopes.",
+        "options": [
+          {
+            "id": "file_default",
+            "label": "Report checked-in default",
+            "recommended": true,
+            "rationale": "Can be verified from the available file fixture."
+          },
+          {
+            "id": "runtime",
+            "label": "Inspect the running backend",
+            "recommended": false
+          }
+        ],
+        "more_options": [
+          {
+            "id": "explain",
+            "label": "Explain the evidence and choices"
+          }
+        ],
+        "free_text_allowed": true,
+        "optional": false,
+        "can_pause_or_cancel": true,
+        "snapshot": {
+          "contract": {
+            "id": "C1",
+            "objective": "Identify the database",
+            "scope": {
+              "environment": "unspecified"
+            },
+            "required_results": [
+              "Determine which database scope the user means"
+            ],
+            "tier": "T2"
+          },
+          "evidence_hashes": [],
+          "proposal": null
+        },
+        "snapshot_hash": "sha256:84b92fc4b9af0aac921a1330cdd82279534007f66ac3009331a53cd08ff86851",
+        "issued_at": "2026-09-14T00:00:00.020Z",
+        "expires_at": null,
+        "status": "pending",
+        "proposal_hash": null,
+        "human_response_required": true
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 0,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 20,
+        "human_wait_ms": 0
+      }
+    },
+    {
+      "id": "EV3",
+      "seq": 3,
+      "timestamp": "2026-09-14T00:00:01.030Z",
+      "producer": {
+        "kind": "human_fixture",
+        "rule_id": "ambiguous-custom-fixture-v1"
+      },
+      "kind": "human_response",
+      "record": {
+        "decision_id": "D1",
+        "response_type": "custom",
+        "text": "Use that one, unless the other is active.",
+        "received_at": "2026-09-14T00:00:01.030Z"
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 0,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 30,
+        "human_wait_ms": 1000
+      }
+    },
+    {
+      "id": "EV4",
+      "seq": 4,
+      "timestamp": "2026-09-14T00:00:01.040Z",
+      "producer": {
+        "kind": "deterministic_fixture",
+        "rule_id": "ambiguous-custom-fixture-v1"
+      },
+      "kind": "interpretation",
+      "record": {
+        "id": "I1",
+        "response_ref": "EV3",
+        "raw_text": "Use that one, unless the other is active.",
+        "normalizer_rule": "unresolved-reference-fixture-v1",
+        "normalized_option_id": null,
+        "contract_delta": null,
+        "validation": "ambiguous",
+        "reason": "The referents and requested runtime condition are not established.",
+        "grants_action_approval": false
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 0,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 40,
+        "human_wait_ms": 1000
+      }
+    },
+    {
+      "id": "EV5",
+      "seq": 5,
+      "timestamp": "2026-09-14T00:00:01.050Z",
+      "producer": {
+        "kind": "deterministic_fixture",
+        "rule_id": "ambiguous-custom-fixture-v1"
+      },
+      "kind": "human_echo",
+      "record": {
+        "interpretation_id": "I1",
+        "displayed_text": "I cannot determine which source you want me to use from this reply."
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 0,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 50,
+        "human_wait_ms": 1000
+      }
+    },
+    {
+      "id": "EV6",
+      "seq": 6,
+      "timestamp": "2026-09-14T00:00:01.060Z",
+      "producer": {
+        "kind": "deterministic_fixture",
+        "rule_id": "ambiguous-custom-fixture-v1"
+      },
+      "kind": "clarification",
+      "record": {
+        "decision_id": "D1",
+        "question": "Should I report only the checked-in default, or inspect the running backend?",
+        "retains_original_options": true,
+        "free_text_allowed": true,
+        "pending": true
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 0,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 60,
+        "human_wait_ms": 1000
+      }
+    },
+    {
+      "id": "EV7",
+      "seq": 7,
+      "timestamp": "2026-09-14T00:00:01.070Z",
+      "producer": {
+        "kind": "deterministic_fixture",
+        "rule_id": "ambiguous-custom-fixture-v1"
+      },
+      "kind": "run_state",
+      "record": {
+        "status": "waiting_for_human",
+        "decision_id": "D1",
+        "contract_id": "C1",
+        "tier": "T2",
+        "approval_granted": false,
+        "tool_calls": 0,
+        "scope_changed": false
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 0,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 70,
+        "human_wait_ms": 1000
+      }
+    }
+  ],
+  "source_manifest_hash": "sha256:2806c1d80ad132123c622c68e01c0258abaca5086eb7b81d185d47f7ab0cec01"
+}

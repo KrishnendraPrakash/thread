@@ -1,0 +1,257 @@
+{
+  "status": "intentionally invalid historical planning example; not an executed run",
+  "expected_failures": [
+    "field-specific line 2 is not a checked output",
+    "final fidelity references a pre-render check",
+    "supported answer lacks a claim-status transition"
+  ],
+  "original_trace": {
+    "status": "synthetic planning example, not an executed run or a complete replay schema",
+    "scenario_id": "database-scope-01",
+    "fixtures": {
+      "settings.toml": "[database]\ndefault = \"sqlite\"\n"
+    },
+    "request": "Which database do we use?",
+    "events": [
+      {
+        "kind": "contract",
+        "record": {
+          "id": "C1",
+          "objective": "Identify the database",
+          "scope": {
+            "project": "synthetic-example",
+            "environment": "unspecified"
+          },
+          "required_results": [
+            "Identify the intended configuration or runtime scope"
+          ],
+          "assumptions": [],
+          "tier": "T2",
+          "tier_reason": "Material scope ambiguity"
+        }
+      },
+      {
+        "kind": "decision",
+        "record": {
+          "id": "D1",
+          "checkpoint": "contract_scope",
+          "type": "clarification",
+          "question": "Should I report the checked-in default or the running application's backend?",
+          "reason": "These can differ; runtime scope was not specified.",
+          "options": [
+            {
+              "id": "file_default",
+              "label": "Report the checked-in default",
+              "recommended": true,
+              "rationale": "Provides a verifiable answer from the available fixture."
+            },
+            {
+              "id": "runtime",
+              "label": "Inspect the running backend",
+              "recommended": false
+            },
+            {
+              "id": "compare",
+              "label": "Compare configuration and runtime",
+              "recommended": false
+            }
+          ],
+          "more_options": [
+            {
+              "id": "documentation",
+              "label": "Report only the documented design"
+            }
+          ],
+          "free_text_allowed": true,
+          "optional": false,
+          "can_pause_or_cancel": true,
+          "action_hash": null,
+          "status": "pending"
+        }
+      },
+      {
+        "kind": "human_response",
+        "record": {
+          "decision_id": "D1",
+          "response_type": "custom",
+          "text": "Only the checked-in default in settings.toml."
+        }
+      },
+      {
+        "kind": "decision_resolution",
+        "record": {
+          "decision_id": "D1",
+          "status": "answered",
+          "resume_checkpoint": "contract_scope",
+          "approval_granted": false
+        }
+      },
+      {
+        "kind": "contract",
+        "record": {
+          "id": "C2",
+          "supersedes": "C1",
+          "objective": "Report the database.default value in settings.toml",
+          "scope": {
+            "project": "synthetic-example",
+            "environment": "checked-in fixture",
+            "source": "settings.toml",
+            "version": "fixture-v1"
+          },
+          "required_results": [
+            "Name the exact field value and cite the file location"
+          ],
+          "assumptions": [],
+          "tier": "T1",
+          "tier_reason": "Direct local field report; no runtime inference"
+        }
+      },
+      {
+        "kind": "tool",
+        "record": {
+          "call_id": "TC1",
+          "name": "read_file",
+          "arguments": {
+            "path": "settings.toml",
+            "start_line": 1,
+            "end_line": 2
+          },
+          "policy_result": "allowed_by_existing_fixture_read_scope",
+          "state_version": "fixture-v1",
+          "result": {
+            "source_key": "settings.toml",
+            "version": "fixture-v1",
+            "text": "[database]\ndefault = \"sqlite\"\n",
+            "start_line": 1,
+            "end_line": 2,
+            "truncated": false,
+            "cursor": null
+          }
+        }
+      },
+      {
+        "kind": "evidence",
+        "record": {
+          "id": "E1",
+          "source_key": "settings.toml",
+          "version": "fixture-v1",
+          "locator": {
+            "start_line": 1,
+            "end_line": 2
+          },
+          "excerpt": "[database]\ndefault = \"sqlite\"\n",
+          "source_kind": "local_file",
+          "scope": {
+            "environment": "checked-in fixture",
+            "version": "fixture-v1"
+          },
+          "observed_at": "2026-09-14T00:00:00Z",
+          "effective_at": null,
+          "truncated": false
+        }
+      },
+      {
+        "kind": "claim",
+        "record": {
+          "id": "CL1",
+          "statement": "The checked-in database.default field in settings.toml is sqlite.",
+          "proposition": {
+            "field": "database.default",
+            "value": "sqlite"
+          },
+          "scope": {
+            "source": "settings.toml",
+            "environment": "checked-in fixture",
+            "version": "fixture-v1"
+          },
+          "evidence_ids": [
+            "E1"
+          ],
+          "type": "source_report",
+          "status": "unchecked"
+        }
+      },
+      {
+        "kind": "check",
+        "record": {
+          "id": "K1",
+          "claim_ids": [
+            "CL1"
+          ],
+          "evidence_ids": [
+            "E1"
+          ],
+          "method": "exact_source_span",
+          "method_version": "illustrative-v1",
+          "result": "supported",
+          "detail": "The excerpt matches fixture-v1, lines 1–2."
+        }
+      },
+      {
+        "kind": "check",
+        "record": {
+          "id": "K2",
+          "claim_ids": [
+            "CL1"
+          ],
+          "evidence_ids": [
+            "E1"
+          ],
+          "method": "parse_toml_field",
+          "method_version": "illustrative-v1",
+          "result": "supported",
+          "computed_output": {
+            "field": "database.default",
+            "value": "sqlite"
+          },
+          "detail": "Parsing establishes the field value, not a running application's state."
+        }
+      },
+      {
+        "kind": "check",
+        "record": {
+          "id": "K3",
+          "claim_ids": [
+            "CL1"
+          ],
+          "evidence_ids": [
+            "E1"
+          ],
+          "method": "contract_scope_and_template_fields",
+          "method_version": "illustrative-v1",
+          "result": "supported",
+          "detail": "The scoped field report covers C2. The template uses the validated value and locator."
+        }
+      },
+      {
+        "kind": "answer",
+        "record": {
+          "rendered_text": "The checked-in default is sqlite (settings.toml, database.default, line 2).",
+          "claim_ids": [
+            "CL1"
+          ],
+          "limitations": [
+            "Runtime state was outside the chosen scope and was not inspected."
+          ],
+          "final_fidelity_check": "K3",
+          "status": "supported"
+        }
+      },
+      {
+        "kind": "persistence",
+        "record": {
+          "durable_inferred_facts_saved": [],
+          "cross_run_cache_enabled": false,
+          "reason": "No durable inference is needed for this answer; this example disables answer caching."
+        }
+      }
+    ],
+    "replay_notes": [
+      "All timestamps and outcomes are illustrative.",
+      "Strict replay must match tool name, canonical arguments, occurrence, and state.",
+      "A changed request for runtime inspection would diverge from this fixture.",
+      "The example clarification is not an authorization to execute actions."
+    ],
+    "measured_latency_ms": null
+  }
+}

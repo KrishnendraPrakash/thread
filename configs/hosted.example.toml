@@ -1,0 +1,16 @@
+# Optional M4B draft. No provider request is made by the scaffold.
+[profile]
+name = "hosted"
+enabled = false
+
+[model]
+provider = "replace-with-supported-provider"
+model = "replace-with-supported-model"
+api_key_env = "THREAD_AGENT_API_KEY"
+
+[network]
+mode = "explicit_hosted"
+allow_automatic_fallback = false
+
+[budget]
+max_cost_per_run = 0.0 # Choose explicitly; free-tier eligibility is provider/account-specific.

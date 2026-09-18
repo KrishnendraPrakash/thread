@@ -1,0 +1,15 @@
+# Optional M4B draft. No endpoint or credential is accessed by the scaffold.
+[profile]
+name = "private"
+enabled = false
+
+[model]
+provider = "private_endpoint"
+endpoint = "https://llm.example.invalid/v1"
+model = "replace-with-organization-model"
+api_key_env = "THREAD_AGENT_API_KEY"
+verify_tls = true
+
+[network]
+mode = "private_endpoint"
+allow_hosted_fallback = false

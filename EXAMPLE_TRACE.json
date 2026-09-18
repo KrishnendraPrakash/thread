@@ -1,0 +1,807 @@
+{
+  "schema_version": "0.2-planning",
+  "run_id": "database-scope-02",
+  "status": "synthetic teaching trace; no live model or tool execution",
+  "clock": "scripted UTC timestamps; budget time is scripted, not measured",
+  "measured_latency_ms": null,
+  "replay_capability": {
+    "deterministic_fixture_steps": true,
+    "measured_model_replay": false
+  },
+  "config": {
+    "limits": {
+      "model_requests": 12,
+      "tool_calls": 8,
+      "repair_passes": 2,
+      "active_elapsed_ms": 120000
+    },
+    "mode": "deterministic_synthetic_fixture",
+    "hash_encoding": "UTF-8; structured objects use sorted compact JSON",
+    "model": null
+  },
+  "config_hash": "sha256:5e7ed125198eb0592480b716617e5b0ff016b8b28464d0336c07c9e587fb7683",
+  "source_manifest": {
+    "settings.toml": {
+      "content": "[database]\ndefault = \"sqlite\"\n",
+      "content_hash": "sha256:d8d20ddefd212329eeacb1a08662bd765d05be93cbf7bbe42157b78cb0ff21b0",
+      "display_version": "fixture-v1"
+    }
+  },
+  "events": [
+    {
+      "id": "EV1",
+      "seq": 1,
+      "timestamp": "2026-09-14T00:00:00.010Z",
+      "producer": {
+        "kind": "deterministic_fixture",
+        "rule_id": "ambiguous-database-request-v1"
+      },
+      "kind": "contract",
+      "record": {
+        "id": "C1",
+        "objective": "Identify the database",
+        "scope": {
+          "environment": "unspecified"
+        },
+        "required_results": [
+          "Determine which database scope the user means"
+        ],
+        "tier": "T2"
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 0,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 10,
+        "human_wait_ms": 0
+      }
+    },
+    {
+      "id": "EV2",
+      "seq": 2,
+      "timestamp": "2026-09-14T00:00:00.020Z",
+      "producer": {
+        "kind": "deterministic_fixture",
+        "rule_id": "fixture-rule-v1"
+      },
+      "kind": "decision",
+      "record": {
+        "id": "D1",
+        "type": "clarification",
+        "checkpoint": "contract_scope",
+        "question": "Report the checked-in default or the running backend?",
+        "reason": "File default and runtime behavior are different scopes.",
+        "options": [
+          {
+            "id": "file_default",
+            "label": "Report checked-in default",
+            "recommended": true,
+            "rationale": "Can be verified from the available file fixture."
+          },
+          {
+            "id": "runtime",
+            "label": "Inspect the running backend",
+            "recommended": false
+          }
+        ],
+        "more_options": [
+          {
+            "id": "explain",
+            "label": "Explain the evidence and choices"
+          }
+        ],
+        "free_text_allowed": true,
+        "optional": false,
+        "can_pause_or_cancel": true,
+        "snapshot": {
+          "contract": {
+            "id": "C1",
+            "objective": "Identify the database",
+            "scope": {
+              "environment": "unspecified"
+            },
+            "required_results": [
+              "Determine which database scope the user means"
+            ],
+            "tier": "T2"
+          },
+          "evidence_hashes": [],
+          "proposal": null
+        },
+        "snapshot_hash": "sha256:84b92fc4b9af0aac921a1330cdd82279534007f66ac3009331a53cd08ff86851",
+        "issued_at": "2026-09-14T00:00:00.020Z",
+        "expires_at": null,
+        "status": "pending",
+        "proposal_hash": null,
+        "human_response_required": true
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 0,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 20,
+        "human_wait_ms": 0
+      }
+    },
+    {
+      "id": "EV3",
+      "seq": 3,
+      "timestamp": "2026-09-14T00:00:01.030Z",
+      "producer": {
+        "kind": "human_fixture",
+        "rule_id": "fixture-rule-v1"
+      },
+      "kind": "human_response",
+      "record": {
+        "decision_id": "D1",
+        "response_type": "custom",
+        "text": "Only the checked-in default in settings.toml.",
+        "received_at": "2026-09-14T00:00:01.030Z"
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 0,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 30,
+        "human_wait_ms": 1000
+      }
+    },
+    {
+      "id": "EV4",
+      "seq": 4,
+      "timestamp": "2026-09-14T00:00:01.040Z",
+      "producer": {
+        "kind": "deterministic_fixture",
+        "rule_id": "fixture-rule-v1"
+      },
+      "kind": "interpretation",
+      "record": {
+        "id": "I1",
+        "response_ref": "EV3",
+        "raw_text": "Only the checked-in default in settings.toml.",
+        "normalizer_rule": "exact-fixture-phrase-map-v1",
+        "normalizer_input": "Only the checked-in default in settings.toml.",
+        "normalized_option_id": "file_default",
+        "contract_delta": {
+          "scope": {
+            "source": "settings.toml",
+            "environment": "checked-in default"
+          },
+          "required_results": [
+            "Report database.default from settings.toml and cite the source"
+          ]
+        },
+        "validation": "exact known fixture phrase; no unresolved ambiguity",
+        "grants_action_approval": false
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 0,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 40,
+        "human_wait_ms": 1000
+      }
+    },
+    {
+      "id": "EV5",
+      "seq": 5,
+      "timestamp": "2026-09-14T00:00:01.050Z",
+      "producer": {
+        "kind": "deterministic_fixture",
+        "rule_id": "fixture-rule-v1"
+      },
+      "kind": "human_echo",
+      "record": {
+        "interpretation_id": "I1",
+        "displayed_text": "I will report only the checked-in default in settings.toml."
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 0,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 50,
+        "human_wait_ms": 1000
+      }
+    },
+    {
+      "id": "EV6",
+      "seq": 6,
+      "timestamp": "2026-09-14T00:00:01.060Z",
+      "producer": {
+        "kind": "deterministic_fixture",
+        "rule_id": "fixture-rule-v1"
+      },
+      "kind": "decision_resolution",
+      "record": {
+        "decision_id": "D1",
+        "status": "answered",
+        "response_ref": "EV3",
+        "interpretation_id": "I1",
+        "echo_ref": "EV5",
+        "snapshot_hash": "sha256:84b92fc4b9af0aac921a1330cdd82279534007f66ac3009331a53cd08ff86851",
+        "approval_granted": false
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 0,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 60,
+        "human_wait_ms": 1000
+      }
+    },
+    {
+      "id": "EV7",
+      "seq": 7,
+      "timestamp": "2026-09-14T00:00:01.070Z",
+      "producer": {
+        "kind": "deterministic_fixture",
+        "rule_id": "fixture-rule-v1"
+      },
+      "kind": "contract",
+      "record": {
+        "id": "C2",
+        "supersedes": "C1",
+        "objective": "Report database.default in settings.toml",
+        "scope": {
+          "source": "settings.toml",
+          "environment": "checked-in default"
+        },
+        "required_results": [
+          "Report database.default from settings.toml and cite the source"
+        ],
+        "tier": "T1"
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 0,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 70,
+        "human_wait_ms": 1000
+      }
+    },
+    {
+      "id": "EV8",
+      "seq": 8,
+      "timestamp": "2026-09-14T00:00:01.080Z",
+      "producer": {
+        "kind": "deterministic_fixture",
+        "rule_id": "fixture-rule-v1"
+      },
+      "kind": "tier_change",
+      "record": {
+        "old_contract_id": "C1",
+        "new_contract_id": "C2",
+        "from": "T2",
+        "to": "T1",
+        "direction": "decrease",
+        "cause": {
+          "decision_id": "D1",
+          "interpretation_id": "I1",
+          "rule": "explicit-user-scope-narrowing-v1"
+        },
+        "removed_obligations": [
+          "Investigate runtime backend"
+        ],
+        "retained_obligations": [
+          "Report exact file value",
+          "Check source and scope",
+          "Enforce tool policy"
+        ],
+        "model_self_assessment": false
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 0,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 80,
+        "human_wait_ms": 1000
+      }
+    },
+    {
+      "id": "EV9",
+      "seq": 9,
+      "timestamp": "2026-09-14T00:00:01.090Z",
+      "producer": {
+        "kind": "deterministic_fixture",
+        "rule_id": "fixture-rule-v1"
+      },
+      "kind": "policy",
+      "record": {
+        "id": "POL_TC1",
+        "decision": "allow",
+        "rule_id": "scoped_fixture_read-v1",
+        "scope_grant_id": "GRANT_FIXTURE_READ",
+        "operation": "read_file",
+        "boundary": {
+          "workspace": "synthetic-fixture",
+          "resolved_path": "settings.toml",
+          "within_scope": true
+        },
+        "action_hash": "sha256:b1ce866fca30fe639c6d238c2f1677fe3dcff3fbeb1e8f295e6911a69e23241a",
+        "state_hash": "sha256:d8d20ddefd212329eeacb1a08662bd765d05be93cbf7bbe42157b78cb0ff21b0"
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 0,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 90,
+        "human_wait_ms": 1000
+      }
+    },
+    {
+      "id": "EV10",
+      "seq": 10,
+      "timestamp": "2026-09-14T00:00:01.100Z",
+      "producer": {
+        "kind": "tool_fixture",
+        "rule_id": "fixture-rule-v1"
+      },
+      "kind": "tool",
+      "record": {
+        "call_id": "TC1",
+        "name": "read_file",
+        "arguments": {
+          "path": "settings.toml",
+          "start_line": 1,
+          "end_line": 2
+        },
+        "policy_ref": "EV9",
+        "state_hash": "sha256:d8d20ddefd212329eeacb1a08662bd765d05be93cbf7bbe42157b78cb0ff21b0",
+        "result": {
+          "source_key": "settings.toml",
+          "content_hash": "sha256:d8d20ddefd212329eeacb1a08662bd765d05be93cbf7bbe42157b78cb0ff21b0",
+          "text": "[database]\ndefault = \"sqlite\"\n",
+          "locator": {
+            "start_line": 1,
+            "end_line": 2
+          },
+          "truncated": false,
+          "cursor": null
+        }
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 1,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 100,
+        "human_wait_ms": 1000
+      }
+    },
+    {
+      "id": "EV11",
+      "seq": 11,
+      "timestamp": "2026-09-14T00:00:01.110Z",
+      "producer": {
+        "kind": "deterministic_fixture",
+        "rule_id": "fixture-rule-v1"
+      },
+      "kind": "evidence",
+      "record": {
+        "id": "E1",
+        "source_key": "settings.toml",
+        "content_hash": "sha256:d8d20ddefd212329eeacb1a08662bd765d05be93cbf7bbe42157b78cb0ff21b0",
+        "display_version": "fixture-v1",
+        "source_kind": "local_file",
+        "tool_event_ref": "EV10",
+        "locator": {
+          "start_line": 1,
+          "end_line": 2
+        },
+        "excerpt": "[database]\ndefault = \"sqlite\"\n",
+        "scope": {
+          "environment": "checked-in fixture"
+        },
+        "observed_at": "2026-09-14T00:00:01.100Z",
+        "effective_at": null,
+        "truncated": false
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 1,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 110,
+        "human_wait_ms": 1000
+      }
+    },
+    {
+      "id": "EV12",
+      "seq": 12,
+      "timestamp": "2026-09-14T00:00:01.120Z",
+      "producer": {
+        "kind": "deterministic_fixture",
+        "rule_id": "fixture-rule-v1"
+      },
+      "kind": "claim",
+      "record": {
+        "id": "CL1",
+        "statement": "The checked-in database.default field in settings.toml is sqlite.",
+        "scope": {
+          "source": "settings.toml",
+          "environment": "checked-in default"
+        },
+        "evidence_ids": [
+          "E1"
+        ],
+        "type": "source_report",
+        "immutable": true
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 1,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 120,
+        "human_wait_ms": 1000
+      }
+    },
+    {
+      "id": "EV13",
+      "seq": 13,
+      "timestamp": "2026-09-14T00:00:01.130Z",
+      "producer": {
+        "kind": "deterministic_fixture",
+        "rule_id": "fixture-rule-v1"
+      },
+      "kind": "check",
+      "record": {
+        "id": "K1",
+        "claim_ids": [
+          "CL1"
+        ],
+        "evidence_ids": [
+          "E1"
+        ],
+        "method": "snapshot_excerpt_integrity",
+        "method_version": "fixture-v1",
+        "inputs": {
+          "candidate_ref": "E1.excerpt",
+          "reference_manifest_key": "settings.toml",
+          "reference_content_hash": "sha256:d8d20ddefd212329eeacb1a08662bd765d05be93cbf7bbe42157b78cb0ff21b0",
+          "locator": {
+            "start_line": 1,
+            "end_line": 2
+          },
+          "read_path": "Load immutable manifest bytes separately from the captured tool-result record."
+        },
+        "input_hash": "sha256:748fca44341acdf1a4897d05c0919280bc9e195f4b02c1f8ab33fbdb8a1cfd36",
+        "result": "pass",
+        "computed_output": {
+          "bytes_match": true,
+          "proves": "excerpt integrity only; not independent factual corroboration"
+        }
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 1,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 130,
+        "human_wait_ms": 1000
+      }
+    },
+    {
+      "id": "EV14",
+      "seq": 14,
+      "timestamp": "2026-09-14T00:00:01.140Z",
+      "producer": {
+        "kind": "deterministic_fixture",
+        "rule_id": "fixture-rule-v1"
+      },
+      "kind": "check",
+      "record": {
+        "id": "K2",
+        "claim_ids": [
+          "CL1"
+        ],
+        "evidence_ids": [
+          "E1"
+        ],
+        "method": "parse_toml_field",
+        "method_version": "fixture-v1",
+        "inputs": {
+          "snapshot_key": "settings.toml",
+          "content_hash": "sha256:d8d20ddefd212329eeacb1a08662bd765d05be93cbf7bbe42157b78cb0ff21b0",
+          "field": "database.default"
+        },
+        "input_hash": "sha256:8aa67cb45b5d51741b96f00beb14451fb5b51c09856dd82d0224249b27d9fcde",
+        "result": "supported",
+        "computed_output": {
+          "source": "settings.toml",
+          "field": "database.default",
+          "value": "sqlite"
+        }
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 1,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 140,
+        "human_wait_ms": 1000
+      }
+    },
+    {
+      "id": "EV15",
+      "seq": 15,
+      "timestamp": "2026-09-14T00:00:01.150Z",
+      "producer": {
+        "kind": "deterministic_fixture",
+        "rule_id": "fixture-rule-v1"
+      },
+      "kind": "check",
+      "record": {
+        "id": "K3",
+        "claim_ids": [
+          "CL1"
+        ],
+        "evidence_ids": [
+          "E1"
+        ],
+        "method": "contract_coverage",
+        "method_version": "fixture-v1",
+        "inputs": {
+          "contract_id": "C2",
+          "claim_ids": [
+            "CL1"
+          ]
+        },
+        "input_hash": "sha256:ba3cacab8b401c2a921f9eeec6f133b4c3752b75ff7452a0dc0d8481a2e0307b",
+        "result": "pass",
+        "computed_output": {
+          "required_results_covered": true,
+          "runtime_inference": false
+        }
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 1,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 150,
+        "human_wait_ms": 1000
+      }
+    },
+    {
+      "id": "EV16",
+      "seq": 16,
+      "timestamp": "2026-09-14T00:00:01.160Z",
+      "producer": {
+        "kind": "deterministic_fixture",
+        "rule_id": "fixture-rule-v1"
+      },
+      "kind": "claim_status",
+      "record": {
+        "claim_id": "CL1",
+        "from": "unchecked",
+        "to": "supported",
+        "check_ids": [
+          "K1",
+          "K2",
+          "K3"
+        ],
+        "evidence_snapshot_hash": "sha256:b6bc6eea6d250ef6cb0d31da1ff324c24dbbd6b1519fde2ee328b6b864839623",
+        "reducer_rule": "required-check-results-v1"
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 1,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 160,
+        "human_wait_ms": 1000
+      }
+    },
+    {
+      "id": "EV17",
+      "seq": 17,
+      "timestamp": "2026-09-14T00:00:01.170Z",
+      "producer": {
+        "kind": "deterministic_fixture",
+        "rule_id": "fixture-template-v1"
+      },
+      "kind": "render",
+      "record": {
+        "id": "R1",
+        "text": "The checked-in default is sqlite (settings.toml, database.default).",
+        "limitations": [],
+        "claim_ids": [
+          "CL1"
+        ],
+        "claim_status_refs": [
+          "EV16"
+        ],
+        "coverage_check_id": "K3",
+        "template_id": "checked-fields-v2",
+        "template_content": "The checked-in default is {value} ({source}, {field}).",
+        "template_hash": "sha256:4a8d88c53a700bbd4c905f10963188d40b42866fa8159dcba3ca283508fabd5c",
+        "output_hash": "sha256:454ae1ca67452c7494a2c2902ab7dddd1af3ee7f3c49549dbce5f5616843b206",
+        "template_inputs": {
+          "template": "The checked-in default is {value} ({source}, {field}).",
+          "bindings": {
+            "source": {
+              "check_id": "K2",
+              "output_field": "source",
+              "value": "settings.toml"
+            },
+            "field": {
+              "check_id": "K2",
+              "output_field": "field",
+              "value": "database.default"
+            },
+            "value": {
+              "check_id": "K2",
+              "output_field": "value",
+              "value": "sqlite"
+            }
+          },
+          "limitations_rule": "empty-limitations-v1",
+          "limitations": [],
+          "required_status_refs": [
+            "EV16"
+          ]
+        },
+        "template_inputs_hash": "sha256:c100432fad2b66e2e733d3a68892260178cd0af4d287a6cbd34b5d6a57bca1b0"
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 1,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 170,
+        "human_wait_ms": 1000
+      }
+    },
+    {
+      "id": "EV18",
+      "seq": 18,
+      "timestamp": "2026-09-14T00:00:01.180Z",
+      "producer": {
+        "kind": "deterministic_fixture",
+        "rule_id": "fixture-rule-v1"
+      },
+      "kind": "check",
+      "record": {
+        "id": "FINAL_FIDELITY",
+        "claim_ids": [
+          "CL1"
+        ],
+        "evidence_ids": [],
+        "method": "post_render_exact_fixture_template",
+        "method_version": "fixture-v1",
+        "inputs": {
+          "render_id": "R1",
+          "render_hash": "sha256:454ae1ca67452c7494a2c2902ab7dddd1af3ee7f3c49549dbce5f5616843b206",
+          "reference_template_manifest_key": "checked-fields-v2",
+          "reference_template_hash": "sha256:4a8d88c53a700bbd4c905f10963188d40b42866fa8159dcba3ca283508fabd5c",
+          "independent_check_output_bindings": {
+            "source": {
+              "check_id": "K2",
+              "output_field": "source",
+              "value": "settings.toml"
+            },
+            "field": {
+              "check_id": "K2",
+              "output_field": "field",
+              "value": "database.default"
+            },
+            "value": {
+              "check_id": "K2",
+              "output_field": "value",
+              "value": "sqlite"
+            }
+          },
+          "limitations_rule": "empty-limitations-v1",
+          "expected_limitations": [],
+          "claim_status_refs": [
+            "EV16"
+          ]
+        },
+        "input_hash": "sha256:685e8b06cecea3178259446ef0d92936c8fc8d43f87ce5e5c6e075d09310f831",
+        "result": "pass",
+        "computed_output": {
+          "matched": true,
+          "expected_from_checked_bindings": "The checked-in default is sqlite (settings.toml, database.default).",
+          "unverified_specifics": []
+        }
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 1,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 180,
+        "human_wait_ms": 1000
+      }
+    },
+    {
+      "id": "EV19",
+      "seq": 19,
+      "timestamp": "2026-09-14T00:00:01.190Z",
+      "producer": {
+        "kind": "deterministic_fixture",
+        "rule_id": "fixture-rule-v1"
+      },
+      "kind": "answer",
+      "record": {
+        "render_id": "R1",
+        "rendered_text": "The checked-in default is sqlite (settings.toml, database.default).",
+        "limitations": [],
+        "output_hash": "sha256:454ae1ca67452c7494a2c2902ab7dddd1af3ee7f3c49549dbce5f5616843b206",
+        "claim_ids": [
+          "CL1"
+        ],
+        "claim_status_refs": [
+          "EV16"
+        ],
+        "final_fidelity_check": "FINAL_FIDELITY",
+        "status": "supported"
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 1,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 190,
+        "human_wait_ms": 1000
+      }
+    }
+  ],
+  "template_manifest": {
+    "checked-fields-v2": {
+      "content": "The checked-in default is {value} ({source}, {field}).",
+      "content_hash": "sha256:4a8d88c53a700bbd4c905f10963188d40b42866fa8159dcba3ca283508fabd5c",
+      "binding_source": "previous immutable check outputs",
+      "limitations_rule": "empty-limitations-v1"
+    }
+  },
+  "source_manifest_hash": "sha256:2806c1d80ad132123c622c68e01c0258abaca5086eb7b81d185d47f7ab0cec01"
+}

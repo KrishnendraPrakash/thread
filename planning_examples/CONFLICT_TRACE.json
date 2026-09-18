@@ -1,0 +1,1012 @@
+{
+  "schema_version": "0.2-planning",
+  "run_id": "conflicting-records-01",
+  "status": "synthetic teaching trace; no live model or tool execution",
+  "clock": "scripted UTC timestamps; budget time is scripted, not measured",
+  "measured_latency_ms": null,
+  "replay_capability": {
+    "deterministic_fixture_steps": true,
+    "measured_model_replay": false
+  },
+  "config": {
+    "limits": {
+      "model_requests": 12,
+      "tool_calls": 8,
+      "repair_passes": 2,
+      "active_elapsed_ms": 120000
+    },
+    "mode": "deterministic_synthetic_fixture",
+    "hash_encoding": "UTF-8; structured objects use sorted compact JSON",
+    "model": null
+  },
+  "config_hash": "sha256:5e7ed125198eb0592480b716617e5b0ff016b8b28464d0336c07c9e587fb7683",
+  "source_manifest": {
+    "README.md": {
+      "content": "The service uses PostgreSQL.\n",
+      "content_hash": "sha256:70918d92d5a32ef16b824f67835068067f6003378172f0af4389e1461723fabb",
+      "display_version": "fixture-v1"
+    },
+    "settings.toml": {
+      "content": "[database]\ndefault = \"sqlite\"\n",
+      "content_hash": "sha256:d8d20ddefd212329eeacb1a08662bd765d05be93cbf7bbe42157b78cb0ff21b0",
+      "display_version": "fixture-v1"
+    }
+  },
+  "events": [
+    {
+      "id": "EV1",
+      "seq": 1,
+      "timestamp": "2026-09-14T00:00:00.010Z",
+      "producer": {
+        "kind": "deterministic_fixture",
+        "rule_id": "fixture-rule-v1"
+      },
+      "kind": "contract",
+      "record": {
+        "id": "C1",
+        "objective": "Determine the current backend and explain conflicting project records",
+        "scope": {
+          "environment": "runtime and checked-in records"
+        },
+        "required_results": [
+          "Identify runtime backend if observable",
+          "Explain the differing source reports"
+        ],
+        "tier": "T2"
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 0,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 10,
+        "human_wait_ms": 0
+      }
+    },
+    {
+      "id": "EV2",
+      "seq": 2,
+      "timestamp": "2026-09-14T00:00:00.020Z",
+      "producer": {
+        "kind": "deterministic_fixture",
+        "rule_id": "fixture-rule-v1"
+      },
+      "kind": "policy",
+      "record": {
+        "id": "POL_TC1",
+        "decision": "allow",
+        "rule_id": "scoped_fixture_read-v1",
+        "scope_grant_id": "GRANT_FIXTURE_READ",
+        "operation": "read_file",
+        "boundary": {
+          "workspace": "synthetic-fixture",
+          "resolved_path": "README.md",
+          "within_scope": true
+        },
+        "action_hash": "sha256:1b71ad9b1651d845adb5acc8f80a4bc25e31e65d8b46daf368e41363c5913809",
+        "state_hash": "sha256:70918d92d5a32ef16b824f67835068067f6003378172f0af4389e1461723fabb"
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 0,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 20,
+        "human_wait_ms": 0
+      }
+    },
+    {
+      "id": "EV3",
+      "seq": 3,
+      "timestamp": "2026-09-14T00:00:00.030Z",
+      "producer": {
+        "kind": "tool_fixture",
+        "rule_id": "fixture-rule-v1"
+      },
+      "kind": "tool",
+      "record": {
+        "call_id": "TC1",
+        "name": "read_file",
+        "arguments": {
+          "path": "README.md",
+          "start_line": 1,
+          "end_line": 1
+        },
+        "policy_ref": "EV2",
+        "state_hash": "sha256:70918d92d5a32ef16b824f67835068067f6003378172f0af4389e1461723fabb",
+        "result": {
+          "source_key": "README.md",
+          "content_hash": "sha256:70918d92d5a32ef16b824f67835068067f6003378172f0af4389e1461723fabb",
+          "text": "The service uses PostgreSQL.\n",
+          "locator": {
+            "start_line": 1,
+            "end_line": 1
+          },
+          "truncated": false,
+          "cursor": null
+        }
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 1,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 30,
+        "human_wait_ms": 0
+      }
+    },
+    {
+      "id": "EV4",
+      "seq": 4,
+      "timestamp": "2026-09-14T00:00:00.040Z",
+      "producer": {
+        "kind": "deterministic_fixture",
+        "rule_id": "fixture-rule-v1"
+      },
+      "kind": "evidence",
+      "record": {
+        "id": "E1",
+        "source_key": "README.md",
+        "content_hash": "sha256:70918d92d5a32ef16b824f67835068067f6003378172f0af4389e1461723fabb",
+        "display_version": "fixture-v1",
+        "source_kind": "local_file",
+        "tool_event_ref": "EV3",
+        "locator": {
+          "start_line": 1,
+          "end_line": 1
+        },
+        "excerpt": "The service uses PostgreSQL.\n",
+        "scope": {
+          "environment": "checked-in fixture"
+        },
+        "observed_at": "2026-09-14T00:00:00.030Z",
+        "effective_at": null,
+        "truncated": false
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 1,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 40,
+        "human_wait_ms": 0
+      }
+    },
+    {
+      "id": "EV5",
+      "seq": 5,
+      "timestamp": "2026-09-14T00:00:00.050Z",
+      "producer": {
+        "kind": "deterministic_fixture",
+        "rule_id": "fixture-rule-v1"
+      },
+      "kind": "policy",
+      "record": {
+        "id": "POL_TC2",
+        "decision": "allow",
+        "rule_id": "scoped_fixture_read-v1",
+        "scope_grant_id": "GRANT_FIXTURE_READ",
+        "operation": "read_file",
+        "boundary": {
+          "workspace": "synthetic-fixture",
+          "resolved_path": "settings.toml",
+          "within_scope": true
+        },
+        "action_hash": "sha256:b1ce866fca30fe639c6d238c2f1677fe3dcff3fbeb1e8f295e6911a69e23241a",
+        "state_hash": "sha256:d8d20ddefd212329eeacb1a08662bd765d05be93cbf7bbe42157b78cb0ff21b0"
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 1,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 50,
+        "human_wait_ms": 0
+      }
+    },
+    {
+      "id": "EV6",
+      "seq": 6,
+      "timestamp": "2026-09-14T00:00:00.060Z",
+      "producer": {
+        "kind": "tool_fixture",
+        "rule_id": "fixture-rule-v1"
+      },
+      "kind": "tool",
+      "record": {
+        "call_id": "TC2",
+        "name": "read_file",
+        "arguments": {
+          "path": "settings.toml",
+          "start_line": 1,
+          "end_line": 2
+        },
+        "policy_ref": "EV5",
+        "state_hash": "sha256:d8d20ddefd212329eeacb1a08662bd765d05be93cbf7bbe42157b78cb0ff21b0",
+        "result": {
+          "source_key": "settings.toml",
+          "content_hash": "sha256:d8d20ddefd212329eeacb1a08662bd765d05be93cbf7bbe42157b78cb0ff21b0",
+          "text": "[database]\ndefault = \"sqlite\"\n",
+          "locator": {
+            "start_line": 1,
+            "end_line": 2
+          },
+          "truncated": false,
+          "cursor": null
+        }
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 2,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 60,
+        "human_wait_ms": 0
+      }
+    },
+    {
+      "id": "EV7",
+      "seq": 7,
+      "timestamp": "2026-09-14T00:00:00.070Z",
+      "producer": {
+        "kind": "deterministic_fixture",
+        "rule_id": "fixture-rule-v1"
+      },
+      "kind": "evidence",
+      "record": {
+        "id": "E2",
+        "source_key": "settings.toml",
+        "content_hash": "sha256:d8d20ddefd212329eeacb1a08662bd765d05be93cbf7bbe42157b78cb0ff21b0",
+        "display_version": "fixture-v1",
+        "source_kind": "local_file",
+        "tool_event_ref": "EV6",
+        "locator": {
+          "start_line": 1,
+          "end_line": 2
+        },
+        "excerpt": "[database]\ndefault = \"sqlite\"\n",
+        "scope": {
+          "environment": "checked-in fixture"
+        },
+        "observed_at": "2026-09-14T00:00:00.060Z",
+        "effective_at": null,
+        "truncated": false
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 2,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 70,
+        "human_wait_ms": 0
+      }
+    },
+    {
+      "id": "EV8",
+      "seq": 8,
+      "timestamp": "2026-09-14T00:00:00.080Z",
+      "producer": {
+        "kind": "deterministic_fixture",
+        "rule_id": "fixture-rule-v1"
+      },
+      "kind": "claim",
+      "record": {
+        "id": "CL1",
+        "statement": "README.md states that the service uses PostgreSQL.",
+        "scope": {
+          "source": "README.md",
+          "kind": "documented statement"
+        },
+        "evidence_ids": [
+          "E1"
+        ],
+        "type": "source_report",
+        "immutable": true
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 2,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 80,
+        "human_wait_ms": 0
+      }
+    },
+    {
+      "id": "EV9",
+      "seq": 9,
+      "timestamp": "2026-09-14T00:00:00.090Z",
+      "producer": {
+        "kind": "deterministic_fixture",
+        "rule_id": "fixture-rule-v1"
+      },
+      "kind": "claim",
+      "record": {
+        "id": "CL2",
+        "statement": "settings.toml sets database.default to sqlite.",
+        "scope": {
+          "source": "settings.toml",
+          "kind": "checked-in default"
+        },
+        "evidence_ids": [
+          "E2"
+        ],
+        "type": "source_report",
+        "immutable": true
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 2,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 90,
+        "human_wait_ms": 0
+      }
+    },
+    {
+      "id": "EV10",
+      "seq": 10,
+      "timestamp": "2026-09-14T00:00:00.100Z",
+      "producer": {
+        "kind": "deterministic_fixture",
+        "rule_id": "fixture-rule-v1"
+      },
+      "kind": "claim",
+      "record": {
+        "id": "CL3",
+        "statement": "The current runtime backend can be established.",
+        "scope": {
+          "environment": "current runtime"
+        },
+        "evidence_ids": [],
+        "type": "investigation_target",
+        "immutable": true
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 2,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 100,
+        "human_wait_ms": 0
+      }
+    },
+    {
+      "id": "EV11",
+      "seq": 11,
+      "timestamp": "2026-09-14T00:00:00.110Z",
+      "producer": {
+        "kind": "deterministic_fixture",
+        "rule_id": "fixture-rule-v1"
+      },
+      "kind": "investigation",
+      "record": {
+        "id": "INV1",
+        "claim_id": "CL3",
+        "alternatives": [
+          "The runtime uses the checked-in default",
+          "The runtime uses an override consistent with the README",
+          "Neither source describes current runtime state"
+        ],
+        "selected_observation": "Read resolved backend from the configured runtime-status endpoint",
+        "reason": "Direct runtime configuration could distinguish the alternatives; file agreement alone would not."
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 2,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 110,
+        "human_wait_ms": 0
+      }
+    },
+    {
+      "id": "EV12",
+      "seq": 12,
+      "timestamp": "2026-09-14T00:00:00.120Z",
+      "producer": {
+        "kind": "deterministic_fixture",
+        "rule_id": "fixture-rule-v1"
+      },
+      "kind": "policy",
+      "record": {
+        "id": "POL_TC3",
+        "decision": "allow",
+        "rule_id": "configured-runtime-read-v1",
+        "scope_grant_id": "GRANT_FIXTURE_READ",
+        "operation": "runtime_status",
+        "boundary": {
+          "endpoint": "synthetic-local-status",
+          "read_only": true,
+          "within_scope": true
+        },
+        "action_hash": "sha256:16b5209676b718522d1dddc845cd343524078d689f87b865239c8187775bc48e",
+        "state_hash": "sha256:fb07a76e85dc99ad4f70130e440005079bfd6ab922326720657490d3e13d3a54"
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 2,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 120,
+        "human_wait_ms": 0
+      }
+    },
+    {
+      "id": "EV13",
+      "seq": 13,
+      "timestamp": "2026-09-14T00:00:00.130Z",
+      "producer": {
+        "kind": "tool_fixture",
+        "rule_id": "fixture-rule-v1"
+      },
+      "kind": "tool",
+      "record": {
+        "call_id": "TC3",
+        "name": "runtime_status",
+        "arguments": {
+          "endpoint": "synthetic-local-status"
+        },
+        "policy_ref": "EV12",
+        "state_hash": "sha256:fb07a76e85dc99ad4f70130e440005079bfd6ab922326720657490d3e13d3a54",
+        "result": {
+          "status": "unavailable",
+          "error_class": "unsupported_capability",
+          "detail": "This fixture provides no runtime-status observation.",
+          "truncated": false
+        }
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 3,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 130,
+        "human_wait_ms": 0
+      }
+    },
+    {
+      "id": "EV14",
+      "seq": 14,
+      "timestamp": "2026-09-14T00:00:00.140Z",
+      "producer": {
+        "kind": "deterministic_fixture",
+        "rule_id": "fixture-rule-v1"
+      },
+      "kind": "evidence",
+      "record": {
+        "id": "E3",
+        "source_key": "runtime_status",
+        "content_hash": "sha256:6d9a2b48ac646756903c26d268d22b30a7dac6dacd3bc3d39bcfb28d8e123377",
+        "source_kind": "tool_observation",
+        "tool_event_ref": "EV13",
+        "value": {
+          "status": "unavailable",
+          "error_class": "unsupported_capability",
+          "detail": "This fixture provides no runtime-status observation.",
+          "truncated": false
+        },
+        "scope": {
+          "endpoint": "synthetic-local-status"
+        },
+        "observed_at": "2026-09-14T00:00:00.130Z",
+        "truncated": false
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 3,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 140,
+        "human_wait_ms": 0
+      }
+    },
+    {
+      "id": "EV15",
+      "seq": 15,
+      "timestamp": "2026-09-14T00:00:00.150Z",
+      "producer": {
+        "kind": "deterministic_fixture",
+        "rule_id": "fixture-rule-v1"
+      },
+      "kind": "check",
+      "record": {
+        "id": "K1",
+        "claim_ids": [
+          "CL1"
+        ],
+        "evidence_ids": [
+          "E1"
+        ],
+        "method": "exact_source_report",
+        "method_version": "fixture-v1",
+        "inputs": {
+          "source_key": "README.md",
+          "content_hash": "sha256:70918d92d5a32ef16b824f67835068067f6003378172f0af4389e1461723fabb"
+        },
+        "input_hash": "sha256:914713b63bea44854a0ce80016ca50e64611b35f899e5c9044f33af183ceb42e",
+        "result": "supported",
+        "computed_output": {
+          "source_statement": "The service uses PostgreSQL."
+        }
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 3,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 150,
+        "human_wait_ms": 0
+      }
+    },
+    {
+      "id": "EV16",
+      "seq": 16,
+      "timestamp": "2026-09-14T00:00:00.160Z",
+      "producer": {
+        "kind": "deterministic_fixture",
+        "rule_id": "fixture-rule-v1"
+      },
+      "kind": "check",
+      "record": {
+        "id": "K2",
+        "claim_ids": [
+          "CL2"
+        ],
+        "evidence_ids": [
+          "E2"
+        ],
+        "method": "parse_toml_field",
+        "method_version": "fixture-v1",
+        "inputs": {
+          "source_key": "settings.toml",
+          "content_hash": "sha256:d8d20ddefd212329eeacb1a08662bd765d05be93cbf7bbe42157b78cb0ff21b0",
+          "field": "database.default"
+        },
+        "input_hash": "sha256:1cbd6e6b12553827845ec110dee92c19c2edd496bcffe12e13c6645c6fb561cd",
+        "result": "supported",
+        "computed_output": {
+          "value": "sqlite"
+        }
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 3,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 160,
+        "human_wait_ms": 0
+      }
+    },
+    {
+      "id": "EV17",
+      "seq": 17,
+      "timestamp": "2026-09-14T00:00:00.170Z",
+      "producer": {
+        "kind": "deterministic_fixture",
+        "rule_id": "fixture-rule-v1"
+      },
+      "kind": "check",
+      "record": {
+        "id": "K3",
+        "claim_ids": [
+          "CL3"
+        ],
+        "evidence_ids": [
+          "E1",
+          "E2",
+          "E3"
+        ],
+        "method": "runtime_observation_required",
+        "method_version": "fixture-v1",
+        "inputs": {
+          "observation_id": "E3",
+          "reports": [
+            "CL1",
+            "CL2"
+          ]
+        },
+        "input_hash": "sha256:53e4fbbf3af86d5427856fb7eca4f98a249380b42768d53318a2ba31b6893eb8",
+        "result": "insufficient",
+        "computed_output": {
+          "runtime_backend": null,
+          "reason": "Documents describe different scopes; no applicable runtime observation resolves the question."
+        }
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 3,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 170,
+        "human_wait_ms": 0
+      }
+    },
+    {
+      "id": "EV18",
+      "seq": 18,
+      "timestamp": "2026-09-14T00:00:00.180Z",
+      "producer": {
+        "kind": "deterministic_fixture",
+        "rule_id": "fixture-rule-v1"
+      },
+      "kind": "claim_status",
+      "record": {
+        "claim_id": "CL1",
+        "from": "unchecked",
+        "to": "supported",
+        "check_ids": [
+          "K1"
+        ],
+        "evidence_snapshot_hash": "sha256:831436bbd603e770c22742048a94d658d80c2461f65a4f7c860b51963b59ed69",
+        "reducer_rule": "required-check-results-v1"
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 3,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 180,
+        "human_wait_ms": 0
+      }
+    },
+    {
+      "id": "EV19",
+      "seq": 19,
+      "timestamp": "2026-09-14T00:00:00.190Z",
+      "producer": {
+        "kind": "deterministic_fixture",
+        "rule_id": "fixture-rule-v1"
+      },
+      "kind": "claim_status",
+      "record": {
+        "claim_id": "CL2",
+        "from": "unchecked",
+        "to": "supported",
+        "check_ids": [
+          "K2"
+        ],
+        "evidence_snapshot_hash": "sha256:39d506114bb0f2e9a004c1f22ccf80f6d5a9ae195359a4d952be81b6d604eba2",
+        "reducer_rule": "required-check-results-v1"
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 3,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 190,
+        "human_wait_ms": 0
+      }
+    },
+    {
+      "id": "EV20",
+      "seq": 20,
+      "timestamp": "2026-09-14T00:00:00.200Z",
+      "producer": {
+        "kind": "deterministic_fixture",
+        "rule_id": "fixture-rule-v1"
+      },
+      "kind": "claim_status",
+      "record": {
+        "claim_id": "CL3",
+        "from": "unchecked",
+        "to": "insufficient",
+        "check_ids": [
+          "K3"
+        ],
+        "evidence_snapshot_hash": "sha256:9d90c483fbb8f64e6e49f6b032105b27c253dc317837086fcc7d39d293663f61",
+        "reducer_rule": "required-check-results-v1"
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 3,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 200,
+        "human_wait_ms": 0
+      }
+    },
+    {
+      "id": "EV21",
+      "seq": 21,
+      "timestamp": "2026-09-14T00:00:00.210Z",
+      "producer": {
+        "kind": "deterministic_fixture",
+        "rule_id": "fixture-rule-v1"
+      },
+      "kind": "repair_decision",
+      "record": {
+        "action": "stop_investigation",
+        "reason": "No further authorized runtime source is available in this fixture.",
+        "budget_exhausted": false,
+        "unresolved_claim_ids": [
+          "CL3"
+        ],
+        "source_reports_preserved": [
+          "CL1",
+          "CL2"
+        ]
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 3,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 210,
+        "human_wait_ms": 0
+      }
+    },
+    {
+      "id": "EV22",
+      "seq": 22,
+      "timestamp": "2026-09-14T00:00:00.220Z",
+      "producer": {
+        "kind": "deterministic_fixture",
+        "rule_id": "fixture-rule-v1"
+      },
+      "kind": "check",
+      "record": {
+        "id": "COVERAGE",
+        "claim_ids": [
+          "CL1",
+          "CL2",
+          "CL3"
+        ],
+        "evidence_ids": [
+          "E1",
+          "E2",
+          "E3"
+        ],
+        "method": "contract_coverage",
+        "method_version": "fixture-v1",
+        "inputs": {
+          "contract_id": "C1"
+        },
+        "input_hash": "sha256:ead037f6a83836dde64592fe2c309cbf2e7f3c70f8adf9fb238849d11c37b31b",
+        "result": "partial",
+        "computed_output": {
+          "covered": [
+            "Explain the differing source reports"
+          ],
+          "unresolved": [
+            "Identify runtime backend"
+          ],
+          "complete": false
+        }
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 3,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 220,
+        "human_wait_ms": 0
+      }
+    },
+    {
+      "id": "EV23",
+      "seq": 23,
+      "timestamp": "2026-09-14T00:00:00.230Z",
+      "producer": {
+        "kind": "deterministic_fixture",
+        "rule_id": "fixture-template-v1"
+      },
+      "kind": "render",
+      "record": {
+        "id": "R1",
+        "text": "README.md states: \"The service uses PostgreSQL.\" settings.toml sets database.default to sqlite. The current runtime backend remains unresolved.",
+        "limitations": [
+          "The runtime-status check returned no usable observation; the two source reports remain unresolved for runtime behavior."
+        ],
+        "claim_ids": [
+          "CL1",
+          "CL2",
+          "CL3"
+        ],
+        "claim_status_refs": [
+          "EV18",
+          "EV19",
+          "EV20"
+        ],
+        "coverage_check_id": "COVERAGE",
+        "template_id": "checked-fields-v2",
+        "template_content": "README.md states: \"{readme_statement}\" settings.toml sets database.default to {config_value}. The current runtime backend remains unresolved.",
+        "template_hash": "sha256:8b07c4c86b6685faefcc06b6e909a0b626202664b08f3bf7f941afe02ed48af1",
+        "output_hash": "sha256:eab0ffeff1b7a0f20db0403d23aa1217c367ea6acdcb735473b48ee8cd904ddc",
+        "template_inputs": {
+          "template": "README.md states: \"{readme_statement}\" settings.toml sets database.default to {config_value}. The current runtime backend remains unresolved.",
+          "bindings": {
+            "readme_statement": {
+              "check_id": "K1",
+              "output_field": "source_statement",
+              "value": "The service uses PostgreSQL."
+            },
+            "config_value": {
+              "check_id": "K2",
+              "output_field": "value",
+              "value": "sqlite"
+            }
+          },
+          "limitations_rule": "runtime-observation-insufficient-v1",
+          "limitations": [
+            "The runtime-status check returned no usable observation; the two source reports remain unresolved for runtime behavior."
+          ],
+          "required_status_refs": [
+            "EV18",
+            "EV19",
+            "EV20"
+          ]
+        },
+        "template_inputs_hash": "sha256:466ad21d30ac239bcca9d1156c590c4e52dd9d283cf9991a202737a1954a6e04"
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 3,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 230,
+        "human_wait_ms": 0
+      }
+    },
+    {
+      "id": "EV24",
+      "seq": 24,
+      "timestamp": "2026-09-14T00:00:00.240Z",
+      "producer": {
+        "kind": "deterministic_fixture",
+        "rule_id": "fixture-rule-v1"
+      },
+      "kind": "check",
+      "record": {
+        "id": "FINAL_FIDELITY",
+        "claim_ids": [
+          "CL1",
+          "CL2",
+          "CL3"
+        ],
+        "evidence_ids": [],
+        "method": "post_render_exact_fixture_template",
+        "method_version": "fixture-v1",
+        "inputs": {
+          "render_id": "R1",
+          "render_hash": "sha256:eab0ffeff1b7a0f20db0403d23aa1217c367ea6acdcb735473b48ee8cd904ddc",
+          "reference_template_manifest_key": "checked-fields-v2",
+          "reference_template_hash": "sha256:8b07c4c86b6685faefcc06b6e909a0b626202664b08f3bf7f941afe02ed48af1",
+          "independent_check_output_bindings": {
+            "readme_statement": {
+              "check_id": "K1",
+              "output_field": "source_statement",
+              "value": "The service uses PostgreSQL."
+            },
+            "config_value": {
+              "check_id": "K2",
+              "output_field": "value",
+              "value": "sqlite"
+            }
+          },
+          "limitations_rule": "runtime-observation-insufficient-v1",
+          "expected_limitations": [
+            "The runtime-status check returned no usable observation; the two source reports remain unresolved for runtime behavior."
+          ],
+          "claim_status_refs": [
+            "EV18",
+            "EV19",
+            "EV20"
+          ]
+        },
+        "input_hash": "sha256:d1a623676730cce065dc550764910ad73dcaaeb48456a9cea3a8b627327da831",
+        "result": "pass",
+        "computed_output": {
+          "matched": true,
+          "expected_from_checked_bindings": "README.md states: \"The service uses PostgreSQL.\" settings.toml sets database.default to sqlite. The current runtime backend remains unresolved.",
+          "unverified_specifics": []
+        }
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 3,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 240,
+        "human_wait_ms": 0
+      }
+    },
+    {
+      "id": "EV25",
+      "seq": 25,
+      "timestamp": "2026-09-14T00:00:00.250Z",
+      "producer": {
+        "kind": "deterministic_fixture",
+        "rule_id": "fixture-rule-v1"
+      },
+      "kind": "answer",
+      "record": {
+        "render_id": "R1",
+        "rendered_text": "README.md states: \"The service uses PostgreSQL.\" settings.toml sets database.default to sqlite. The current runtime backend remains unresolved.",
+        "limitations": [
+          "The runtime-status check returned no usable observation; the two source reports remain unresolved for runtime behavior."
+        ],
+        "output_hash": "sha256:eab0ffeff1b7a0f20db0403d23aa1217c367ea6acdcb735473b48ee8cd904ddc",
+        "claim_ids": [
+          "CL1",
+          "CL2",
+          "CL3"
+        ],
+        "claim_status_refs": [
+          "EV18",
+          "EV19",
+          "EV20"
+        ],
+        "final_fidelity_check": "FINAL_FIDELITY",
+        "status": "limited"
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 3,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 250,
+        "human_wait_ms": 0
+      }
+    }
+  ],
+  "template_manifest": {
+    "checked-fields-v2": {
+      "content": "README.md states: \"{readme_statement}\" settings.toml sets database.default to {config_value}. The current runtime backend remains unresolved.",
+      "content_hash": "sha256:8b07c4c86b6685faefcc06b6e909a0b626202664b08f3bf7f941afe02ed48af1",
+      "binding_source": "previous immutable check outputs",
+      "limitations_rule": "runtime-observation-insufficient-v1"
+    }
+  },
+  "source_manifest_hash": "sha256:8f40c8d46ab2b2a7185b47931ffb6a372961afb67fb3c604881a2a2a97b89815"
+}

@@ -1,0 +1,161 @@
+flowchart TD
+    request["User request"] --> contract["Build contract: rules first, model only as needed"]
+    contract --> scope{"Essential scope clear?"}
+    scope -->|No| decision
+    scope -->|Yes| tier{"Choose tier: record cause and superseding contract for reductions"}
+    tier -->|T0| transform["Transform supplied input or compute"]
+    transform --> fidelity{"Fidelity, values, and coverage pass?"}
+    fidelity -->|Yes| answer["Deliver checked answer with relevant limits"]
+    fidelity -->|Needs stronger checks| investigate
+
+    tier -->|T1| lookup["Request direct local evidence"]
+    lookup --> policy
+    tier -->|T2| investigate["Plan targeted evidence gathering or authorized action"]
+    investigate --> policy
+
+    subgraph execution["Controlled execution"]
+        policy{"Runtime policy and typed arguments"}
+        tool["Execute allowed tool with scoped capabilities"]
+        result["Bounded result: source version, locator, truncation, and paging"]
+        errors["Classify errors and reconcile uncertain side effects"]
+        policy -->|Allowed| tool
+        policy -->|Approval required| decision
+        policy -->|Denied| stop["Report limitation or persist paused state"]
+        tool -->|Success| result
+        tool -->|Failure| errors
+        errors --> retry{"Safe useful retry within budget?"}
+        retry -->|Yes| investigate
+        retry -->|No| stop
+    end
+
+    result --> evidence[("Evidence store: immutable source bytes, hashes, and checked locators")]
+    evidence --> eligible{"Direct scoped lookup or stronger check needed?"}
+    eligible -->|Direct T1 field or quote| direct["Bind claim to source and check parsed value, quote, and scope"]
+    direct --> directok{"Direct checks and contract coverage pass?"}
+    directok -->|Yes| directstatus["Append supported claim status with completed check references"]
+    directstatus --> template["Render constrained source report from checked bindings"]
+    template --> finalcheck
+    directok -->|No| investigate
+    eligible -->|T2 or promote| claims["Select evidence IDs and construct material claims before prose"]
+    claims --> schedule["Schedule applicable checks on one evidence snapshot"]
+
+    subgraph verification["Independent checks: sequential by default on local hardware"]
+        support["Semantic support: supported, contradicted, or insufficient"]
+        freshness["Check source applicability, versions, and conflicts"]
+        outcome["Check calculations, tests, and observed outcomes"]
+        coverage["Check required claims and contract coverage"]
+    end
+
+    schedule --> support
+    schedule --> freshness
+    schedule --> outcome
+    schedule --> coverage
+    support --> join["Collect all required results"]
+    freshness --> join
+    outcome --> join
+    coverage --> join
+    join --> statuses["Append claim-status transitions bound to check results and evidence hashes"]
+    statuses --> gate{"Evidence and checks sufficient?"}
+    gate -->|Yes| render["Render from checked claims"]
+    gate -->|Gap or conflict| repair{"Useful next step within budget?"}
+    repair -->|Observation available| investigate
+    repair -->|Human knowledge or choice required| decision
+    repair -->|No| partial["Render supported partial content or state evidence gap"]
+    render --> finalcheck{"Post-render fidelity: exact output hash, checked claims, scope, and locators preserved?"}
+    finalcheck -->|Yes| answer
+    finalcheck -->|No and budget remains| claims
+    finalcheck -->|Budget exhausted| partial
+    partial --> partialcheck{"Post-render check of limited template passes?"}
+    partialcheck -->|Yes| answer
+    partialcheck -->|No| stop
+
+    subgraph human["Human-in-the-loop: flat terminal interaction"]
+        decision["Persist question, reason, evidence, proposal, and checkpoint"]
+        menu["Recommended option, alternatives, More options, free text, pause/cancel"]
+        wait[("Wait for explicit response; survive restart")]
+        interpret["Record normalized option or custom interpretation with raw reply and proposed delta"]
+        clear{"Interpretation unambiguous and validated?"}
+        echo["Echo interpreted scope or revised proposal; echo is not approval"]
+        validate{"Response valid for current decision and proposal?"}
+        resume{"Resume saved checkpoint"}
+        decision --> menu
+        menu --> wait
+        wait -->|Explicit response| interpret
+        interpret --> clear
+        clear -->|No| decision
+        clear -->|Yes| echo
+        echo --> validate
+        validate -->|Stale or changed proposal| decision
+        validate -->|Valid selection, custom reply, or optional skip| resume
+        validate -->|Cancel| stop
+    end
+
+    resume -->|Clarified or revised scope| contract
+    resume -->|Exact action approval| policy
+    resume -->|New attributed evidence| evidence
+    resume -->|Explicit provider choice| adapter
+
+    subgraph providers["Model service: used only for stages requiring a model"]
+        adapter["Capability, destination, context, and budget checks"]
+        local["M1 local Ollama: model candidates pending benchmarks"]
+        optional["M4B optional hosted free, paid, or private endpoint"]
+        structured["Validated structured results returned to requesting stage"]
+        adapter -->|Configured local profile| local
+        adapter -->|Explicitly configured later| optional
+        local --> structured
+        optional --> structured
+        adapter -->|User configuration required| decision
+    end
+
+    adapter -.-> contract
+    adapter -.-> transform
+    adapter -.-> investigate
+    adapter -.-> claims
+    adapter -.-> support
+    adapter -.-> render
+
+    answer --> memory[("Persist eligible attributed facts and decisions")]
+    memory --> cache["Evict affected source-keyed caches; no durable inferred facts in v1"]
+
+    subgraph harness["Controls across stages"]
+        controls["Permissions, offline policy, cancellation, and resource budgets"]
+        state[("Session state, decisions, and replayable allowed traces")]
+        modelrecord["Actual model-call records: exact input, raw output, artifact/options, and usage"]
+    end
+    controls -.-> policy
+    controls -.-> adapter
+    controls -.-> schedule
+    result -.-> state
+    structured -.-> modelrecord
+    modelrecord -.-> state
+    human -.-> state
+    join -.-> state
+    answer -.-> state
+
+    subgraph evaluation["Independent evaluation, not runtime self-grading"]
+        replay["Step or strict trajectory replay: no live tool effects"]
+        mismatch["Unmatched request or changed approval: replay mismatch"]
+        fixtures["Fresh isolated end-to-end fixtures"]
+        grade["Deterministic references, human labels, optional calibrated independent grader"]
+        metrics["Per-profile correctness, claim recall, tiering, HIL, latency, and cost"]
+        replay -->|Divergence| mismatch
+        replay --> grade
+        fixtures --> grade
+        grade --> metrics
+    end
+    state -.-> replay
+
+    %% Nodes are responsibilities, not a mandatory sequence of model calls.
+    %% Action policy applies on every tier; tiering cannot grant permissions.
+    %% T0 uses supplied input as evidence; T1 is only direct scoped reporting.
+    %% Citation existence and valid JSON do not establish semantic support.
+    %% Precise citation locators are checked output data, not renderer guesses.
+    %% All factual paths render before their final fidelity check and delivery.
+    %% Claim status is projected from explicit append-only transition events.
+    %% Custom input cannot silently reduce checking depth or approve a changed action.
+    %% Required check results must be collected; timeouts remain unresolved.
+    %% Source extraction/checking/rendering calls expose no action tools.
+    %% Human recommendations and silence never submit approval.
+    %% All model roles obey configured destinations; no silent cloud fallback.
+    %% Parallel checks are optional; local inference concurrency defaults to one.
+    %% No cross-run discovery or absence cache without a versioned complete scope.

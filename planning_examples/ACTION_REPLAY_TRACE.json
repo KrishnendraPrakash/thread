@@ -1,0 +1,687 @@
+{
+  "schema_version": "0.2-planning",
+  "run_id": "changed-action-and-replay-01",
+  "status": "synthetic teaching trace; no live model or tool execution",
+  "clock": "scripted UTC timestamps; budget time is scripted, not measured",
+  "measured_latency_ms": null,
+  "replay_capability": {
+    "deterministic_fixture_steps": true,
+    "measured_model_replay": false
+  },
+  "config": {
+    "limits": {
+      "model_requests": 12,
+      "tool_calls": 8,
+      "repair_passes": 2,
+      "active_elapsed_ms": 120000
+    },
+    "mode": "deterministic_synthetic_fixture",
+    "hash_encoding": "UTF-8; structured objects use sorted compact JSON",
+    "model": null
+  },
+  "config_hash": "sha256:5e7ed125198eb0592480b716617e5b0ff016b8b28464d0336c07c9e587fb7683",
+  "source_manifest": {
+    "settings.toml": {
+      "content": "[database]\ndefault = \"sqlite\"\n",
+      "content_hash": "sha256:d8d20ddefd212329eeacb1a08662bd765d05be93cbf7bbe42157b78cb0ff21b0",
+      "display_version": "fixture-v1"
+    }
+  },
+  "events": [
+    {
+      "id": "EV1",
+      "seq": 1,
+      "timestamp": "2026-09-14T00:00:00.010Z",
+      "producer": {
+        "kind": "deterministic_fixture",
+        "rule_id": "fixture-rule-v1"
+      },
+      "kind": "contract",
+      "record": {
+        "id": "C1",
+        "objective": "Change the checked-in database default to postgres",
+        "scope": {
+          "source": "settings.toml"
+        },
+        "required_results": [
+          "Show and apply an approved exact diff",
+          "Read back the result"
+        ],
+        "tier": "T2"
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 0,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 10,
+        "human_wait_ms": 0
+      }
+    },
+    {
+      "id": "EV2",
+      "seq": 2,
+      "timestamp": "2026-09-14T00:00:00.020Z",
+      "producer": {
+        "kind": "deterministic_fixture",
+        "rule_id": "fixture-rule-v1"
+      },
+      "kind": "action_proposal",
+      "record": {
+        "id": "P1",
+        "action": {
+          "tool": "replace_file",
+          "arguments": {
+            "path": "settings.toml",
+            "expected_content_hash": "sha256:d8d20ddefd212329eeacb1a08662bd765d05be93cbf7bbe42157b78cb0ff21b0",
+            "new_content": "[database]\ndefault = \"postgres\"\n"
+          }
+        },
+        "action_hash": "sha256:5cadf9e026027e0805b5dd188e2715580dbdfc3d46f8a2f81ff28e6701425401",
+        "state_preconditions": {
+          "settings.toml": "sha256:d8d20ddefd212329eeacb1a08662bd765d05be93cbf7bbe42157b78cb0ff21b0"
+        },
+        "diff": "-default = \"sqlite\"\n+default = \"postgres\"",
+        "target_value": "postgres"
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 0,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 20,
+        "human_wait_ms": 0
+      }
+    },
+    {
+      "id": "EV3",
+      "seq": 3,
+      "timestamp": "2026-09-14T00:00:00.030Z",
+      "producer": {
+        "kind": "deterministic_fixture",
+        "rule_id": "fixture-rule-v1"
+      },
+      "kind": "policy",
+      "record": {
+        "id": "POL1",
+        "decision": "approval_required",
+        "rule_id": "explicit-file-write-v1",
+        "scope_grant_id": null,
+        "operation": "replace_file",
+        "boundary": {
+          "workspace": "synthetic-fixture",
+          "resolved_path": "settings.toml",
+          "within_scope": true
+        },
+        "action_hash": "sha256:5cadf9e026027e0805b5dd188e2715580dbdfc3d46f8a2f81ff28e6701425401",
+        "state_preconditions": {
+          "settings.toml": "sha256:d8d20ddefd212329eeacb1a08662bd765d05be93cbf7bbe42157b78cb0ff21b0"
+        }
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 0,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 30,
+        "human_wait_ms": 0
+      }
+    },
+    {
+      "id": "EV4",
+      "seq": 4,
+      "timestamp": "2026-09-14T00:00:00.040Z",
+      "producer": {
+        "kind": "deterministic_fixture",
+        "rule_id": "fixture-rule-v1"
+      },
+      "kind": "decision",
+      "record": {
+        "id": "D1",
+        "type": "approval",
+        "checkpoint": "action_policy",
+        "question": "Apply this exact postgres diff?",
+        "reason": "A concrete authorization is needed.",
+        "options": [
+          {
+            "id": "apply",
+            "label": "Apply displayed diff",
+            "recommended": true,
+            "rationale": "Matches the current request."
+          },
+          {
+            "id": "revise",
+            "label": "Revise the proposal",
+            "recommended": false
+          }
+        ],
+        "more_options": [
+          {
+            "id": "explain",
+            "label": "Explain the evidence and choices"
+          }
+        ],
+        "free_text_allowed": true,
+        "optional": false,
+        "can_pause_or_cancel": true,
+        "snapshot": {
+          "contract": {
+            "id": "C1",
+            "objective": "Change the checked-in database default to postgres",
+            "scope": {
+              "source": "settings.toml"
+            },
+            "required_results": [
+              "Show and apply an approved exact diff",
+              "Read back the result"
+            ],
+            "tier": "T2"
+          },
+          "evidence_hashes": [],
+          "proposal": {
+            "id": "P1",
+            "action": {
+              "tool": "replace_file",
+              "arguments": {
+                "path": "settings.toml",
+                "expected_content_hash": "sha256:d8d20ddefd212329eeacb1a08662bd765d05be93cbf7bbe42157b78cb0ff21b0",
+                "new_content": "[database]\ndefault = \"postgres\"\n"
+              }
+            },
+            "action_hash": "sha256:5cadf9e026027e0805b5dd188e2715580dbdfc3d46f8a2f81ff28e6701425401",
+            "state_preconditions": {
+              "settings.toml": "sha256:d8d20ddefd212329eeacb1a08662bd765d05be93cbf7bbe42157b78cb0ff21b0"
+            },
+            "diff": "-default = \"sqlite\"\n+default = \"postgres\"",
+            "target_value": "postgres"
+          }
+        },
+        "snapshot_hash": "sha256:ad027dc5e45a139d6db78b51ac435be66756add0211fa871430705d3edad2f6a",
+        "issued_at": "2026-09-14T00:00:00.040Z",
+        "expires_at": null,
+        "status": "pending",
+        "proposal_hash": "sha256:0a076767e9c37d2366d218770b51b3c4dd23f0b4fcdadebd1b9a0327f63f748b",
+        "human_response_required": true
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 0,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 40,
+        "human_wait_ms": 0
+      }
+    },
+    {
+      "id": "EV5",
+      "seq": 5,
+      "timestamp": "2026-09-14T00:00:01.050Z",
+      "producer": {
+        "kind": "human_fixture",
+        "rule_id": "fixture-rule-v1"
+      },
+      "kind": "human_response",
+      "record": {
+        "decision_id": "D1",
+        "response_type": "custom",
+        "text": "Use mysql instead.",
+        "received_at": "2026-09-14T00:00:01.050Z"
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 0,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 50,
+        "human_wait_ms": 1000
+      }
+    },
+    {
+      "id": "EV6",
+      "seq": 6,
+      "timestamp": "2026-09-14T00:00:01.060Z",
+      "producer": {
+        "kind": "deterministic_fixture",
+        "rule_id": "fixture-rule-v1"
+      },
+      "kind": "interpretation",
+      "record": {
+        "id": "I1",
+        "response_ref": "EV5",
+        "raw_text": "Use mysql instead.",
+        "normalized_option_id": null,
+        "normalizer_rule": "exact-fixture-target-change-v1",
+        "contract_delta": {
+          "target_value": "mysql"
+        },
+        "validation": "Unambiguous fixture mapping; modifies the proposed action, does not approve it.",
+        "grants_action_approval": false
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 0,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 60,
+        "human_wait_ms": 1000
+      }
+    },
+    {
+      "id": "EV7",
+      "seq": 7,
+      "timestamp": "2026-09-14T00:00:01.070Z",
+      "producer": {
+        "kind": "deterministic_fixture",
+        "rule_id": "fixture-rule-v1"
+      },
+      "kind": "human_echo",
+      "record": {
+        "interpretation_id": "I1",
+        "displayed_text": "I will revise the diff to mysql and show it for approval."
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 0,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 70,
+        "human_wait_ms": 1000
+      }
+    },
+    {
+      "id": "EV8",
+      "seq": 8,
+      "timestamp": "2026-09-14T00:00:01.080Z",
+      "producer": {
+        "kind": "deterministic_fixture",
+        "rule_id": "fixture-rule-v1"
+      },
+      "kind": "decision_resolution",
+      "record": {
+        "decision_id": "D1",
+        "status": "answered",
+        "response_ref": "EV5",
+        "interpretation_id": "I1",
+        "approval_granted": false,
+        "valid_for_approval": false,
+        "reason": "Replaced proposal"
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 0,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 80,
+        "human_wait_ms": 1000
+      }
+    },
+    {
+      "id": "EV9",
+      "seq": 9,
+      "timestamp": "2026-09-14T00:00:01.090Z",
+      "producer": {
+        "kind": "deterministic_fixture",
+        "rule_id": "fixture-rule-v1"
+      },
+      "kind": "contract",
+      "record": {
+        "id": "C2",
+        "objective": "Change the checked-in database default to mysql",
+        "scope": {
+          "source": "settings.toml"
+        },
+        "required_results": [
+          "Show and apply an approved exact diff",
+          "Read back the result"
+        ],
+        "tier": "T2",
+        "supersedes": "C1"
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 0,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 90,
+        "human_wait_ms": 1000
+      }
+    },
+    {
+      "id": "EV10",
+      "seq": 10,
+      "timestamp": "2026-09-14T00:00:01.100Z",
+      "producer": {
+        "kind": "deterministic_fixture",
+        "rule_id": "fixture-rule-v1"
+      },
+      "kind": "action_proposal",
+      "record": {
+        "id": "P2",
+        "action": {
+          "tool": "replace_file",
+          "arguments": {
+            "path": "settings.toml",
+            "expected_content_hash": "sha256:d8d20ddefd212329eeacb1a08662bd765d05be93cbf7bbe42157b78cb0ff21b0",
+            "new_content": "[database]\ndefault = \"mysql\"\n"
+          }
+        },
+        "action_hash": "sha256:78af0cb17e0411d76451c39636094cb8503da3d05b9323d9bbc1e49d2f38c718",
+        "state_preconditions": {
+          "settings.toml": "sha256:d8d20ddefd212329eeacb1a08662bd765d05be93cbf7bbe42157b78cb0ff21b0"
+        },
+        "diff": "-default = \"sqlite\"\n+default = \"mysql\"",
+        "target_value": "mysql"
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 0,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 100,
+        "human_wait_ms": 1000
+      }
+    },
+    {
+      "id": "EV11",
+      "seq": 11,
+      "timestamp": "2026-09-14T00:00:01.110Z",
+      "producer": {
+        "kind": "deterministic_fixture",
+        "rule_id": "fixture-rule-v1"
+      },
+      "kind": "decision",
+      "record": {
+        "id": "D2",
+        "type": "approval",
+        "checkpoint": "action_policy",
+        "question": "Apply this exact mysql diff?",
+        "reason": "A concrete authorization is needed.",
+        "options": [
+          {
+            "id": "apply",
+            "label": "Apply displayed revised diff",
+            "recommended": true,
+            "rationale": "Matches the revised request."
+          },
+          {
+            "id": "reject",
+            "label": "Reject the change",
+            "recommended": false
+          }
+        ],
+        "more_options": [
+          {
+            "id": "explain",
+            "label": "Explain the evidence and choices"
+          }
+        ],
+        "free_text_allowed": true,
+        "optional": false,
+        "can_pause_or_cancel": true,
+        "snapshot": {
+          "contract": {
+            "id": "C2",
+            "objective": "Change the checked-in database default to mysql",
+            "scope": {
+              "source": "settings.toml"
+            },
+            "required_results": [
+              "Show and apply an approved exact diff",
+              "Read back the result"
+            ],
+            "tier": "T2",
+            "supersedes": "C1"
+          },
+          "evidence_hashes": [],
+          "proposal": {
+            "id": "P2",
+            "action": {
+              "tool": "replace_file",
+              "arguments": {
+                "path": "settings.toml",
+                "expected_content_hash": "sha256:d8d20ddefd212329eeacb1a08662bd765d05be93cbf7bbe42157b78cb0ff21b0",
+                "new_content": "[database]\ndefault = \"mysql\"\n"
+              }
+            },
+            "action_hash": "sha256:78af0cb17e0411d76451c39636094cb8503da3d05b9323d9bbc1e49d2f38c718",
+            "state_preconditions": {
+              "settings.toml": "sha256:d8d20ddefd212329eeacb1a08662bd765d05be93cbf7bbe42157b78cb0ff21b0"
+            },
+            "diff": "-default = \"sqlite\"\n+default = \"mysql\"",
+            "target_value": "mysql"
+          }
+        },
+        "snapshot_hash": "sha256:ef6965589c781f22e0e28725b06d75ba29f459459bf78686cdaa754b7481f55f",
+        "issued_at": "2026-09-14T00:00:01.110Z",
+        "expires_at": null,
+        "status": "pending",
+        "proposal_hash": "sha256:354414c69ff60a4046485af98c296f7d4a804a2a6130b6b290ad9c937e944d2c",
+        "human_response_required": true
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 0,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 110,
+        "human_wait_ms": 1000
+      }
+    },
+    {
+      "id": "EV12",
+      "seq": 12,
+      "timestamp": "2026-09-14T00:00:01.120Z",
+      "producer": {
+        "kind": "human_fixture",
+        "rule_id": "fixture-rule-v1"
+      },
+      "kind": "human_response",
+      "record": {
+        "decision_id": "D1",
+        "response_type": "option",
+        "option_id": "apply",
+        "proposal_hash": "sha256:0a076767e9c37d2366d218770b51b3c4dd23f0b4fcdadebd1b9a0327f63f748b",
+        "received_at": "2026-09-14T00:00:01.120Z"
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 0,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 120,
+        "human_wait_ms": 1000
+      }
+    },
+    {
+      "id": "EV13",
+      "seq": 13,
+      "timestamp": "2026-09-14T00:00:01.130Z",
+      "producer": {
+        "kind": "deterministic_fixture",
+        "rule_id": "fixture-rule-v1"
+      },
+      "kind": "approval_validation",
+      "record": {
+        "response_ref": "EV12",
+        "decision_id": "D1",
+        "requested_action_hash": "sha256:5cadf9e026027e0805b5dd188e2715580dbdfc3d46f8a2f81ff28e6701425401",
+        "current_action_hash": "sha256:78af0cb17e0411d76451c39636094cb8503da3d05b9323d9bbc1e49d2f38c718",
+        "result": "rejected_stale_approval",
+        "rule_id": "approval-current-exact-action-v1",
+        "consumed": false,
+        "tool_dispatched": false,
+        "pending_decision_id": "D2"
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 0,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 130,
+        "human_wait_ms": 1000
+      }
+    },
+    {
+      "id": "EV14",
+      "seq": 14,
+      "timestamp": "2026-09-14T00:00:01.140Z",
+      "producer": {
+        "kind": "deterministic_fixture",
+        "rule_id": "fixture-rule-v1"
+      },
+      "kind": "run_state",
+      "record": {
+        "status": "waiting_for_human",
+        "decision_id": "D2",
+        "tool_calls": 0,
+        "source_unchanged_hash": "sha256:d8d20ddefd212329eeacb1a08662bd765d05be93cbf7bbe42157b78cb0ff21b0"
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 0,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 140,
+        "human_wait_ms": 1000
+      }
+    },
+    {
+      "id": "EV15",
+      "seq": 15,
+      "timestamp": "2026-09-14T00:00:01.150Z",
+      "producer": {
+        "kind": "deterministic_fixture",
+        "rule_id": "fixture-rule-v1"
+      },
+      "kind": "replay_start",
+      "record": {
+        "subrun_id": "REPLAY1",
+        "mode": "strict_trajectory",
+        "fixture_hash": "sha256:3cf87e29dc04ba4dce161fe5b1c99191072ebef0aba4ef909bb79399d666bd23",
+        "live_tools_enabled": false,
+        "live_approvals_enabled": false
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 0,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 150,
+        "human_wait_ms": 1000
+      }
+    },
+    {
+      "id": "EV16",
+      "seq": 16,
+      "timestamp": "2026-09-14T00:00:01.160Z",
+      "producer": {
+        "kind": "deterministic_fixture",
+        "rule_id": "fixture-rule-v1"
+      },
+      "kind": "replay_request",
+      "record": {
+        "subrun_id": "REPLAY1",
+        "request": {
+          "tool": "replace_file",
+          "arguments": {
+            "path": "settings.toml",
+            "expected_content_hash": "sha256:d8d20ddefd212329eeacb1a08662bd765d05be93cbf7bbe42157b78cb0ff21b0",
+            "new_content": "[database]\ndefault = \"mysql\"\n"
+          }
+        },
+        "request_hash": "sha256:78af0cb17e0411d76451c39636094cb8503da3d05b9323d9bbc1e49d2f38c718",
+        "state_preconditions": {
+          "settings.toml": "sha256:d8d20ddefd212329eeacb1a08662bd765d05be93cbf7bbe42157b78cb0ff21b0"
+        }
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 0,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 160,
+        "human_wait_ms": 1000
+      }
+    },
+    {
+      "id": "EV17",
+      "seq": 17,
+      "timestamp": "2026-09-14T00:00:01.170Z",
+      "producer": {
+        "kind": "deterministic_fixture",
+        "rule_id": "fixture-rule-v1"
+      },
+      "kind": "replay_stop",
+      "record": {
+        "subrun_id": "REPLAY1",
+        "reason": "replay_mismatch",
+        "expected_request_hash": "sha256:5cadf9e026027e0805b5dd188e2715580dbdfc3d46f8a2f81ff28e6701425401",
+        "actual_request_hash": "sha256:78af0cb17e0411d76451c39636094cb8503da3d05b9323d9bbc1e49d2f38c718",
+        "different_fields": [
+          "arguments.new_content"
+        ],
+        "recorded_output_substituted": false,
+        "live_tool_calls": 0,
+        "parent_run_status": "waiting_for_human"
+      },
+      "budget": {
+        "accounting": "scripted fixture counters, not runtime measurements",
+        "model_requests": 0,
+        "tool_calls": 0,
+        "repair_passes": 0,
+        "prompt_tokens": 0,
+        "output_tokens": 0,
+        "active_elapsed_ms": 170,
+        "human_wait_ms": 1000
+      }
+    }
+  ],
+  "replay_fixture": {
+    "source": "synthetic recorded-request fixture, not a live action log",
+    "expected_next_request": {
+      "tool": "replace_file",
+      "arguments": {
+        "path": "settings.toml",
+        "expected_content_hash": "sha256:d8d20ddefd212329eeacb1a08662bd765d05be93cbf7bbe42157b78cb0ff21b0",
+        "new_content": "[database]\ndefault = \"postgres\"\n"
+      }
+    },
+    "expected_state_preconditions": {
+      "settings.toml": "sha256:d8d20ddefd212329eeacb1a08662bd765d05be93cbf7bbe42157b78cb0ff21b0"
+    }
+  },
+  "replay_fixture_hash": "sha256:3cf87e29dc04ba4dce161fe5b1c99191072ebef0aba4ef909bb79399d666bd23",
+  "source_manifest_hash": "sha256:2806c1d80ad132123c622c68e01c0258abaca5086eb7b81d185d47f7ab0cec01"
+}

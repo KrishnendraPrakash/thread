@@ -1,0 +1,27 @@
+# Draft only. The scaffold CLI does not read this file.
+[profile]
+name = "local"
+enabled = false
+
+[model]
+provider = "ollama"
+endpoint = "http://127.0.0.1:11434"
+model = "" # Choose and pin an evaluated model; none is selected by this scaffold.
+keep_alive_seconds = 300
+max_concurrent_requests = 1
+
+[workspace]
+path = "./examples/projects/minimal"
+
+[network]
+mode = "local_only"
+allow_hosted_fallback = false
+
+[storage]
+directory = ".thread-agent"
+
+[limits]
+model_requests = 12
+tool_calls = 8
+repair_passes = 2
+active_seconds = 120
