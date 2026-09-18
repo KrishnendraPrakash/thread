@@ -33,4 +33,6 @@ Updated: 2026-09-18. The package/CLI scaffold is implemented; most architecture 
 
 ## Collaboration
 
+Use detailed commit messages for this project, as requested by the user. Include a concise subject and a body explaining the problem, changes, validation performed, and material limitations. Apply this to every commit prepared for a push; the preference does not itself authorize unrelated changes or publication.
+
 Explain the concrete change and why it matters. Keep the user informed during longer work. Respect existing authorization and reserve questions for material missing information. Preserve unrelated work; avoid unnecessary rewrites or formatting churn. End with the result, actual validation, and unresolved limits.

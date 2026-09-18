@@ -8,4 +8,4 @@ Start with [AGENTS.md](AGENTS.md) and [engineering standards](steering/engineeri
 4. Add outcome-oriented tests when implementing real behavior. Never report an empty test suite or scaffold smoke check as runtime validation.
 5. Keep fixtures synthetic, isolate external integrations, and exclude credentials, private traces, and model weights.
 
-The repository license and public hosting location are still open decisions. See [release readiness](docs/releasing.md) before publication.
+The source repository is hosted at [KrishnendraPrakash/thread](https://github.com/KrishnendraPrakash/thread). The repository license remains an open decision. See [release readiness](docs/releasing.md) before a package or agent release, and the [workflow guide](docs/workflows.md) for the planned runtime paths.

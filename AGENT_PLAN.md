@@ -85,4 +85,4 @@ Numerical targets are proposed acceptance criteria, not measured speed or reliab
 
 ## Open planning decisions
 
-Finalize the three real tasks, minimum supported hardware/OS, acceptable latency/cost, action policy and data retention, repository license, and the first optional hosted integration. Benchmark candidate models before choosing defaults when that work is requested. Initial scaffolding has started; agent behavior implementation and publication remain pending.
+Finalize the three real tasks, minimum supported hardware/OS, acceptable latency/cost, action policy and data retention, repository license, and the first optional hosted integration. Benchmark candidate models before choosing defaults when that work is requested. The scaffold source is on GitHub; agent behavior implementation and a package/agent release remain pending. The [public README](README.md) and [workflow guide](docs/workflows.md) explain current usage and the planned paths.

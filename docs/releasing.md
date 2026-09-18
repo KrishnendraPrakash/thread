@@ -1,10 +1,10 @@
 # Release readiness
 
-No release or publication is configured. The user has authorized the local scaffold, not deployment or registry publication.
+The source repository is published at [KrishnendraPrakash/thread](https://github.com/KrishnendraPrakash/thread). No package or agent release is configured. Source publication does not authorize deployment or registry publication.
 
 Before publishing a usable release:
 
-- Select the public repository URL, package name, and repository license. No license grant or license classifier is invented by the scaffold.
+- Confirm the release package name and select the repository license. The source repository URL is established; no license grant or license classifier is invented by the scaffold.
 - Finish the intended runtime milestone and record acceptance outcomes separately from packaging checks.
 - Pin a tested model artifact/quantization/runtime and retain relevant model/dependency notices.
 - Verify installation from a fresh checkout and a built distribution on declared supported platforms.
