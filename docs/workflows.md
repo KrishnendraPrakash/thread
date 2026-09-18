@@ -2,7 +2,7 @@
 
 [Back to the README](../README.md)
 
-Thread is currently an installable scaffold with help, version, and status commands. **All agent workflows below are planned, not implemented.** The final contribution workflow describes development on the current scaffold.
+Thread now has an [experimental direct-field workflow](first-workflow.md) with local suggestions, saved field choices, and source-report replay. **The diagrams below describe the broader target architecture; they do not imply complete implementation.** The separate first-workflow guide shows the implemented path. The final contribution workflow describes current development.
 
 These diagrams split the [full architecture](../AGENT_ARCHITECTURE.mmd) into readable views. Nodes describe responsibilities, not separate services or mandatory model calls. [SPEC.md](../SPEC.md) is authoritative. Every tool operation must pass runtime policy; arrows never grant permissions.
 
@@ -271,4 +271,4 @@ flowchart TD
     revise -->|No| merge["Maintainer review and merge"]
 ```
 
-The current CI checks style, Python syntax, and CLI smoke commands. It is not an agent acceptance suite. See [development commands](development.md) and [contribution guidance](../CONTRIBUTING.md).
+The current CI checks style, syntax, CLI behavior, boundary tests, and deterministic development fixtures without a model server. It is not the full M1 or model benchmark suite. See [development commands](development.md) and [contribution guidance](../CONTRIBUTING.md).

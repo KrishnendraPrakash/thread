@@ -1,3 +1,3 @@
-# Integration tests — reserved
+# CLI integration tests
 
-Cover real implemented storage transactions and adapter contracts. Separate synthetic/local transport tests from live model tests. No default suite may require paid keys, downloads, or an external account.
+Subprocess tests exercise pending decisions, explicit replies, completed reports, trace inspection, and replay using isolated state. No model server is required. Live-model smoke tests are separate and documented in [the workflow guide](../../docs/first-workflow.md).

@@ -4,54 +4,45 @@ As of: 2026-09-18. Recheck the workspace before relying on this snapshot.
 
 ## Active phase
 
-**Initial implementation: architecture-aligned repository scaffold, with public onboarding documentation.** The scaffold is complete. The user subsequently requested Git publication and a clearer public README with workflow diagrams. The source repository has been pushed; agent runtime behavior, model installation/benchmarking, and package/release publication have not been performed.
+**Initial implementation: experimental direct-field workflow (pre-M1).** After trying scaffold status, the user requested the next step toward use. That authorizes the first local workflow and its validation. It does not complete the full M0/M1 acceptance gates or authorize model downloads, general actions, hosted providers, or a package release.
 
-Continue within the next user-authorized scope. A structure request does not require building all future capabilities, and the former planning-only status must not block implementation that the user now requests.
+The public documentation is already on GitHub. The current implementation increment makes a narrow source-report workflow usable; broader architecture remains a target.
 
-## What exists
+## Implemented
 
-- [README.md](../README.md), [pyproject.toml](../pyproject.toml), and [uv.lock](../uv.lock): package setup and initial development dependency resolution.
-- [src/thread_agent](../src/thread_agent): Python source tree. CLI help, version, and implementation status work; other component packages are documented placeholders.
-- [Component map](../docs/structure.md): responsibilities and optional extension locations.
-- [Public quick start](../README.md) and [workflow guide](../docs/workflows.md): clone/install instructions, working CLI examples, troubleshooting, roadmap, and separate diagrams of the major planned workflows. Planned behavior is explicitly distinguished from the current scaffold.
-- Draft configuration and prompt files, schema locations, synthetic sample projects, test/evaluation directories, developer/release docs, and scaffold-only GitHub CI/templates.
-- [AGENT_PLAN.md](../AGENT_PLAN.md), [SPEC.md](../SPEC.md), [RATIONALE.md](../RATIONALE.md), and [AGENT_ARCHITECTURE.mmd](../AGENT_ARCHITECTURE.mmd): design and roadmap.
-- [EXAMPLE_TRACE.json](../EXAMPLE_TRACE.json) and [planning_examples](../planning_examples/README.md): synthetic teaching traces, not runtime outputs or a frozen schema.
-- [AGENTS.md](../AGENTS.md) and this steering directory: persistent development context.
+- `thread-agent ask --file FILE --field POINTER`: exact scalar TOML/JSON field reports with source hashes and explicit captured-file scope. No model needed.
+- Optional natural-language question plus `--model NAME`: local Ollama suggests a field, which requires explicit human scope confirmation. Values are parsed, not generated. Source values are not included in the model prompt.
+- Numbered recommendations and alternatives, More, exact custom field text, pause/cancel, ambiguity handling, persistence across restart, and stale/duplicate field-reply rejection. These are field clarifications, not action approvals.
+- Scoped descriptor-based reads on macOS/Linux, size/type limits, rejected traversal/symlinks/hard links, and no source writes or shell tools.
+- SQLite session snapshots and ordered events; `sessions`, `resume`, `trace`, and deterministic stored-source `replay`.
+- `doctor` lists installed models from literal loopback Ollama; no model download or automatic provider fallback.
+- [First workflow guide](../docs/first-workflow.md), current [README](../README.md), [component map](../docs/structure.md), and ten [development fixtures](../evals/cases/development/field_lookup.json).
 
-Python minimum is now 3.11. Packaging uses setuptools; the current core has no third-party runtime dependencies. Ruff is an optional development extra; future behavior tests use unittest. pip and optional uv setup are documented.
+Python minimum remains 3.11. No third-party runtime dependency was added. Draft config files are not loaded; explicit CLI flags configure this increment. Other source packages remain placeholders.
 
 ## Actual validation
 
-On local Python 3.12.13:
+Local Python 3.12.13 / macOS arm64:
 
-- Installed the editable scaffold and development tooling into an ignored local .venv.
-- Ruff lint and formatting, Python syntax compilation, TOML/JSON parsing, and document-link checks passed.
-- Built a wheel and source distribution.
-- Installed the wheel into a separate temporary environment without network/runtime dependencies; console and module entry points worked.
-- Verified that the unsupported run command is rejected and the smoke commands do not create agent data.
-- Checked wheel contents for accidental test/evaluation/configuration fixture inclusion.
+- All 28 automated tests pass. They cover field outcomes, path boundaries, malformed input, unchanged source files, persisted/restarted choices, ambiguous/stale/duplicate replies, provider output validation, and replay without live source/model access.
+- Ten synthetic development fixtures compare exact field values against references kept outside the source workspace. They are deterministic tests, not 30 model trials or a held-out benchmark.
+- One live field-suggestion call used existing Ollama 0.34.2 and llama3.1:8b Q4_K_M. It suggested /database/default, remained pending, then returned sqlite after a scripted fixture confirmation. Stored-source replay passed. Exact model identity is recorded in the workflow guide; this does not establish a certified model default or performance distribution.
+- CLI help/status, local source reports, trace/replay, Ruff, and syntax checks are verified during implementation. CI is configured to run tests without a model server; hosted results for this increment are not yet verified.
+- Built a wheel and source distribution; installed the wheel into a fresh temporary environment without runtime dependency downloads and exercised the exact-field report and replay there. The wheel contains the new runtime modules and excludes evaluation/test fixtures.
+- Checked 103 local documentation links/anchors, matched the README status example, and parsed all 14 current Mermaid sources. Diagram tooling remains temporary; visual rendering on GitHub is not claimed.
 
-CI configuration targets Python 3.11 and 3.12 on Linux; hosted CI results have not been verified in this documentation task and cross-platform support is not yet certified. No behavior tests exist; no M0/M1 acceptance gate or live model evaluation has passed. Mermaid source exists; rendered-diagram validation and fresh-session steering discovery remain unverified.
+Earlier scaffold work checked installation, wheel/source builds, isolated wheel CLI entry points, and public documentation links. The documentation update parsed 12 embedded Mermaid diagrams plus the original full architecture; those prior checks are not runtime measurements. Fresh-session steering discovery and GitHub visual rendering remain unverified.
 
-Previous planning work checked synthetic trace hashes, references, status transitions, ordering, and scripted budgets. Those checks are not runtime/model measurements.
+## Still unimplemented or incomplete
 
-The public documentation update checked local links and heading anchors, matched the README's expected output to the working CLI, and exercised help/version/status plus the source-only invocation. Mermaid 11 parsed all 12 embedded diagrams and the existing full architecture source. Parser tooling was installed only in a temporary directory; no project dependency changed. GitHub visual rendering and the Windows setup commands remain unverified.
+General chat and file search; multi-file synthesis and semantic support checking; T0/T2 routing; full Contract/Evidence/Claim/Check/Decision schemas; exact tokenizer-aware/global budgets; complete HIL/action approval scenarios; arbitrary custom-language interpretation; strict model-trajectory replay; durable memory, retention/deletion operations, skills, file edits, and hosted/private adapters.
 
-## Remaining implementation
+The first workflow uses a smaller versioned event format. Unknown provider usage remains null; its records do not meet every full-spec trace/replay requirement. Source-report replay validates stored bytes and reported fields, not source truth, question intent, current state, or model quality. The three real priority tasks, minimum hardware, and full profile/benchmark freeze remain open. No M0/M1 or release gate is declared complete.
 
-The agent loop, adapters, tools/policy, HIL persistence, memory, source snapshots, rendering/verification, replay, and independent graders are not implemented. Configuration examples and prompt drafts are not loaded by the scaffold CLI. Optional provider/gateway/integration folders do not enable services.
+## Repository and working preferences
 
-Git is initialized on main with origin at https://github.com/KrishnendraPrakash/thread.git. The user reported a successful push, and local main and origin/main matched the corrected initial commit when this documentation task began. No package publication, model download, or license selection has occurred. Source publication does not satisfy the M6 release gate.
-
-## Open decisions before freezing M0
-
-1. The user's three real priority tasks and their acceptance outcomes.
-2. Minimum supported hardware/OS and a baseline model-test configuration.
-3. Exact model artifact/quantization and compatibility checks; model names remain candidates.
-4. Final latency/cost limits, action policy, and data retention.
-5. Public repository license and initial optional provider coverage.
+Git is on main with origin at https://github.com/KrishnendraPrakash/thread.git. The user requested detailed commit messages; follow [engineering standards](engineering.md). Check actual Git status before assuming an implementation change has been committed or pushed. No package publication, model download, or license selection has occurred. Source publication does not satisfy M6.
 
 ## Next boundary
 
-Define M0 acceptance fixtures and scope, then implement the narrow local M1 workflow with a complete human-decision cycle. Packaging success does not establish agent-task success. Keep optional integrations staged, and preserve the reviewed trace/HIL invariants from SPEC.md.
+Use the experimental workflow, gather real task requirements, and expand the M0/M1 profile deliberately. Add full typed records, budgets, capability tests, human-decision scenarios, and replay guarantees before attempting the broader acceptance gates. Qwen3.5-9B/4B remain untested candidates; the available llama smoke test is not a replacement default.

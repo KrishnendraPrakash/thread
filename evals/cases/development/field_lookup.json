@@ -1,0 +1,12 @@
+[
+  {"id":"F01","file":"settings.toml","source":"[database]\ndefault = \"sqlite\"\n","field":"/database/default","expected":"sqlite"},
+  {"id":"F02","file":"settings.toml","source":"port = 8080\n","field":"/port","expected":8080},
+  {"id":"F03","file":"settings.toml","source":"enabled = false\n","field":"/enabled","expected":false},
+  {"id":"F04","file":"settings.toml","source":"ratio = 1.25\n","field":"/ratio","expected":1.25},
+  {"id":"F05","file":"settings.toml","source":"title = \"café\"\n","field":"/title","expected":"café"},
+  {"id":"F06","file":"settings.json","source":"{\"items\":[\"a\",\"b\"]}","field":"/items/1","expected":"b"},
+  {"id":"F07","file":"settings.json","source":"{\"a/b\":{\"~x\":7}}","field":"/a~1b/~0x","expected":7},
+  {"id":"F08","file":"settings.json","source":"{\"value\":null}","field":"/value","expected":null},
+  {"id":"F09","file":"settings.json","source":"{\"note\":\"line one\\nline two\"}","field":"/note","expected":"line one\nline two"},
+  {"id":"F10","file":"settings.json","source":"42","field":"","expected":42}
+]

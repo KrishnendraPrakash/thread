@@ -1,6 +1,6 @@
 # Project direction
 
-Updated: 2026-09-18. Basis: the user's planning instructions, subsequent scaffold authorization, and the current [plan](../AGENT_PLAN.md).
+Updated: 2026-09-18. Basis: the user's planning instructions, subsequent scaffold and first local workflow authorization, and the current [plan](../AGENT_PLAN.md).
 
 ## Established direction
 

@@ -4,7 +4,7 @@
 
 Thread aims to help you understand project files, remember explicit decisions, and make bounded changes with your approval. Its primary workflow is being designed for a local model without paid API credentials. Hosted models using your own keys and private model servers are planned options.
 
-> **Early development — scaffold only.** You can install the Python package and use its help, version, and status commands today. Chat, model connections, file tools, verification, memory, and human approvals are not implemented yet. This repository contains the design and foundations for those capabilities.
+> **Experimental first workflow.** You can now report exact fields from local TOML/JSON files, ask an installed Ollama model to suggest a field, and save/resume your field choices. General chat, semantic verification, file edits, durable memory, and action approvals are not implemented. [Try the working workflow](docs/first-workflow.md).
 
 [Quick start](#quick-start) · [Available commands](#available-commands) · [Workflow diagrams](docs/workflows.md) · [Roadmap](#roadmap) · [Contributing](CONTRIBUTING.md)
 
@@ -15,19 +15,19 @@ Thread aims to help you understand project files, remember explicit decisions, a
 | Install from a Git checkout | Available |
 | CLI help, version, and implementation status | Available |
 | Architecture, specifications, and synthetic examples | Available for review |
-| Ask questions about local project files | Planned |
-| Run a local model through Ollama | Planned for M1 |
-| Clarify requests and approve actions in the terminal | Planned; decisions will survive restarts |
+| Report exact TOML/JSON fields | Available on macOS/Linux; general file Q&A remains planned |
+| Local Ollama field suggestions | Experimental; requires explicit model selection and human confirmation |
+| Persist and resume field choices | Available; action approvals remain planned |
 | Remember and correct explicit facts or decisions | Planned for M4 |
 | Make approved file edits and check their outcomes | Planned for M4 |
 | Use hosted free tiers, paid API keys, or on-premises models | Optional, planned for M4B |
 | Web dashboard, messaging, scheduling, and delegation | Deferred extensions |
 
-No model accuracy, agent-task success rate, or hardware performance has been measured. A public source repository is available; a usable agent release is still ahead.
+Deterministic tests and one local-model smoke call have passed for this narrow workflow. Model accuracy, broad task success, hardware support, and the complete M1 gate have not been established. A general agent release is still ahead.
 
 ## Quick start
 
-You need **Git and Python 3.11 or newer**. No GPU, model download, or API key is needed to try the current scaffold. Installation may download Python build tooling. The current package has no third-party runtime dependencies.
+You need **Git and Python 3.11 or newer**. No GPU, model download, or API key is needed for exact-field reports. Installation may download Python build tooling. The current package has no third-party runtime dependencies.
 
 ### macOS or Linux
 
@@ -50,27 +50,37 @@ py -3 -m venv .venv
 .\.venv\Scripts\python.exe -m thread_agent status
 ```
 
-Ensure `py -3 --version` reports Python 3.11 or newer. The Windows commands use the environment's Python directly, so shell activation is unnecessary. Windows setup has not yet been tested by this project.
+Ensure `py -3 --version` reports Python 3.11 or newer. The Windows commands use the environment's Python directly, so shell activation is unnecessary. Windows setup has not yet been tested by this project; secure file reads currently require macOS/Linux.
 
 If you already cloned the repository, start from its directory and skip the clone step. If your virtual environment already exists, reuse it.
 
 Expected output:
 
 ```text
-Thread Agent 0.0.0.dev0: scaffold only.
-Available: package installation, --help, --version, and status.
-Not yet available: agent runs, provider connections, memory, or approvals.
-Define M0 acceptance fixtures and implement the local M1 workflow.
+Thread Agent 0.0.0.dev0: experimental local field lookup.
+Available: exact TOML/JSON fields, local model suggestions, saved choices, and replay.
+Not yet available: general chat, file edits, durable memory, or hosted models.
+Full M1 acceptance and model accuracy are not established.
+Try: thread-agent ask --file examples/projects/minimal/settings.toml --field /database/default
 ```
 
-That output confirms the CLI works. It does not test a model connection or run an agent task.
+Now try a real source report on macOS/Linux, with no model required:
+
+```bash
+thread-agent ask --file examples/projects/minimal/settings.toml --field /database/default
+```
+
+The report contains `"value": "sqlite"`, the source path, field, and source hash. It describes the captured file, not a running application.
+
+For local-model suggestions, saved choices, and replay, follow the [step-by-step guide](docs/first-workflow.md). `status` reports implementation progress; `doctor` checks local Ollama connectivity.
 
 ```mermaid
 flowchart LR
     clone["Clone repository"] --> env["Create Python environment"]
     env --> install["Install package"]
     install --> status["Run thread-agent status"]
-    status --> explore["Explore the design and contribute"]
+    status --> lookup["Try an exact field report"]
+    lookup --> explore["Explore the design and contribute"]
 ```
 
 ### Optional: use uv
@@ -95,14 +105,21 @@ Run these with your virtual environment activated:
 | `thread-agent --version` | Show the installed package version |
 | `thread-agent status` | Explain which parts are implemented |
 | `thread-agent status --json` | Return the same implementation status as JSON |
+| `thread-agent ask --file FILE --field POINTER` | Report an exact scalar field with its source hash |
+| `thread-agent ask --file FILE` | Choose a field interactively; optional question and `--model` |
+| `thread-agent doctor` | List installed local Ollama models without generating text |
+| `thread-agent sessions` | List locally saved sessions |
+| `thread-agent resume SESSION_ID` | Resume a saved field choice |
+| `thread-agent trace SESSION_ID` | Inspect local records, including captured source content |
+| `thread-agent replay SESSION_ID` | Verify a stored source report without live tools or models |
 
 You can also use `python -m thread_agent` in place of `thread-agent`. On Windows, use `.\.venv\Scripts\python.exe -m thread_agent` if the environment is not activated.
 
-There is **no `run`, `chat`, or model setup command yet**. Files in [configs](configs/README.md), [prompts](prompts/README.md), and `.env.example` are design examples; the CLI does not load them.
+There is **no general `run`, `chat`, or model download command**. The `ask` command currently supports exact source-field reports only. Files in [configs](configs/README.md), [prompts](prompts/README.md), and `.env.example` are design examples; the CLI does not load them.
 
 ## What Thread is being built to do
 
-These are **planned use cases**, not commands you can execute today:
+These are the broader intended use cases. The first row now has a narrow implementation through explicit field selection; the others remain planned:
 
 | Example request | Intended behavior |
 | --- | --- |
@@ -156,11 +173,11 @@ Recommendations and silence will never approve an action. Ambiguous custom repli
 
 ## Models and deployment options
 
-**No model adapter is connected today.** The intended choices are:
+**A local Ollama field-suggestion adapter is available experimentally.** It cannot generate arbitrary answers or execute tools. The broader choices are:
 
 | Mode | Planned setup | Stage |
 | --- | --- | --- |
-| Local, primary path | Ollama and a model that passes capability and task checks; no paid API credentials | M1 |
+| Local, primary path | Ollama field suggestions work with explicit model selection; full capability/task gates remain pending | Experimental pre-M1 |
 | Hosted free tier | Your provider credentials, with visible quota and data terms | M4B, optional |
 | Hosted paid API | Your provider credentials and an explicit budget | M4B, optional |
 | Private / on-premises | Your endpoint, model ID, authentication, and verified TLS | M4B, optional |
@@ -171,7 +188,7 @@ The design prohibits silent fallback to a cloud or paid provider. Offline policy
 
 ## Workflow diagrams
 
-For readable diagrams of each major path, open the [workflow guide](docs/workflows.md):
+For the implemented path, see [the first workflow diagram](docs/first-workflow.md#implemented-path). The [broader workflow guide](docs/workflows.md) illustrates the target architecture:
 
 | Diagram | What it explains |
 | --- | --- |
@@ -196,7 +213,7 @@ thread/
 ├── configs/            Draft local, hosted, and private profiles
 ├── prompts/            Draft role prompts
 ├── schemas/            Record and trace schema design locations
-├── tests/              Future unit, integration, and acceptance tests
+├── tests/              Behavior tests and development reference checks
 ├── evals/              Evaluation cases, fixtures, and grader locations
 ├── examples/           Synthetic sample projects
 ├── planning_examples/  Synthetic traces and deliberately negative cases
@@ -205,15 +222,15 @@ thread/
 └── .github/            Scaffold CI and contribution templates
 ```
 
-Most Python modules currently contain only a responsibility docstring. See the [component map](docs/structure.md) for ownership. The [synthetic traces](planning_examples/README.md) demonstrate intended records and failure cases; they are not real executions or benchmarks.
+The first workflow implements the CLI, scoped reads, field parsing, local suggestions, SQLite sessions, and deterministic replay. Other modules remain responsibility placeholders. See the [component map](docs/structure.md) for ownership. The [synthetic traces](planning_examples/README.md) demonstrate intended records and failure cases; they are not real executions or benchmarks.
 
 ## Roadmap
 
 | Stage | Deliverable | Current status |
 | --- | --- | --- |
 | Scaffold | Package, information CLI, docs, examples, and CI configuration | Implemented |
-| M0 | Freeze initial tasks, fixtures, schemas, and baseline hardware profile | Not complete |
-| M1 | Local model workflow, terminal decisions, scoped reads, sessions, and basic replay | Planned |
+| M0 | Freeze initial tasks, fixtures, schemas, and baseline hardware profile | Ten deterministic development cases added; full freeze pending |
+| M1 | Local model workflow, terminal decisions, scoped reads, sessions, and basic replay | Narrow field workflow implemented; full M1 acceptance pending |
 | M2 | Evidence-bound claims and answer verification | Planned |
 | M3 | Investigation, task promotion, bounded repair, and recovery | Planned |
 | M4 | Attributed memory, skills, cache invalidation, and approved edits | Planned |
@@ -230,9 +247,10 @@ See the [plan](AGENT_PLAN.md) for sequencing and [specification](SPEC.md#10-mile
 | `thread-agent: command not found` | Activate `.venv`, then install with `python -m pip install -e .`. You can also use `python -m thread_agent status`. |
 | `No module named thread_agent` | Install the checkout using the same environment's Python that runs the command. |
 | Installation rejects your Python version | Check `python --version` inside the environment; Python 3.11+ is required. |
-| Status says “scaffold only” | Expected: the agent runtime has not been built yet. |
+| Status still says “scaffold only” | You have an older checkout/install. Check your source version and reinstall the current checkout. |
 | `run` or `chat` is rejected | These commands do not exist yet. Use `--help` for available commands. |
-| Editing a config or adding an API key has no effect | Configuration loading and providers are not implemented. |
+| Editing a config or adding an API key has no effect | Draft TOML profiles are not loaded. The current adapter uses explicit `--model` with loopback Ollama; hosted keys are unsupported. |
+| A field choice remains pending | Answer the menu or resume the printed session. Exit code 2 can mean a pending decision. |
 
 For a source-only smoke check on macOS/Linux, without installing the package:
 
@@ -251,12 +269,13 @@ python -m pip install -e '.[dev]'
 python -m ruff check .
 python -m ruff format --check .
 python -m compileall -q src
+python -m unittest discover -s tests -v
 thread-agent --help
 thread-agent --version
 thread-agent status --json
 ```
 
-These check packaging, style, syntax, and the CLI. **There are no behavior tests yet.** A zero-test run is not an acceptance pass. Local scaffold checks were performed with Python 3.12.13; CI is configured for Python 3.11 and 3.12 on Linux. This README does not claim a hosted CI result or cross-platform certification.
+These check style, syntax, the CLI, source-read boundaries, persisted choices, provider validation, and deterministic reference outcomes. They require no model server or paid credentials. A zero-test run is not a pass. Local checks used Python 3.12.13; CI is configured for Python 3.11 and 3.12 on Linux. See [validation and limits](docs/first-workflow.md#validation-and-remaining-work) for the single live smoke test and incomplete M1 gates.
 
 For design context, read [SPEC.md](SPEC.md), [RATIONALE.md](RATIONALE.md), and [AGENTS.md](AGENTS.md). The steering Markdown guides project development; it is separate from the planned agent's runtime memory.
 

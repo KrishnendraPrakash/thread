@@ -1,6 +1,6 @@
 # Engineering and review standards
 
-Updated: 2026-09-18. The package/CLI scaffold is implemented; most architecture modules remain reserved boundaries. Detailed product invariants are in [SPEC.md](../SPEC.md).
+Updated: 2026-09-18. The experimental direct-field workflow is implemented; other architecture modules remain reserved boundaries. Detailed product invariants are in [SPEC.md](../SPEC.md).
 
 ## Code organization and patterns
 
@@ -9,7 +9,7 @@ Updated: 2026-09-18. The package/CLI scaffold is implemented; most architecture 
 - Keep business decisions and transformations testable independently of the terminal, model server, filesystem, and clock. Use deterministic code for policy, parsing, calculation, hashing, state reduction, and validated templates where appropriate.
 - Separate immutable records from state projections. Define serialization, canonical hashes, schema versions, and migrations deliberately when persistence is implemented. Include provenance instead of reconstructing it from prose later.
 - Use explicit error categories and bounded retries. Preserve meaningful errors; do not catch exceptions broadly and silently turn them into success. Reconcile uncertain side effects before retrying them.
-- Prefer standard-library facilities when adequate and keep new dependencies purposeful. The scaffold uses Python 3.11+, setuptools, pip-compatible packaging, optional uv with uv.lock, Ruff lint/format, and unittest for future behavior tests. Follow pyproject.toml and docs/development.md. There are no behavior tests yet; do not claim otherwise.
+- Prefer standard-library facilities when adequate and keep new dependencies purposeful. The scaffold uses Python 3.11+, setuptools, pip-compatible packaging, optional uv with uv.lock, Ruff lint/format, and unittest for behavior tests. Follow pyproject.toml and docs/development.md. Behavior and deterministic development-fixture tests exist. They are not the full M1/model benchmark suite.
 - Keep secrets in environment variables or local secret storage. Public fixtures and examples use synthetic data and portable paths. The local core and its tests must not require a paid provider.
 
 ## Architecture invariants to preserve

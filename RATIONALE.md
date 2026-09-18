@@ -93,3 +93,11 @@ These choices keep the first package installable and reviewable while preserving
 - [Agent evaluation guidance](https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents) motivates outcome grading, isolated trials, multiple grader types, and repeated attempts.
 - [Qwen3.5-9B](https://huggingface.co/Qwen/Qwen3.5-9B), [Qwen3.5-4B](https://huggingface.co/Qwen/Qwen3.5-4B), and the [Ollama distribution listing](https://ollama.com/library/qwen3.5) were checked during planning. The model cards identify Apache-2.0 licensing. Exact selected artifacts, notices, compatibility, and quality remain release checks.
 - [Gemini API pricing](https://ai.google.dev/gemini-api/docs/pricing) is a reference for an optional hosted free-tier candidate. Availability, quotas, and data terms must be checked when that integration is introduced.
+
+## First usable increment — 2026-09-18
+
+After running scaffold status, the user requested the next step. The implemented profile deliberately limits an answer to a scalar field in an explicitly selected TOML/JSON source. A local model can suggest a field but cannot generate its value or silently establish the user's intended scope. Persisted human field selection precedes deterministic parsing, claim/status records, coverage, rendering, and checking the actual rendered slots.
+
+This provides a useful local operation without presenting general semantic verification as solved. Explicit --field lookups need no model; optional Ollama calls use a model the caller selects. An existing llama3.1:8b was used for one synthetic smoke case, not adopted as a certified default or substituted for the planned Qwen evaluation. No models were downloaded.
+
+The profile is pre-M1: source-report replay is narrower than model trajectory replay; field decisions are narrower than exact-action approvals; records and budgets are not the full release schemas. These gaps are named in SPEC.md section 12 and docs/first-workflow.md. Adding deterministic reference fixtures does not establish the full M0 workload or a benchmark result.

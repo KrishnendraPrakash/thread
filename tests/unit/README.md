@@ -1,3 +1,3 @@
-# Unit tests — reserved
+# Unit and component tests
 
-Cover implemented routing, source hashing, status reduction, budget accounting, policy boundaries, and custom-response validation. Avoid tests that merely repeat constant data or assert empty scaffold modules exist.
+The initial tests check source-field outcomes, filesystem boundaries, saved field decisions, replay integrity, and provider response validation. They use temporary workspaces and SQLite stores. Model responses are synthetic; these are not model benchmarks.

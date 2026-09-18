@@ -1,6 +1,6 @@
 # Agent specification
 
-Status: requirements for the planned agent; a package/CLI scaffold exists, but the agent runtime has not been implemented or benchmarked. Updated 2026-09-18.
+Status: requirements for the target agent. An experimental source-field workflow now exists; the complete runtime and milestone gates have not been implemented or benchmarked. Updated 2026-09-18.
 MUST is a release requirement for the applicable capability; SHOULD is a proposed default that can change with documented evaluation evidence. Numerical settings below are initial targets, not measured hardware capabilities.
 
 ## 1. Scope and terminology
@@ -209,3 +209,16 @@ MUST is a release requirement for the applicable capability; SHOULD is a propose
 Trace linting MUST check causal event ordering, referential integrity, hashes, status projections, decision validity, budget accounting, and the exact render checked. Passing trace linting establishes internal consistency only; it does not establish a model's factual accuracy or a runtime's correct implementation.
 
 The latency and success gates are proposed engineering targets. They MUST be reviewed against the initial hardware baseline before freezing; changes MUST be documented and MUST NOT be used to retroactively label a failing run successful. Small suites do not establish population-wide reliability.
+
+## 12. Experimental direct-field increment
+
+The first implementation increment is a restricted T1 source report, documented in [the workflow guide](docs/first-workflow.md). It is pre-M1 work and does not waive the release requirements above.
+
+- The caller explicitly selects a scoped TOML/JSON file. An exact scalar field pointer supplies the contract directly; otherwise a persisted human choice establishes that source-field scope.
+- An explicitly selected local Ollama model may suggest a field using structured output. It receives the question and field names, not source values. Its suggestion cannot submit the human choice or establish that the original question was answered.
+- Python parses the value, binds it to captured source bytes, records checks/status/coverage, renders a JSON report, then checks actual output slots. A report describes captured file content only. It makes no runtime, causal, multi-source, or semantic truth claim.
+- Pending field choices support recommendations, alternatives, More, exact custom field input, pause/cancel, restart, and stale/duplicate rejection. This required choice has no optional Skip. Natural-language ambiguity remains pending. Action proposal approvals and the complete H01–H13 suite are not implemented.
+- Local SQLite retains source snapshots and a smaller field-lookup-v1 event format. Replay checks the stored field report only, without live tool or model calls. Full trace schemas, model-trajectory replay, deletion/retention, tokenizer-aware budgets, and complete startup capability gates remain outstanding.
+- Deterministic development fixtures and one local-model smoke call establish limited implementation evidence, not full M0/M1 acceptance. Models are explicitly chosen and no download, cloud fallback, or source edit occurs.
+
+This narrows the initial implementation, not the product goal or the acceptance criteria. The full architecture diagram remains a target; the first workflow guide shows the implemented path separately.

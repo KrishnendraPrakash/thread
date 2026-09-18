@@ -1,1 +1,1 @@
-"""Reserved for provider interfaces and capability checks; no connections exist yet."""
+"""Local field suggestions; additional provider interfaces remain planned."""

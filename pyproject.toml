@@ -5,12 +5,12 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "thread-agent"
 dynamic = ["version"]
-description = "Scaffold for a local-first personal agent with evidence and human decisions"
+description = "Experimental local source-field reports with evidence and human decisions"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = []
 classifiers = [
-    "Development Status :: 1 - Planning",
+    "Development Status :: 2 - Pre-Alpha",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
 ]

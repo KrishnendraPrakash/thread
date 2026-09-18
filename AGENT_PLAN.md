@@ -1,7 +1,7 @@
 # Agent plan
 
-Status: initial repository scaffold created; the agent runtime, model benchmarks, and public release remain pending.
-Updated: 2026-09-18 after the user's request to create the architecture-aligned folder structure.
+Status: an experimental exact-field workflow is implemented; the full agent runtime, model benchmarks, and public release remain pending.
+Updated: 2026-09-18 after the user's request for the next usable step beyond scaffold status.
 
 ## Goal
 
@@ -47,7 +47,7 @@ Hosted free/paid APIs and private endpoints remain planned at M4B. A free hosted
 
 ## Milestones
 
-The package scaffold, CLI help/version/status, configuration drafts, component folders, optional extension locations, and scaffold CI now exist. See [README.md](README.md) and the [component map](docs/structure.md). M0 decisions and M1 acceptance gates are not complete; packaging success is not agent-task success.
+The package scaffold and a narrow source-field workflow now exist: scoped TOML/JSON reads, optional local Ollama field suggestions, saved human field choices, deterministic verification, and stored-source replay. See the [first workflow guide](docs/first-workflow.md). Ten deterministic development fixtures and boundary tests have been added. This is a pre-M1 increment, not full M1 acceptance. See [README.md](README.md) and the [component map](docs/structure.md). M0 decisions and M1 acceptance gates are not complete; packaging success is not agent-task success.
 
 | Milestone | Deliverable | Primary gate |
 | --- | --- | --- |
@@ -85,4 +85,4 @@ Numerical targets are proposed acceptance criteria, not measured speed or reliab
 
 ## Open planning decisions
 
-Finalize the three real tasks, minimum supported hardware/OS, acceptable latency/cost, action policy and data retention, repository license, and the first optional hosted integration. Benchmark candidate models before choosing defaults when that work is requested. The scaffold source is on GitHub; agent behavior implementation and a package/agent release remain pending. The [public README](README.md) and [workflow guide](docs/workflows.md) explain current usage and the planned paths.
+Finalize the three real tasks, minimum supported hardware/OS, acceptable latency/cost, action policy and data retention, repository license, and the first optional hosted integration. Benchmark candidate models before choosing defaults when that work is requested. The scaffold source is on GitHub; broader agent behavior and a package/agent release remain pending. The [public README](README.md) and [workflow guide](docs/workflows.md) explain current usage and the planned paths.

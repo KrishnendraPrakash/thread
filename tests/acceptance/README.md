@@ -1,3 +1,3 @@
-# Acceptance tests — reserved
+# Development reference checks
 
-Exercise complete local tasks and the H01–H13 decision scenarios from SPEC.md. Check resulting state and failure boundaries, not just response wording. M1 acceptance gates have not been run.
+The current test runs ten deterministic field-report fixtures and compares actual values, source paths, and pointers to independent references outside the agent workspace. It also replays the stored reports. This does not complete the M1 acceptance gates or H01–H13 scenarios in SPEC.md.

@@ -1,6 +1,6 @@
 # Contributing
 
-Start with [AGENTS.md](AGENTS.md) and [engineering standards](steering/engineering.md). The current contribution target is the local M1 workflow; optional provider and UI folders are reservations.
+Start with [AGENTS.md](AGENTS.md) and [engineering standards](steering/engineering.md). The current contribution target is completing M0/M1 beyond the [experimental field workflow](docs/first-workflow.md); optional provider and UI folders are reservations.
 
 1. Use Python 3.11+ and the [development setup](docs/development.md).
 2. Keep changes focused and describe the behavior they establish.

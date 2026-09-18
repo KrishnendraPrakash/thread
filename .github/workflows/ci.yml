@@ -1,4 +1,4 @@
-name: Scaffold checks
+name: Local workflow checks
 
 on:
   push:
@@ -27,7 +27,9 @@ jobs:
         run: python -m ruff format --check .
       - name: Compile source
         run: python -m compileall -q src
-      - name: CLI smoke checks (not agent acceptance tests)
+      - name: Behavior and development fixture tests (no model server needed)
+        run: python -m unittest discover -s tests -v
+      - name: CLI smoke checks
         run: |
           thread-agent --help
           thread-agent --version
