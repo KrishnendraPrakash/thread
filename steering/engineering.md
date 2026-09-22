@@ -1,6 +1,6 @@
 # Engineering and review standards
 
-Updated: 2026-09-18. The experimental direct-field workflow is implemented; other architecture modules remain reserved boundaries. Detailed product invariants are in [SPEC.md](../SPEC.md).
+Updated: 2026-09-22. The experimental field CLI and VS Code developer slice are implemented; other architecture modules remain reserved boundaries. Detailed product invariants are in [SPEC.md](../SPEC.md).
 
 ## Code organization and patterns
 

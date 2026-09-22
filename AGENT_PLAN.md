@@ -1,13 +1,13 @@
 # Agent plan
 
-Status: an experimental exact-field workflow is implemented; the full agent runtime, model benchmarks, and public release remain pending.
-Updated: 2026-09-18 after the user's request for the next usable step beyond scaffold status.
+Status: experimental VS Code developer workflows and the exact-field CLI are implemented; full verification, model benchmarks and public release gates remain pending.
+Updated: 2026-09-22 after the user promoted VS Code, repository questions, debugging assistance, features and document summaries to the immediate scope.
 
 ## Goal
 
 Build a public, reusable personal agent that runs primarily with a local model without paid API credentials, produces evidence-based answers, and supports persistent human choices and approvals. Optional hosted free tiers, paid APIs, and on-premises models use the same runtime.
 
-Initial scope is one user per installation, Python, a terminal interface, SQLite, and scoped local files. First tasks: answer project questions, remember/correct explicit project decisions, and perform approved bounded edits with observable outcome checks. The actual three user-priority tasks still need to be finalized.
+Current scope is one user per installation, a Python core, VS Code as the developer interface, the existing field CLI, and scoped local files. User-selected priorities are repository understanding, debugging assistance, writing features and document summaries. The first editor slice uses bounded retrieval, local Ollama, explicit diff approval and text extraction; the full semantic verification runtime remains unfinished. See [VS Code usage](docs/vscode.md) and SPEC.md section 13.
 
 ## Five records explain the design
 

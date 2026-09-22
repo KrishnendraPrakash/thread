@@ -1,5 +1,7 @@
 # Workflow guide
 
+For the implemented developer extension, see [VS Code workflows](vscode.md) and its [Mermaid source](vscode-workflow.mmd). The broader architecture diagrams below remain targets except where marked implemented.
+
 [Back to the README](../README.md)
 
 Thread now has an [experimental direct-field workflow](first-workflow.md) with local suggestions, saved field choices, and source-report replay. **The diagrams below describe the broader target architecture; they do not imply complete implementation.** The separate first-workflow guide shows the implemented path. The final contribution workflow describes current development.

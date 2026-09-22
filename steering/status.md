@@ -1,48 +1,40 @@
 # Current project status
 
-As of: 2026-09-18. Recheck the workspace before relying on this snapshot.
+As of: 2026-09-22. Inspect current files and outputs before relying on this snapshot.
 
-## Active phase
+## Active phase and authorization
 
-**Initial implementation: experimental direct-field workflow (pre-M1).** After trying scaffold status, the user requested the next step toward use. That authorizes the first local workflow and its validation. It does not complete the full M0/M1 acceptance gates or authorize model downloads, general actions, hosted providers, or a package release.
-
-The public documentation is already on GitHub. The current implementation increment makes a narrow source-report workflow usable; broader architecture remains a target.
+**Experimental VS Code developer slice plus the existing field CLI; full milestone gates remain open.** The user explicitly requested a VS Code extension for repository understanding, debugging assistance, writing features and document summaries. That authorizes this interface, backend workflows and approved bounded edits. Model downloads, hosted fallback, Marketplace publication and a repository license decision remain outside this increment.
 
 ## Implemented
 
-- `thread-agent ask --file FILE --field POINTER`: exact scalar TOML/JSON field reports with source hashes and explicit captured-file scope. No model needed.
-- Optional natural-language question plus `--model NAME`: local Ollama suggests a field, which requires explicit human scope confirmation. Values are parsed, not generated. Source values are not included in the model prompt.
-- Numbered recommendations and alternatives, More, exact custom field text, pause/cancel, ambiguity handling, persistence across restart, and stale/duplicate field-reply rejection. These are field clarifications, not action approvals.
-- Scoped descriptor-based reads on macOS/Linux, size/type limits, rejected traversal/symlinks/hard links, and no source writes or shell tools.
-- SQLite session snapshots and ordered events; `sessions`, `resume`, `trace`, and deterministic stored-source `replay`.
-- `doctor` lists installed models from literal loopback Ollama; no model download or automatic provider fallback.
-- [First workflow guide](../docs/first-workflow.md), current [README](../README.md), [component map](../docs/structure.md), and ten [development fixtures](../evals/cases/development/field_lookup.json).
+- VS Code sidebar and commands for repository questions, diagnosis, feature proposals and selected document summaries. Local installed Ollama model selection; Python 3.11+ subprocess with bundled editor dependencies; no paid API or model download.
+- Bounded saved-source discovery with root/nested gitignore, path/type/size/link restrictions and lexical retrieval. Source snapshots include paths, lines and hashes. Coverage/exclusions are disclosed. General model interpretations remain labeled unverified.
+- Diagnosis includes user errors and VS Code diagnostics. Explicitly selecting/confirming an existing task can execute it; only its exit code is observed. No breakpoint control, generated-command execution or terminal-output interpretation.
+- Up to four proposed text-file replacements/creations, exact native diffs, explicit review/apply choices, custom refinement, More, pause/cancel, source/buffer revalidation, and post-edit buffer comparison. Existing edits remain unsaved. No deletes, renames, new directories, auto-save, commit or push actions in the product.
+- UTF-8 text, extracted PDF text and DOCX main-body summaries with explicit ranges, limits and extraction omissions. No OCR or universal document-format support.
+- Latest analysis/proposal persisted in VS Code workspace state; Clear removes the active entry. Pending proposals survive reload, but review confirmations must be repeated. This is separate from CLI SQLite and is not a durable knowledge memory or full history.
+- Existing CLI exact TOML/JSON field reports, optional Ollama field suggestions, saved human field choices, trace and deterministic stored-source replay remain available.
 
-Python minimum remains 3.11. No third-party runtime dependency was added. Draft config files are not loaded; explicit CLI flags configure this increment. Other source packages remain placeholders.
+See [VS Code usage](../docs/vscode.md), [editor Mermaid source](../docs/vscode-workflow.mmd), [field CLI](../docs/first-workflow.md), SPEC.md sections 12–13 and the component map. The base CLI still has no third-party runtime dependency; the optional editor extra adds pathspec and pypdf. Draft profiles remain unloaded; editor settings and explicit CLI flags configure their respective interfaces.
 
 ## Actual validation
 
-Local Python 3.12.13 / macOS arm64:
+Local environment: macOS arm64, Python 3.12.13, Node 25.6.1 and VS Code 1.138.0.
 
-- All 28 automated tests pass. They cover field outcomes, path boundaries, malformed input, unchanged source files, persisted/restarted choices, ambiguous/stale/duplicate replies, provider output validation, and replay without live source/model access.
-- Ten synthetic development fixtures compare exact field values against references kept outside the source workspace. They are deterministic tests, not 30 model trials or a held-out benchmark.
-- One live field-suggestion call used existing Ollama 0.34.2 and llama3.1:8b Q4_K_M. It suggested /database/default, remained pending, then returned sqlite after a scripted fixture confirmation. Stored-source replay passed. Exact model identity is recorded in the workflow guide; this does not establish a certified model default or performance distribution.
-- CLI help/status, local source reports, trace/replay, Ruff, and syntax checks are verified during implementation. CI is configured to run tests without a model server; hosted results for this increment are not yet verified.
-- Built a wheel and source distribution; installed the wheel into a fresh temporary environment without runtime dependency downloads and exercised the exact-field report and replay there. The wheel contains the new runtime modules and excludes evaluation/test fixtures.
-- Checked 103 local documentation links/anchors, matched the README status example, and parsed all 14 current Mermaid sources. Diagram tooling remains temporary; visual rendering on GitHub is not claimed.
+- Python deterministic/workflow tests cover the original field behavior plus retrieval/ignore boundaries, linked files, source locators, immutable/stale proposals, mode/citation rejection, UTF-8 ranges, PDF text/blank/malformed cases, DOCX/entity rejection and the subprocess protocol. The current suite has 45 tests; it includes synthetic model responses and is not a model benchmark.
+- Three Node subprocess tests pass: invalid operations, executable failures, cancellation/concurrency. TypeScript compiles.
+- An isolated VS Code Extension Host fixture passed activation, command registration, sidebar activation, macOS path-alias handling, approved native buffer edits, file creation, persisted decision state and duplicate/stale rejection. Approvals were scripted in a temporary synthetic repository, not exercised on user source. Visual layout and every interactive HIL branch have not been manually certified.
+- One live editor smoke case used the existing Ollama 0.34.2 / llama3.1:8b Q4_K_M. It identified an add function's subtraction bug, returned the expected replacement proposal and left the fixture source unchanged. It is one synthetic example, not model certification, repeated-trial accuracy or a benchmark. The earlier CLI field smoke remains documented separately.
+- A local VSIX built with the Python core and dependency notices, excluding node_modules, tests and workspace sources. No Marketplace publication or installation into the user's normal VS Code profile occurred.
+- CI now includes Python checks plus Node compilation/subprocess checks and VSIX packaging. Hosted results for this commit are not yet verified. Linux UI, Windows and remote-host support are not certified.
 
-Earlier scaffold work checked installation, wheel/source builds, isolated wheel CLI entry points, and public documentation links. The documentation update parsed 12 embedded Mermaid diagrams plus the original full architecture; those prior checks are not runtime measurements. Fresh-session steering discovery and GitHub visual rendering remain unverified.
+## Outstanding limits and next work
 
-## Still unimplemented or incomplete
+Full semantic support checking, complete Contract/Evidence/Claim/Check/Decision schemas, all H01–H13 scenarios, exact tokenizer/global budgets, model-trajectory replay, durable memory/history/retention, richer document extraction, language-server/symbol retrieval and hosted/private adapters remain unfinished. The editor preserves completed model inputs/raw outputs, but failed calls do not retain a complete audit trail. It does not meet the full trace/replay contract.
 
-General chat and file search; multi-file synthesis and semantic support checking; T0/T2 routing; full Contract/Evidence/Claim/Check/Decision schemas; exact tokenizer-aware/global budgets; complete HIL/action approval scenarios; arbitrary custom-language interpretation; strict model-trajectory replay; durable memory, retention/deletion operations, skills, file edits, and hosted/private adapters.
+Filesystem/editor checks support ordinary trusted local development, not hostile concurrent mutation or an OS sandbox. Use one editor window per working tree. General answers may be wrong despite valid citations; approved code still needs inspection and tests. No M0/M1/M6 or public release gate is declared complete. Qwen candidates remain untested; no model default was certified.
 
-The first workflow uses a smaller versioned event format. Unknown provider usage remains null; its records do not meet every full-spec trace/replay requirement. Source-report replay validates stored bytes and reported fields, not source truth, question intent, current state, or model quality. The three real priority tasks, minimum hardware, and full profile/benchmark freeze remain open. No M0/M1 or release gate is declared complete.
+## Repository preferences
 
-## Repository and working preferences
-
-Git is on main with origin at https://github.com/KrishnendraPrakash/thread.git. The user requested detailed commit messages; follow [engineering standards](engineering.md). Check actual Git status before assuming an implementation change has been committed or pushed. No package publication, model download, or license selection has occurred. Source publication does not satisfy M6.
-
-## Next boundary
-
-Use the experimental workflow, gather real task requirements, and expand the M0/M1 profile deliberately. Add full typed records, budgets, capability tests, human-decision scenarios, and replay guarantees before attempting the broader acceptance gates. Qwen3.5-9B/4B remain untested candidates; the available llama smoke test is not a replacement default.
+Git origin is https://github.com/KrishnendraPrakash/thread.git. The user requests detailed commit messages and pushes for completed work. Check actual Git status before claiming a commit/push. No package/Marketplace release, model download or license selection occurred.

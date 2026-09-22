@@ -101,3 +101,11 @@ After running scaffold status, the user requested the next step. The implemented
 This provides a useful local operation without presenting general semantic verification as solved. Explicit --field lookups need no model; optional Ollama calls use a model the caller selects. An existing llama3.1:8b was used for one synthetic smoke case, not adopted as a certified default or substituted for the planned Qwen evaluation. No models were downloaded.
 
 The profile is pre-M1: source-report replay is narrower than model trajectory replay; field decisions are narrower than exact-action approvals; records and budgets are not the full release schemas. These gaps are named in SPEC.md section 12 and docs/first-workflow.md. Adding deterministic reference fixtures does not establish the full M0 workload or a benchmark result.
+
+## VS Code developer slice — 2026-09-22
+
+The user explicitly chose VS Code and four developer workflows. A TypeScript extension calls the existing Python core through isolated, bounded subprocess requests rather than introducing a public HTTP service or a second orchestration framework. Local Ollama remains the only model destination; a model is selected explicitly, without automatic downloads. General answers are clearly labeled unverified because checking a real source ID does not establish entailment.
+
+The first repository context path uses bounded lexical retrieval and root/nested gitignore rules. This is useful without paid embeddings, but cannot claim complete repository comprehension. Native VS Code diffs and WorkspaceEdit provide review and normal editor integration. Snapshot/source/version checks surround approval; uncertain outcomes cannot reuse a proposal. This remains a trusted local-workspace workflow, not an adversarial filesystem sandbox or complete action recovery runtime.
+
+Text, PDF and DOCX cover common documents with explicit extraction limits. Larger ranges stop instead of silently truncating. The extension retains only the latest analysis in workspace state, separate from CLI SQLite sessions. Future work should improve symbol-aware retrieval, independent semantic checks, task-output evidence, richer document coverage and provider profiles against real fixtures before claiming general autonomy.

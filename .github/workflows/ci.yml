@@ -20,7 +20,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install scaffold and development tools
-        run: python -m pip install -e '.[dev]'
+        run: python -m pip install -e '.[dev,editor]'
       - name: Lint
         run: python -m ruff check .
       - name: Formatting
@@ -34,3 +34,29 @@ jobs:
           thread-agent --help
           thread-agent --version
           thread-agent status --json
+
+  vscode:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Install backend in packaging environment
+        run: |
+          python -m venv .venv
+          .venv/bin/python -m pip install -e '.[editor]'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          package-manager-cache: false
+      - name: Install extension development dependencies
+        run: npm ci --prefix extensions/vscode --ignore-scripts
+      - name: Bundle and test extension process
+        run: |
+          .venv/bin/python extensions/vscode/scripts/bundle.py
+          npm test --prefix extensions/vscode
+      - name: Build local VSIX
+        run: |
+          mkdir -p artifacts
+          npm run package --prefix extensions/vscode

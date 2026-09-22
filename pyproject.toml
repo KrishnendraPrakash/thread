@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "thread-agent"
 dynamic = ["version"]
-description = "Experimental local source-field reports with evidence and human decisions"
+description = "Local agent core with experimental VS Code workflows and exact source-field reports"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = []
@@ -17,6 +17,7 @@ classifiers = [
 
 [project.optional-dependencies]
 dev = ["ruff>=0.12,<1"]
+editor = ["pathspec==0.12.1", "pypdf>=6.19,<7"]
 
 [project.scripts]
 thread-agent = "thread_agent.cli.main:main"

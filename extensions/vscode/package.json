@@ -1,0 +1,43 @@
+{
+  "name": "thread-agent",
+  "displayName": "Thread — Local Developer Agent",
+  "description": "Local repository questions, debugging assistance, reviewable feature edits and document summaries.",
+  "version": "0.1.0",
+  "publisher": "KrishnendraPrakash",
+  "license": "UNLICENSED",
+  "repository": {"type": "git", "url": "https://github.com/KrishnendraPrakash/thread.git"},
+  "engines": {"vscode": "^1.95.0"},
+  "categories": ["Machine Learning", "Other"],
+  "main": "./out/extension.js",
+  "extensionKind": ["workspace"],
+  "capabilities": {"untrustedWorkspaces": {"supported": false, "description": "Thread reads saved workspace files and can apply explicitly approved edits."}, "virtualWorkspaces": false},
+  "activationEvents": ["onView:thread.sidebar"],
+  "contributes": {
+    "commands": [
+      {"command": "thread.setup", "title": "Thread: Setup Local Model"},
+      {"command": "thread.ask", "title": "Thread: Ask About Repository"},
+      {"command": "thread.debug", "title": "Thread: Diagnose a Problem"},
+      {"command": "thread.feature", "title": "Thread: Propose a Feature"},
+      {"command": "thread.summary", "title": "Thread: Summarize a Document"},
+      {"command": "thread.review", "title": "Thread: Review Pending Changes"},
+      {"command": "thread.cancel", "title": "Thread: Cancel Current Request"},
+      {"command": "thread.clear", "title": "Thread: Clear Saved Analysis"},
+      {"command": "thread.runTask", "title": "Thread: Run a Workspace Task"}
+    ],
+    "viewsContainers": {"activitybar": [{"id": "thread", "title": "Thread", "icon": "media/thread.svg"}]},
+    "views": {"thread": [{"id": "thread.sidebar", "name": "Local Agent", "type": "webview"}]},
+    "configuration": {"title": "Thread", "properties": {
+      "thread.pythonPath": {"type": "string", "default": "python3", "scope": "machine", "description": "Python 3.11+ executable. Set an absolute path if VS Code cannot find python3. Workspace overrides are ignored."},
+      "thread.model": {"type": "string", "default": "", "scope": "machine", "description": "Exact installed local Ollama model name, selected by Thread: Setup Local Model. No automatic download or fallback."}
+    }}
+  },
+  "scripts": {
+    "compile": "tsc -p .",
+    "test": "npm run compile && node --test out/test/*.test.js",
+    "test:host": "node scripts/test-host.cjs",
+    "bundle": "../../.venv/bin/python scripts/bundle.py",
+    "vscode:prepublish": "npm run compile && npm run bundle",
+    "package": "vsce package --allow-missing-repository --skip-license --out ../../artifacts/thread-agent-0.1.0.vsix"
+  },
+  "devDependencies": {"@types/node": "^20.19.0", "@types/vscode": "~1.95.0", "typescript": "^5.9.3", "@vscode/vsce": "^3.6.2"}
+}

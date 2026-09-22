@@ -1,9 +1,10 @@
 # Architecture-to-folder map
 
-The experimental [direct-field workflow](first-workflow.md) implements the components identified below. Other packages remain reserved boundaries. The full architecture is not implemented, and these first APIs are not frozen.
+The experimental [direct-field workflow](first-workflow.md) implements the components identified below. The [VS Code extension](vscode.md) also implements an experimental developer slice. Other packages remain reserved boundaries. The full architecture is not implemented, and these first APIs are not frozen.
 
 | Package under src/thread_agent | Intended responsibility |
 | --- | --- |
+| editor | Scoped repository discovery/retrieval, text/PDF/DOCX extraction, local model analysis, immutable proposals and revalidation; one-request subprocess protocol. |
 | cli | Help/status, exact field reports, doctor, saved choices, traces, and replay |
 | config | Reserved for typed configuration loading and validation; not implemented. |
 | domain | Evidence dataclass, hashes, canonical JSON, timestamps, and errors; full shared record schemas remain pending. |
@@ -21,7 +22,7 @@ The experimental [direct-field workflow](first-workflow.md) implements the compo
 | evidence | Scalar field extraction with exact JSON pointers; snapshots are retained in the session store. |
 | verification | General verification package reserved; exact field and output-slot checks currently live in runtime/lookup.py. |
 | rendering | General renderer reserved; the direct-field JSON renderer currently lives in runtime/lookup.py. |
-| decisions | General decision service reserved; persisted field choices live in runtime/lookup.py. No action approvals. |
+| decisions | General decision service reserved; persisted field choices live in runtime/lookup.py. Editor action approvals are implemented separately in extensions/vscode. |
 | sessions | Reserved for conversation history and resumable task/execution state. |
 | memory | Reserved for attributed durable facts and dependency-aware bounded caches. |
 | skills | Reserved for versioned reusable procedures; skills cannot grant permissions. |
@@ -50,3 +51,5 @@ Supporting locations are described in [README.md](../README.md). Root design doc
 - Optional adapters/gateways/integrations remain unused until their capability is implemented.
 
 This folder map does not imply that every responsibility needs a separate model call or service.
+
+`extensions/vscode` contains the TypeScript sidebar, subprocess client, native diff/approval/edit integration, task UI and packaging scripts. Editor state uses VS Code workspace storage; it does not share the CLI SQLite session protocol.

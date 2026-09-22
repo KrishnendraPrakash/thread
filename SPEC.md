@@ -1,6 +1,6 @@
 # Agent specification
 
-Status: requirements for the target agent. An experimental source-field workflow now exists; the complete runtime and milestone gates have not been implemented or benchmarked. Updated 2026-09-18.
+Status: requirements for the target agent. The user has authorized a VS Code developer extension in addition to the source-field CLI. The complete milestone gates remain unaccepted. Updated 2026-09-19.
 MUST is a release requirement for the applicable capability; SHOULD is a proposed default that can change with documented evaluation evidence. Numerical settings below are initial targets, not measured hardware capabilities.
 
 ## 1. Scope and terminology
@@ -22,7 +22,7 @@ MUST is a release requirement for the applicable capability; SHOULD is a propose
 
 | ID | Requirement |
 | --- | --- |
-| S1 | The first vertical slice MUST use Python, terminal UI, SQLite, and one local model adapter. Other providers MUST remain optional and arrive in M4B. |
+| S1 | The runtime uses Python and a local model adapter. The initial field CLI uses SQLite. The user has promoted VS Code to the primary developer interface; its extension may use native editor APIs and a scoped subprocess bridge. Other model providers remain optional and staged at M4B. |
 | S2 | The core MUST support one user per installation, scoped local files, corrections to memory, and approved bounded actions. Multi-tenant hosting and delegation are deferred. |
 | S3 | Documentation MUST identify tested OS, hardware, model, quantization, context, and runtime versions. It MUST NOT imply support for every laptop. |
 
@@ -222,3 +222,19 @@ The first implementation increment is a restricted T1 source report, documented 
 - Deterministic development fixtures and one local-model smoke call establish limited implementation evidence, not full M0/M1 acceptance. Models are explicitly chosen and no download, cloud fallback, or source edit occurs.
 
 This narrows the initial implementation, not the product goal or the acceptance criteria. The full architecture diagram remains a target; the first workflow guide shows the implemented path separately.
+
+## 13. Experimental VS Code developer extension
+
+The user explicitly requested VS Code as the first developer interface for repository understanding, debugging assistance, feature writing, and document summaries. This authorizes the editor/backend implementation and bounded approved edits. It does not declare the complete M0–M6 gates passed or authorize model downloads or marketplace publication.
+
+- The extension MUST use a selected installed local Ollama completion model, an explicitly configured Python interpreter, and a scoped subprocess protocol. Repository configuration cannot choose the executable. No paid credential, model download, public HTTP server, or automatic provider fallback is required.
+- Repository discovery MUST respect root/nested .gitignore rules and reject linked, hidden (except .github), secret-named, generated, binary and oversized sources. Bounded lexical retrieval MUST disclose coverage and exclusions. “Entire repository” describes the workspace search scope, not a promise that every file enters a model context or that its behavior is understood.
+- General model interpretations MUST remain visibly unverified. Source-ID/locator/hash validation establishes source identity only. Suggested tests MUST NOT be described as executed. Saved files are the analysis source; dirty workspace buffers require saving or reverting first.
+- Debugging assistance MAY use user-supplied errors and saved-file VS Code diagnostics. It does not control breakpoints, read arbitrary terminal output, or execute model-generated commands. A separate explicit user choice may run an existing VS Code task after displaying its execution and warning about configured dependencies.
+- Edit proposals MUST bind exact before/after content, root, source dependencies and a canonical hash. Existing-file replacements must uniquely match text actually supplied to the model. The first version permits at most four text files, with no deletes, renames or new directories.
+- Human review MUST offer recommended diff inspection, apply, custom refinement, More, pause and cancel. All diffs require explicit review confirmation before the final apply action. No reply or arbitrary custom prose is approval. A new request supersedes the previous proposal.
+- Before applying, the extension MUST revalidate captured dependencies, ignore policy, file preconditions and editor versions. Pending state MUST be persisted before dispatch; uncertain outcomes MUST NOT be automatically retried. After applying, actual editor content MUST be compared with the approved result. Existing files remain unsaved; native file creation may create new files on disk. These checks are not an OS sandbox or atomic protection against hostile concurrent filesystem mutation.
+- Document summaries MUST use explicitly selected UTF-8 text, PDF text extraction or DOCX main-body text. Range, extraction omissions, chunking and bounds MUST be visible. No OCR, arbitrary binary formats, or hidden truncation of a requested whole-document summary. Large documents require a smaller range or exported subset.
+- The first extension retains only its latest completed analysis/proposal in VS Code workspace state, including source excerpts and model-call records; CLI sessions remain separate. Clear removes the active stored entry, not editor undo history, backups or guaranteed physical database erasure. Full retention policy, history, semantic verification, exact tokenizer accounting and strict trajectory replay remain open.
+
+The implementation uses smaller editor-result-v1 and editor-proposal-v1 records. It is an experimental developer slice, not a claim that the full planned verification runtime, general autonomy or release certification is complete. The current interface, limits and setup are documented in [the VS Code guide](docs/vscode.md).

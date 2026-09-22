@@ -2,32 +2,46 @@
 
 **A local-first personal AI agent project designed around checkable answers and human control.**
 
-Thread aims to help you understand project files, remember explicit decisions, and make bounded changes with your approval. Its primary workflow is being designed for a local model without paid API credentials. Hosted models using your own keys and private model servers are planned options.
+Thread now has an experimental **VS Code extension** for repository questions, debugging assistance, reviewable feature edits and document summaries. It uses a model you select from local Ollama, without paid API credentials. The original exact-field CLI also remains available.
 
-> **Experimental first workflow.** You can now report exact fields from local TOML/JSON files, ask an installed Ollama model to suggest a field, and save/resume your field choices. General chat, semantic verification, file edits, durable memory, and action approvals are not implemented. [Try the working workflow](docs/first-workflow.md).
+> **Usable developer preview, not a finished autonomous agent.** General answers are model interpretations with inspectable sources, not independently verified facts. Edits require explicit review and approval. Full model-quality and M1 release gates have not passed.
 
-[Quick start](#quick-start) · [Available commands](#available-commands) · [Workflow diagrams](docs/workflows.md) · [Roadmap](#roadmap) · [Contributing](CONTRIBUTING.md)
+[Install the VS Code extension](docs/vscode.md) · [CLI quick start](#quick-start) · [Workflow diagrams](docs/workflows.md) · [Roadmap](#roadmap) · [Contributing](CONTRIBUTING.md)
+
+## Start with VS Code
+
+From your checkout, with Python 3.11+, uv, Node.js 22+ and npm installed:
+
+```bash
+uv sync --locked --extra dev --extra editor
+npm ci --prefix extensions/vscode --ignore-scripts
+mkdir -p artifacts
+npm run package --prefix extensions/vscode
+```
+
+In VS Code, choose **Extensions → … → Install from VSIX…** and select `artifacts/thread-agent-0.1.0.vsix`. Open your repository, run **Thread: Setup Local Model**, select your Python executable and an installed local Ollama text model, then open the **Thread** sidebar. Models are not downloaded automatically.
+
+See the [step-by-step guide](docs/vscode.md) for prerequisites, examples, approval options, document formats, storage and troubleshooting. The extension is tested on macOS; Linux uses the same secure backend primitives but its editor UI remains untested. Windows is not supported by the secure backend yet.
 
 ## What can I use today?
 
-| Capability | Status |
+| Capability | Current scope |
 | --- | --- |
-| Install from a Git checkout | Available |
-| CLI help, version, and implementation status | Available |
-| Architecture, specifications, and synthetic examples | Available for review |
-| Report exact TOML/JSON fields | Available on macOS/Linux; general file Q&A remains planned |
-| Local Ollama field suggestions | Experimental; requires explicit model selection and human confirmation |
-| Persist and resume field choices | Available; action approvals remain planned |
-| Remember and correct explicit facts or decisions | Planned for M4 |
-| Make approved file edits and check their outcomes | Planned for M4 |
-| Use hosted free tiers, paid API keys, or on-premises models | Optional, planned for M4B |
-| Web dashboard, messaging, scheduling, and delegation | Deferred extensions |
+| Repository questions | Bounded lexical search over eligible saved files; cited model interpretations. |
+| Debugging assistance | User errors + VS Code diagnostics + source excerpts; optional fix proposals. No breakpoint control. |
+| Feature edits | Up to four eligible files, exact diffs, explicit approval, stale-source checks and observed editor-buffer outcomes. |
+| Document summaries | UTF-8 text, extracted PDF text and DOCX main body; range selection and explicit limits, no OCR. |
+| Human choices | Recommended diff review, apply, alternatives, More, custom instructions, pause and cancel. |
+| Run checks | Explicitly select and confirm an existing VS Code task; inspect its terminal output. |
+| Exact TOML/JSON reports | Separate deterministic CLI workflow, with optional local model field suggestions. |
+| Durable knowledge memory / semantic verification | Planned. |
+| Hosted free tiers, paid keys and private endpoints | Optional, planned for M4B. |
 
-Deterministic tests and one local-model smoke call have passed for this narrow workflow. Model accuracy, broad task success, hardware support, and the complete M1 gate have not been established. A general agent release is still ahead.
+“Repository understanding” means retrieving relevant context across the chosen workspace. It does not mean every file is sent to the model or every conclusion is correct. [Coverage and limitations](docs/vscode.md#files-documents-and-model-limits) are part of the result.
 
 ## Quick start
 
-You need **Git and Python 3.11 or newer**. No GPU, model download, or API key is needed for exact-field reports. Installation may download Python build tooling. The current package has no third-party runtime dependencies.
+You need **Git and Python 3.11 or newer**. No GPU, model download, or API key is needed for exact-field reports. Installation may download Python build tooling. The CLI base package has no third-party runtime dependencies; the optional editor extra adds document/ignore parsers.
 
 ### macOS or Linux
 
@@ -59,7 +73,8 @@ Expected output:
 ```text
 Thread Agent 0.0.0.dev0: experimental local field lookup.
 Available: exact TOML/JSON fields, local model suggestions, saved choices, and replay.
-Not yet available: general chat, file edits, durable memory, or hosted models.
+VS Code extension: repository analysis, reviewed edits, and document summaries.
+Not yet available: semantic verification, durable memory, or hosted models.
 Full M1 acceptance and model accuracy are not established.
 Try: thread-agent ask --file examples/projects/minimal/settings.toml --field /database/default
 ```
@@ -119,7 +134,7 @@ There is **no general `run`, `chat`, or model download command**. The `ask` comm
 
 ## What Thread is being built to do
 
-These are the broader intended use cases. The first row now has a narrow implementation through explicit field selection; the others remain planned:
+These are the broader intended use cases. Exact field reports and reviewed editor changes have experimental implementations; durable memory and general semantic verification remain planned:
 
 | Example request | Intended behavior |
 | --- | --- |
@@ -173,11 +188,11 @@ Recommendations and silence will never approve an action. Ambiguous custom repli
 
 ## Models and deployment options
 
-**A local Ollama field-suggestion adapter is available experimentally.** It cannot generate arbitrary answers or execute tools. The broader choices are:
+**Local Ollama powers the experimental editor analysis and the separate CLI field-suggestion workflow.** The editor can propose changes; only explicit human review can apply them. The broader provider choices are:
 
 | Mode | Planned setup | Stage |
 | --- | --- | --- |
-| Local, primary path | Ollama field suggestions work with explicit model selection; full capability/task gates remain pending | Experimental pre-M1 |
+| Local, primary path | Editor analysis and CLI field suggestions use explicit local model selection; full capability/task gates remain pending | Experimental pre-M1 |
 | Hosted free tier | Your provider credentials, with visible quota and data terms | M4B, optional |
 | Hosted paid API | Your provider credentials and an explicit budget | M4B, optional |
 | Private / on-premises | Your endpoint, model ID, authentication, and verified TLS | M4B, optional |
@@ -188,7 +203,7 @@ The design prohibits silent fallback to a cloud or paid provider. Offline policy
 
 ## Workflow diagrams
 
-For the implemented path, see [the first workflow diagram](docs/first-workflow.md#implemented-path). The [broader workflow guide](docs/workflows.md) illustrates the target architecture:
+For the implemented editor path, see [the VS Code diagram](docs/vscode.md#architecture-and-validation). For the CLI, see [the first workflow diagram](docs/first-workflow.md#implemented-path). The [broader workflow guide](docs/workflows.md) illustrates the target architecture:
 
 | Diagram | What it explains |
 | --- | --- |
@@ -209,7 +224,8 @@ The [full architecture Mermaid source](AGENT_ARCHITECTURE.mmd) contains the deta
 
 ```text
 thread/
-├── src/thread_agent/    CLI and reserved agent components
+├── src/thread_agent/    Python CLI, editor backend and reserved components
+├── extensions/vscode/  VS Code interface, review/edit controls and packaging
 ├── configs/            Draft local, hosted, and private profiles
 ├── prompts/            Draft role prompts
 ├── schemas/            Record and trace schema design locations
@@ -222,12 +238,13 @@ thread/
 └── .github/            Scaffold CI and contribution templates
 ```
 
-The first workflow implements the CLI, scoped reads, field parsing, local suggestions, SQLite sessions, and deterministic replay. Other modules remain responsibility placeholders. See the [component map](docs/structure.md) for ownership. The [synthetic traces](planning_examples/README.md) demonstrate intended records and failure cases; they are not real executions or benchmarks.
+The first workflow implements the CLI, scoped reads, field parsing, local suggestions, SQLite sessions, and deterministic replay. The editor backend adds repository retrieval, document extraction and immutable proposals; TypeScript provides the editor integration. Other modules remain responsibility placeholders. See the [component map](docs/structure.md) for ownership. The [synthetic traces](planning_examples/README.md) demonstrate intended records and failure cases; they are not real executions or benchmarks.
 
 ## Roadmap
 
 | Stage | Deliverable | Current status |
 | --- | --- | --- |
+| Editor preview | Repository questions, debugging assistance, reviewed features and document summaries | Experimental; local VSIX available |
 | Scaffold | Package, information CLI, docs, examples, and CI configuration | Implemented |
 | M0 | Freeze initial tasks, fixtures, schemas, and baseline hardware profile | Ten deterministic development cases added; full freeze pending |
 | M1 | Local model workflow, terminal decisions, scoped reads, sessions, and basic replay | Narrow field workflow implemented; full M1 acceptance pending |
@@ -265,7 +282,7 @@ Start with [CONTRIBUTING.md](CONTRIBUTING.md), [project status](steering/status.
 Install development tools and run the current checks:
 
 ```bash
-python -m pip install -e '.[dev]'
+python -m pip install -e '.[dev,editor]'
 python -m ruff check .
 python -m ruff format --check .
 python -m compileall -q src
@@ -275,7 +292,7 @@ thread-agent --version
 thread-agent status --json
 ```
 
-These check style, syntax, the CLI, source-read boundaries, persisted choices, provider validation, and deterministic reference outcomes. They require no model server or paid credentials. A zero-test run is not a pass. Local checks used Python 3.12.13; CI is configured for Python 3.11 and 3.12 on Linux. See [validation and limits](docs/first-workflow.md#validation-and-remaining-work) for the single live smoke test and incomplete M1 gates.
+These check style, syntax, the CLI, source-read boundaries, persisted choices, provider validation, and deterministic reference outcomes. They require no model server or paid credentials. A zero-test run is not a pass. Local checks used Python 3.12.13; CI is configured for Python 3.11 and 3.12 on Linux. See [validation and limits](docs/first-workflow.md#validation-and-remaining-work) for the field workflow, and [current validation](steering/status.md) for the editor checks and incomplete M1 gates.
 
 For design context, read [SPEC.md](SPEC.md), [RATIONALE.md](RATIONALE.md), and [AGENTS.md](AGENTS.md). The steering Markdown guides project development; it is separate from the planned agent's runtime memory.
 

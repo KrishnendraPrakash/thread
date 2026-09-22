@@ -38,3 +38,11 @@ evals/reports/*
 .idea/
 .vscode/
 *.swp
+
+# VS Code extension builds and packaged Python dependencies
+node_modules/
+extensions/vscode/out/
+extensions/vscode/python/
+*.vsix
+.vscode-test/
+artifacts/

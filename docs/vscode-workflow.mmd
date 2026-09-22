@@ -1,0 +1,23 @@
+flowchart TD
+    User["Developer in trusted VS Code workspace"] --> Mode{"Choose workflow"}
+    Mode -->|Repository question| Scan["Scan eligible saved files with gitignore and bounds"]
+    Mode -->|Debugging assistance| Diagnostics["Error description and VS Code diagnostics"]
+    Diagnostics --> Scan
+    Mode -->|Feature| Scan
+    Mode -->|Document| Pick["Explicit file picker and optional range"]
+    Pick --> Extract["Extract text; disclose format and coverage limits"]
+    Scan --> Retrieve["Lexical excerpts with paths, lines and hashes"]
+    Retrieve --> Local["Selected local Ollama model through Python subprocess"]
+    Extract --> Local
+    Local --> Validate["Validate schema, source IDs and edit preconditions"]
+    Validate --> Answer["Unverified model analysis with source snapshots"]
+    Validate --> Proposal{"Changes proposed?"}
+    Proposal -->|Yes| Review["Review exact diffs; alternatives, More, custom text, pause/cancel"]
+    Review -->|Refine| User
+    Review -->|Explicit apply| Fresh["Recheck source hashes, ignore rules and editor buffers"]
+    Fresh -->|Stale| Stop["Stop and request a new proposal"]
+    Fresh -->|Current| Apply["Native VS Code edit; compare actual resulting buffers"]
+    Apply --> Human["Human saves and inspects changes"]
+    Human --> Task["Optional explicit run of a selected workspace task"]
+    Task --> Result["Observe exit code; inspect terminal and diagnostics"]
+    Proposal -->|No| Done["No source changes"]

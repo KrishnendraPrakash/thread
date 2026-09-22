@@ -1,5 +1,8 @@
 # First working workflow: exact source fields
 
+This guide covers the deterministic field CLI. For repository Q&A, approved feature edits and document summaries, use the [VS Code extension](vscode.md).
+
+
 This **experimental pre-M1 increment** reports scalar values from explicitly selected TOML or JSON files. It is not general chat, code search, semantic question answering, memory, or an editing agent. Full M0/M1 gates remain open.
 
 ## 1. Run an exact lookup without a model

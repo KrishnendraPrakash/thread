@@ -129,17 +129,19 @@ def main(argv: Sequence[str] | None = None) -> int:
             report = {
                 "project": "thread-agent",
                 "version": __version__,
-                "stage": "experimental-field-lookup",
+                "stage": "experimental-field-cli-and-vscode",
                 "implemented": [
                     "toml_json_field_reports",
                     "local_ollama_field_suggestions",
                     "persistent_field_clarifications",
                     "source_report_replay",
+                    "vscode_repository_analysis",
+                    "vscode_reviewed_edits",
+                    "vscode_document_summaries",
                 ],
                 "not_implemented": [
                     "general_chat",
                     "semantic_verification",
-                    "file_edits",
                     "durable_memory",
                     "hosted_private_adapters",
                 ],
@@ -153,7 +155,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                 else (
                     f"Thread Agent {__version__}: experimental local field lookup.\n"
                     "Available: exact TOML/JSON fields, local model suggestions, saved choices, and replay.\n"
-                    "Not yet available: general chat, file edits, durable memory, or hosted models.\n"
+                    "VS Code extension: repository analysis, reviewed edits, and document summaries.\n"
+                    "Not yet available: semantic verification, durable memory, or hosted models.\n"
                     "Full M1 acceptance and model accuracy are not established.\n"
                     + report["next_step"]
                 )
