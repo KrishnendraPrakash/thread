@@ -28,7 +28,7 @@ Without uv, create `.venv` and install `python -m pip install -e '.[dev,editor]'
 7. Select an installed local Ollama text model. Embedding-only and detected cloud-backed models cannot run analysis. No model is preselected or certified.
 8. Open the **Thread** activity-bar icon, choose a workflow, write your request and click **Send**.
 
-You can alternatively install with `code --install-extension artifacts/thread-agent-0.1.0.vsix` when the VS Code shell command is configured. This is a local VSIX build; the extension is not published to the Marketplace. The repository license decision remains open.
+You can alternatively install with `code --install-extension artifacts/thread-agent-0.1.0.vsix` when the VS Code shell command is configured. This is a local VSIX build; the extension is not published to the Marketplace. The repository license decision remains open. For Marketplace distribution, use the [public preview publishing guide](publishing.md); the checked public-package command requires the owner license and matching publisher identity.
 
 ## Four workflows
 

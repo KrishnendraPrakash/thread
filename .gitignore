@@ -46,3 +46,6 @@ extensions/vscode/python/
 *.vsix
 .vscode-test/
 artifacts/
+
+# Generated copy of the owner-selected root license for the VSIX
+/extensions/vscode/LICENSE

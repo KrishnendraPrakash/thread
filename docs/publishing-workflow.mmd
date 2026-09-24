@@ -1,0 +1,10 @@
+flowchart TD
+    Owner["Owner confirms publisher ID and chooses license"] --> Configure["Set manifest and root LICENSE"]
+    Configure --> Tests["Run checks from a clean checkout"]
+    Tests --> Build["Build target-specific pre-release VSIX"]
+    Build --> Verify["Check identity, license, notices, channel and SHA-256"]
+    Verify --> Install["Test exact VSIX in a fresh matching VS Code profile"]
+    Install --> Upload["Owner-authenticated Marketplace upload"]
+    Upload --> Review["Marketplace validation"]
+    Review --> Listing["Verify live listing and public installation"]
+    Verify --> Artifact["Optional GitHub build artifact; not a Marketplace listing"]

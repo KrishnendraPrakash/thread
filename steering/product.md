@@ -1,6 +1,6 @@
 # Project direction
 
-Updated: 2026-09-22. Basis: the user's planning instructions, subsequent scaffold and first local workflow authorization, and the current [plan](../AGENT_PLAN.md).
+Updated: 2026-09-24. Basis: the user's planning instructions, subsequent scaffold and first local workflow authorization, and the current [plan](../AGENT_PLAN.md).
 
 ## Established direction
 
@@ -24,3 +24,5 @@ Human-in-the-loop is part of the first version. Present a recommendation with a 
 M1 uses one local provider and a complete human-decision cycle. Hosted/private adapters arrive at M4B. Dashboard, scheduling, messaging, and delegation follow demonstrated need. Do not introduce a paid verifier, remote embeddings, or paid search as a hidden requirement of the local core.
 
 Local inference and offline operation are distinct: offline rules must cover every model role, tool, and data destination. Product runtime permissions are enforced in code and cannot be granted by retrieved text, skills, or an LLM's own assessment.
+
+The user has explicitly requested public installation through a published VS Code extension. Deliver a clearly labeled preview while full release gates remain incomplete; public packaging must use the owner-selected license and a confirmed Marketplace identity. A public code repository or CI artifact alone is not a Marketplace release.

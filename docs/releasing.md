@@ -1,8 +1,8 @@
 # Release readiness
 
-The source repository is published at [KrishnendraPrakash/thread](https://github.com/KrishnendraPrakash/thread). No package or agent release is configured. Source publication does not authorize deployment or registry publication.
+The source repository is published at [KrishnendraPrakash/thread](https://github.com/KrishnendraPrakash/thread). The user has now requested public VS Code distribution. Preview packaging and a manual build workflow are configured; a live Marketplace listing still requires the owner-selected license, confirmed publisher identity and authenticated upload. See [the publishing guide](publishing.md). This authorization does not mean the M6 general-release gates have passed.
 
-Before publishing a usable release:
+Before publishing a general release (the experimental preview remains explicitly limited):
 
 - Confirm the release package name and select the repository license. The source repository URL is established; no license grant or license classifier is invented by the scaffold.
 - Finish the intended runtime milestone and record acceptance outcomes separately from packaging checks.
@@ -13,4 +13,4 @@ Before publishing a usable release:
 - Review distribution contents to exclude secrets, private data, model weights, local databases, held-out answers, and development artifacts.
 - Define a private security-reporting channel before enabling public reports; there is no maintainer contact or response SLA configured yet.
 
-The scaffold CI does not publish packages, download models, execute paid APIs, or run agent benchmarks.
+CI builds/checks packages but does not publish them, download models, execute paid APIs or run agent benchmarks. The preview distribution records actual compatibility and known limits rather than claiming the general-release gates passed.

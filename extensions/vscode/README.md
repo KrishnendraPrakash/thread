@@ -17,4 +17,6 @@ Requires macOS/Linux, VS Code 1.95+, Python 3.11+, local Ollama and an installed
 
 [Full installation, usage, limits and troubleshooting](https://github.com/KrishnendraPrakash/thread/blob/main/docs/vscode.md)
 
-This is a locally packaged developer preview, not a Marketplace release. The project's license decision remains open; included Python dependencies retain their own notices under `python/*dist-info`.
+This is an experimental preview candidate. Publication status is tracked in the repository; preparation does not mean a Marketplace listing is live. See the [publishing guide](https://github.com/KrishnendraPrakash/thread/blob/main/docs/publishing.md). Included Python dependencies retain their own notices under `python/*dist-info`.
+
+[Privacy and local data storage](https://github.com/KrishnendraPrakash/thread/blob/main/extensions/vscode/PRIVACY.md) · [Changelog](https://github.com/KrishnendraPrakash/thread/blob/main/extensions/vscode/CHANGELOG.md)

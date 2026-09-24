@@ -1,0 +1,62 @@
+name: Build VS Code preview for publication
+
+on:
+  workflow_dispatch:
+    inputs:
+      publisher_id:
+        description: 'Confirmed Marketplace publisher ID (must match package.json)'
+        type: string
+        required: true
+      target:
+        description: 'Package target; macOS arm64 is the locally tested editor profile'
+        type: choice
+        default: darwin-arm64
+        options:
+          - darwin-arm64
+          - darwin-x64
+          - linux-x64
+          - linux-arm64
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    env:
+      THREAD_PUBLISHER_ID: ${{ inputs.publisher_id }}
+      THREAD_PACKAGE_TARGET: ${{ inputs.target }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          package-manager-cache: false
+      - name: Create the packaging environment
+        run: |
+          python -m venv .venv
+          .venv/bin/python -m pip install uv
+          .venv/bin/uv sync --locked --extra dev --extra editor
+          npm ci --prefix extensions/vscode --ignore-scripts
+      - name: Check owner configuration and run deterministic checks
+        run: |
+          npm run release:check --prefix extensions/vscode -- --publisher "$THREAD_PUBLISHER_ID"
+          .venv/bin/python -m ruff check .
+          .venv/bin/python -m ruff format --check .
+          .venv/bin/python -m unittest discover -s tests -v
+          .venv/bin/python extensions/vscode/scripts/bundle.py
+          npm test --prefix extensions/vscode
+      - name: Build and inspect the pre-release package
+        run: npm run package:preview --prefix extensions/vscode -- --publisher "$THREAD_PUBLISHER_ID" --target "$THREAD_PACKAGE_TARGET"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: thread-preview-${{ inputs.target }}
+          path: |
+            artifacts/*.vsix
+            artifacts/*.vsix.sha256
+            artifacts/*.release.json
+          if-no-files-found: error
+          retention-days: 14

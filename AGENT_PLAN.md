@@ -1,7 +1,7 @@
 # Agent plan
 
 Status: experimental VS Code developer workflows and the exact-field CLI are implemented; full verification, model benchmarks and public release gates remain pending.
-Updated: 2026-09-22 after the user promoted VS Code, repository questions, debugging assistance, features and document summaries to the immediate scope.
+Updated: 2026-09-24. The user also requested public extension distribution; prepare a labeled preview while publisher identity, license and account authentication are resolved.
 
 ## Goal
 

@@ -6,7 +6,7 @@ Thread now has an experimental **VS Code extension** for repository questions, d
 
 > **Usable developer preview, not a finished autonomous agent.** General answers are model interpretations with inspectable sources, not independently verified facts. Edits require explicit review and approval. Full model-quality and M1 release gates have not passed.
 
-[Install the VS Code extension](docs/vscode.md) · [CLI quick start](#quick-start) · [Workflow diagrams](docs/workflows.md) · [Roadmap](#roadmap) · [Contributing](CONTRIBUTING.md)
+[Install the VS Code extension](docs/vscode.md) · [Publish a preview](docs/publishing.md) · [CLI quick start](#quick-start) · [Workflow diagrams](docs/workflows.md) · [Roadmap](#roadmap) · [Contributing](CONTRIBUTING.md)
 
 ## Start with VS Code
 

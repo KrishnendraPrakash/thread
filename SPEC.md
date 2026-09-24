@@ -225,7 +225,7 @@ This narrows the initial implementation, not the product goal or the acceptance 
 
 ## 13. Experimental VS Code developer extension
 
-The user explicitly requested VS Code as the first developer interface for repository understanding, debugging assistance, feature writing, and document summaries. This authorizes the editor/backend implementation and bounded approved edits. It does not declare the complete M0–M6 gates passed or authorize model downloads or marketplace publication.
+The user explicitly requested VS Code as the first developer interface for repository understanding, debugging assistance, feature writing, and document summaries. This authorizes the editor/backend implementation and bounded approved edits. The subsequent user request authorizes preparation and publication of a clearly labeled public preview. It does not declare the complete M0–M6 gates passed, select a license, supply a publisher identity, or authorize model downloads.
 
 - The extension MUST use a selected installed local Ollama completion model, an explicitly configured Python interpreter, and a scoped subprocess protocol. Repository configuration cannot choose the executable. No paid credential, model download, public HTTP server, or automatic provider fallback is required.
 - Repository discovery MUST respect root/nested .gitignore rules and reject linked, hidden (except .github), secret-named, generated, binary and oversized sources. Bounded lexical retrieval MUST disclose coverage and exclusions. “Entire repository” describes the workspace search scope, not a promise that every file enters a model context or that its behavior is understood.
@@ -238,3 +238,9 @@ The user explicitly requested VS Code as the first developer interface for repos
 - The first extension retains only its latest completed analysis/proposal in VS Code workspace state, including source excerpts and model-call records; CLI sessions remain separate. Clear removes the active stored entry, not editor undo history, backups or guaranteed physical database erasure. Full retention policy, history, semantic verification, exact tokenizer accounting and strict trajectory replay remain open.
 
 The implementation uses smaller editor-result-v1 and editor-proposal-v1 records. It is an experimental developer slice, not a claim that the full planned verification runtime, general autonomy or release certification is complete. The current interface, limits and setup are documented in [the VS Code guide](docs/vscode.md).
+
+## 14. Public preview distribution
+
+The public preview is distinct from the M6 general-release certification. It MUST retain explicit experimental/accuracy limits and be packaged with the Marketplace pre-release flag and preview metadata. Public packaging requires the owner-selected project license and an explicitly supplied publisher ID matching the manifest; the script cannot establish account ownership. The packaged license, dependency notices, identity, target platform and pre-release flag MUST be checked, and package SHA-256/commit provenance recorded. Only tested profiles may be advertised as tested. The initial locally tested editor profile is macOS arm64; Windows/web packages remain excluded.
+
+Public distribution may use a verified Marketplace publisher or an explicitly created GitHub pre-release with the same artifact. A code push, local package or Actions artifact MUST NOT be reported as a live Marketplace listing. Publisher account creation/authentication and license selection require owner input; credentials MUST NOT enter source, public logs, or chat. The manual preview workflow builds artifacts without publication credentials or automatic registry writes. See [publication instructions](docs/publishing.md).

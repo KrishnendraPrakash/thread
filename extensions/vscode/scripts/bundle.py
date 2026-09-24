@@ -25,3 +25,11 @@ for name in ("pathspec", "pypdf"):
         shutil.copy2(package.locate_file(file), destination)
 shutil.copy2(Path(__file__).with_name("bridge.py"), output / "bridge.py")
 print(f"Bundled backend and dependency notices in {output}")
+
+# The project license is selected by the owner; do not invent a license grant.
+license_source = root / "LICENSE"
+license_target = output.parent / "LICENSE"
+if license_source.is_file():
+    shutil.copy2(license_source, license_target)
+elif license_target.exists():
+    license_target.unlink()
