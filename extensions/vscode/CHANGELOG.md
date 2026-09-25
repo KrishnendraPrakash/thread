@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.0 — Managed local AI setup
+
+- Offer a confirmed runtime/model download when local AI is unavailable, with progress, cancellation, alternatives and recovery guidance.
+- Manage a pinned, checksum-verified Ollama 0.34.4 runtime on Apple Silicon macOS 14+, without Homebrew, Docker or admin scripts.
+- Keep models in extension storage and run an owned server on a private loopback port with cloud disabled; preserve existing-server support.
+- Add small/larger starter downloads with sizes and terms; neither is accuracy-certified.
+- Runtime installation/startup and synthetic download/error cases tested; a complete starter-model download/inference trial remains unverified.
+
 ## 0.1.3 — Automatic Python setup and public dependencies
 
 - Detect installed Python automatically; recover from stale paths without the normal interpreter input prompt. Manual configuration is an advanced fallback.

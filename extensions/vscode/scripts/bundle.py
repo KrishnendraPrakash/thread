@@ -24,6 +24,7 @@ for name in ("pathspec", "pypdf"):
         destination.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(package.locate_file(file), destination)
 shutil.copy2(Path(__file__).with_name("bridge.py"), output / "bridge.py")
+shutil.copy2(Path(__file__).with_name("install_runtime.py"), output / "install_runtime.py")
 print(f"Bundled backend and dependency notices in {output}")
 
 # The project license is selected by the owner; do not invent a license grant.

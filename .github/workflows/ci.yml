@@ -50,7 +50,7 @@ jobs:
       - name: Exercise editor backend on each supported Python version
         env:
           PYTHONPATH: src
-        run: python -m unittest tests.editor.test_editor -v
+        run: python -m unittest tests.editor.test_editor tests.editor.test_runtime_install -v
 
   vscode:
     runs-on: ubuntu-latest

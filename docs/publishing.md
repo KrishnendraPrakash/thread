@@ -1,6 +1,6 @@
 # Publish the Thread VS Code preview
 
-A Marketplace listing makes Thread searchable and installable from VS Code. Thread does not need a hosted server: each user runs automatically detected Python 3.9+, local Ollama and their selected text model. A GitHub code push alone does not create a Marketplace listing.
+A Marketplace listing makes Thread searchable and installable from VS Code. Thread does not need a hosted server: each user runs automatically detected Python 3.9+ and local inference. Managed setup can download/start Ollama and a starter model on supported Macs after confirmation. A GitHub code push alone does not create a Marketplace listing.
 
 The owner has requested public distribution. The release candidate remains an experimental preview; full quality/M1/M6 gates are incomplete. Marketplace account setup and the project's license decision must be completed before this repository's public-package command will proceed. The publisher ID is `Krishnendra`, supplied by the owner from the Marketplace upload screen. The extension ID is `Krishnendra.thread-agent`; this is separate from the GitHub repository owner `KrishnendraPrakash`.
 
@@ -30,9 +30,9 @@ npm run package:preview --prefix extensions/vscode -- --publisher YOUR_PUBLISHER
 
 Replace `YOUR_PUBLISHER_ID` with the actual ID; do not use that literal placeholder. The check verifies local configuration, not Marketplace identity ownership. The packaging command uses the pre-release channel, checks manifest/target/license consistency and dependency notices, and writes:
 
-- `artifacts/thread-agent-0.1.3-darwin-arm64.vsix`
-- `artifacts/thread-agent-0.1.3-darwin-arm64.vsix.sha256`
-- `artifacts/thread-agent-0.1.3-darwin-arm64.release.json`
+- `artifacts/thread-agent-0.2.0-darwin-arm64.vsix`
+- `artifacts/thread-agent-0.2.0-darwin-arm64.vsix.sha256`
+- `artifacts/thread-agent-0.2.0-darwin-arm64.release.json`
 
 Versioned names follow package.json if the version changes. The release record contains the commit, dirty-worktree indicator, package identity and SHA-256. Build from a clean checkout for an attributable public artifact. Test the **exact packaged VSIX** in a fresh VS Code profile, including local setup and the four workflows, before upload. Install it through **Extensions → … → Install from VSIX…**. Do not substitute the older generic local-development VSIX for this checked release package.
 
@@ -48,14 +48,14 @@ After committing the confirmed publisher/license configuration, open the reposit
 4. Verify the resulting listing at `https://marketplace.visualstudio.com/items?itemName=YOUR_PUBLISHER_ID.thread-agent`. This is a URL pattern, not an assertion that the listing already exists.
 5. From a separate clean VS Code profile on a matching platform, search the exact extension ID, choose **Install Pre-Release Version**, and run Setup. Confirm the installed version and run a small repository request.
 
-Only after that verification should README installation instructions point users to a live listing. Availability to other platforms requires uploading their matching tested packages. The extension still requires Python, Ollama and an installed local text model on each user's machine; it does not bundle those runtimes or model weights.
+Only after that verification should README installation instructions point users to a live listing. Availability to other platforms requires uploading their matching tested packages. Python is still a prerequisite. On supported Macs the managed setup can download the runtime and a selected model after confirmation; these large files are not bundled in the VSIX. Other supported systems require an existing Ollama installation.
 
 ## Optional terminal publishing
 
 The checked package can also be published with the repository's installed vsce:
 
 ```bash
-extensions/vscode/node_modules/.bin/vsce publish --azure-credential --packagePath artifacts/thread-agent-0.1.3-darwin-arm64.vsix --pre-release
+extensions/vscode/node_modules/.bin/vsce publish --azure-credential --packagePath artifacts/thread-agent-0.2.0-darwin-arm64.vsix --pre-release
 ```
 
 This requires a configured Microsoft Entra identity with permission on the publisher. It is not configured by this repository. The [official publishing guide](https://code.visualstudio.com/api/working-with-extensions/publishing-extension) documents Microsoft Entra authentication and the browser-upload route. It currently states that global Azure DevOps PATs retire on December 1, 2026; do not build a new long-term publishing pipeline around copied PATs. Do not pass tokens in command arguments or commit them.

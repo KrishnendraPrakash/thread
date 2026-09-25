@@ -327,3 +327,13 @@ class EditorTests(unittest.TestCase):
         self.assertTrue(result["ok"])
         self.assertEqual(result["result"]["executable"], sys.executable)
         self.assertEqual(result["result"]["version"], sys.version.split()[0])
+
+    def test_editor_model_endpoint_cannot_be_remote(self):
+        proc = subprocess.run(
+            [sys.executable, "-m", "thread_agent.editor.service"],
+            input=json.dumps({"operation": "models", "endpoint": "https://example.com"}) + "\n",
+            text=True,
+            capture_output=True,
+        )
+        self.assertEqual(proc.returncode, 1)
+        self.assertIn("loopback", json.loads(proc.stdout)["error"])

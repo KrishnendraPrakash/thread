@@ -3,7 +3,9 @@ flowchart TD
     Probe -->|None usable| Advanced["Install Python or choose advanced explicit path; cancel available"]
     Advanced -->|Explicit path| Probe
     Probe --> Models["Check Ollama with same executable; report model setup failures separately"]
-    Models --> User["Developer in trusted VS Code workspace"]
+    Models -->|Missing local AI| Managed["Optional managed setup: choose model, confirm download, verify and start"]
+    Managed --> User["Developer in trusted VS Code workspace"]
+    Models -->|Ready| User
     User --> Mode{"Choose workflow"}
     Mode -->|Repository question| Scan["Scan eligible saved files with gitignore and bounds"]
     Mode -->|Debugging assistance| Diagnostics["Error description and VS Code diagnostics"]

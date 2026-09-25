@@ -4,6 +4,7 @@ import { randomBytes } from 'node:crypto';
 import { realpathSync } from 'node:fs';
 import { Backend } from './backend';
 import { discoverPython, pythonCandidates, PythonRuntime } from './python';
+import { LocalRuntime, ollamaJson, pullModel, STARTER_MODELS } from './localRuntime';
 import { Result, Mode, FileChange } from './types';
 
 class Snapshots implements vscode.TextDocumentContentProvider {
@@ -37,6 +38,10 @@ export function activate(context: vscode.ExtensionContext): void {
 export class Agent implements vscode.WebviewViewProvider, vscode.Disposable {
   readonly snapshots = new Snapshots();
   private backend = new Backend();
+  private managed: LocalRuntime;
+  private managedMode: boolean;
+  private setupController?: AbortController;
+  private callController?: AbortController;
   private detectedPython?: PythonRuntime & { setting: string };
   private discovering = false;
   private discoveryCancelled = false;
@@ -46,6 +51,8 @@ export class Agent implements vscode.WebviewViewProvider, vscode.Disposable {
   private taskExecutions = new Set<vscode.TaskExecution>();
   private taskListener: vscode.Disposable;
   constructor(private context: vscode.ExtensionContext) {
+    this.managed = new LocalRuntime(path.join(context.globalStorageUri.fsPath, 'local-runtime'));
+    this.managedMode = context.globalState.get<boolean>('managedRuntime', false);
     this.result = context.workspaceState.get<Result>('lastResult');
     if (this.result?.decision === 'applying') { this.result.decision = 'uncertain'; }
     this.taskListener = vscode.tasks.onDidEndTaskProcess(event => {
@@ -54,7 +61,7 @@ export class Agent implements vscode.WebviewViewProvider, vscode.Disposable {
       }
     });
   }
-  dispose(): void { this.cancel(); this.taskListener.dispose(); }
+  dispose(): void { this.cancel(); this.managed.stop(); this.taskListener.dispose(); }
   private trusted(): void {
     if (!vscode.workspace.isTrusted) { throw new Error('Trust this workspace before using Thread.'); }
     if (process.platform === 'win32') { throw new Error('This experimental backend currently supports macOS and Linux.'); }
@@ -89,9 +96,19 @@ export class Agent implements vscode.WebviewViewProvider, vscode.Disposable {
     } finally { this.discovering = false; }
   }
   private async call(request: object, python?: string): Promise<any> {
-    this.trusted(); this.view?.webview.postMessage({ type: 'busy', value: true });
-    try { return await this.backend.call(python ?? (await this.resolvePython()).executable, this.context.extensionPath, request); }
-    finally { this.view?.webview.postMessage({ type: 'busy', value: false }); }
+    this.trusted();
+    if (this.callController) { throw new Error('A request is already starting or running.'); }
+    const controller = new AbortController(); this.callController = controller;
+    this.view?.webview.postMessage({ type: 'busy', value: true });
+    try {
+      const operation = (request as { operation?: string }).operation;
+      const endpoint = this.managedMode && (operation === 'models' || operation === 'run')
+        ? await this.managed.start(controller.signal) : 'http://127.0.0.1:11434';
+      const executable = python ?? (await this.resolvePython()).executable;
+      controller.signal.throwIfAborted();
+      return await this.backend.call(executable, this.context.extensionPath, { ...request, endpoint });
+    }
+    finally { this.callController = undefined; this.view?.webview.postMessage({ type: 'busy', value: false }); }
   }
   private async save(): Promise<void> {
     await this.context.workspaceState.update('lastResult', this.result);
@@ -123,20 +140,78 @@ export class Agent implements vscode.WebviewViewProvider, vscode.Disposable {
   }
   async setup(): Promise<void> {
     this.trusted();
-    if (this.backend.busy || this.discovering) { throw new Error('Finish or cancel the current request before changing setup.'); }
+    if (this.backend.busy || this.discovering || this.setupController) { throw new Error('Finish or cancel the current request before changing setup.'); }
     this.detectedPython = undefined;
     const runtime = await this.resolvePython();
     this.notify(`Detected Python ${runtime.version} at ${runtime.executable}. No Python path configuration is needed.`);
     let result: any;
     try { result = await this.call({ operation: 'models' }, runtime.executable); }
-    catch (error) {
-      throw new Error(`Python is ready. Ollama setup failed: ${error instanceof Error ? error.message : String(error)} Install/start Ollama and an installed text model, then run Thread: Setup Local Model again.`);
-    }
+    catch { await this.recoverModelSetup(runtime.executable); return; }
+    if (!result.models.length) { await this.recoverModelSetup(runtime.executable); return; }
     await this.chooseModel(result);
+  }
+  private async recoverModelSetup(python: string): Promise<void> {
+    const choice = await vscode.window.showQuickPick([
+      ...(this.managed.supported ? [{ label: 'Set up local AI for me (Recommended)', detail: 'Thread manages Ollama and a model in its own storage. No terminal or admin commands.' }] : []),
+      { label: 'Retry existing Ollama', detail: 'Use an already running local server on port 11434.' },
+      { label: 'More options', detail: 'Installation guide, storage location and model requirements.' },
+      { label: 'Cancel', detail: 'Do nothing; run setup later.' },
+    ], { title: 'Python is ready — local AI setup is needed', ignoreFocusOut: true });
+    if (!choice || choice.label === 'Cancel') { return; }
+    if (choice.label === 'More options') {
+      const more = await vscode.window.showQuickPick(['Read setup and dependency details', 'Enter an installed model name', 'Cancel'], { title: 'Thread setup options' });
+      if (more === 'Read setup and dependency details') {
+        await vscode.commands.executeCommand('markdown.showPreview', vscode.Uri.file(path.join(this.context.extensionPath, 'README.md')));
+      } else if (more === 'Enter an installed model name') {
+        const name = (await vscode.window.showInputBox({ title: 'Thread: installed model name', prompt: 'Enter the exact name of a model already installed on the selected local runtime.' }))?.trim();
+        if (!name) { return; }
+        const inventory = await this.call({ operation: 'models' }, python);
+        if (!inventory.models.includes(name)) { throw new Error('That model is not installed on the selected local runtime.'); }
+        await vscode.workspace.getConfiguration('thread').update('model', name, vscode.ConfigurationTarget.Global);
+        this.notify(`Selected installed model ${name}.`);
+      }
+      return;
+    }
+    if (choice.label === 'Retry existing Ollama') {
+      const result = await this.backend.call(python, this.context.extensionPath, { operation: 'models' });
+      if (!result.models.length) { throw new Error('Existing Ollama has no local text model. Rerun setup and choose managed setup on supported Macs.'); }
+      this.managedMode = false; this.managed.stop(); await this.context.globalState.update('managedRuntime', false);
+      await this.chooseModel(result); return;
+    }
+    const selected = await vscode.window.showQuickPick(STARTER_MODELS.map((model, index) => ({
+      label: `${model.name}${index === 0 ? ' — small starter (Recommended)' : ''}`, detail: `${model.size}; ${model.description} Not accuracy-certified.`, model,
+    })), { title: 'Choose a local starter model', placeHolder: 'Escape cancels. Existing models remain available through normal setup.', ignoreFocusOut: true });
+    if (!selected) { return; }
+    const confirm = await vscode.window.showInformationMessage(
+      `Download ${selected.model.name} (${selected.model.size})${this.managed.installed ? '' : ' and Ollama 0.34.4 (160 MB)'}? Internet is required for downloads from official Ollama/GitHub services. Runtime and models are stored in ${this.managed.directory}; Ollama may create its normal user configuration. No project changes, API key or admin access. Model details and terms: https://ollama.com/library/${selected.model.name}`,
+      { modal: true }, 'Download and set up');
+    if (confirm !== 'Download and set up') { return; }
+    const controller = new AbortController(); this.setupController = controller;
+    try {
+      await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, title: 'Thread: preparing local AI', cancellable: true }, async (progress, token) => {
+        const cancellation = token.onCancellationRequested(() => controller.abort());
+        try {
+          await this.managed.checkDisk(selected.model.disk);
+          if (!this.managed.installed) { await this.managed.install(python, this.context.extensionPath, controller.signal, message => progress.report({ message })); }
+          const endpoint = await this.managed.start(controller.signal);
+          await pullModel(endpoint, selected.model.name, controller.signal, message => progress.report({ message }));
+          const metadata = await ollamaJson(endpoint, '/api/show', { model: selected.model.name }, controller.signal);
+          if (!metadata.capabilities?.includes('completion') || metadata.remote_host || metadata.remote_model) { throw new Error('Downloaded model is not a local completion model.'); }
+          this.managedMode = true;
+          await this.context.globalState.update('managedRuntime', true);
+          await vscode.workspace.getConfiguration('thread').update('model', selected.model.name, vscode.ConfigurationTarget.Global);
+          this.notify(`Local AI is ready with ${selected.model.name}. Run Thread: Ask About Repository. Answer accuracy is not independently verified.`);
+        } finally { cancellation.dispose(); }
+      });
+    } catch (error) {
+      this.managed.stop();
+      if (controller.signal.aborted) { this.notify('Setup cancelled. Rerun setup to reuse downloaded model layers.'); return; }
+      throw error;
+    } finally { this.setupController = undefined; }
   }
   async configurePythonManually(): Promise<void> {
     this.trusted();
-    if (this.backend.busy || this.discovering) { throw new Error('Finish or cancel the current request before changing setup.'); }
+    if (this.backend.busy || this.discovering || this.setupController) { throw new Error('Finish or cancel the current request before changing setup.'); }
     const python = await vscode.window.showInputBox({ title: 'Thread · Python 3.9+ (advanced override)',
       prompt: 'Enter Python on THIS machine (absolute path recommended). This is separate from Python: Select Interpreter. Python itself and Ollama are not bundled.',
       value: this.setting('pythonPath', '') || this.detectedPython?.executable || 'python3', ignoreFocusOut: true });
@@ -152,7 +227,7 @@ export class Agent implements vscode.WebviewViewProvider, vscode.Disposable {
     });
     if (chosen) {
       await vscode.workspace.getConfiguration('thread').update('model', chosen, vscode.ConfigurationTarget.Global);
-      this.notify(`Using ${chosen} at 127.0.0.1:11434. No paid API key is required.`);
+      this.notify(`Using ${chosen} with ${this.managedMode ? 'Thread-managed local AI' : 'local Ollama'}. No paid API key is required.`);
     }
   }
   private async folder(): Promise<vscode.WorkspaceFolder | undefined> {
@@ -166,7 +241,7 @@ export class Agent implements vscode.WebviewViewProvider, vscode.Disposable {
   }
   async request(mode: Mode, supplied?: string): Promise<void> {
     this.trusted();
-    if (this.backend.busy || this.discovering || this.reviewing) { throw new Error('Finish or cancel the current request/review first.'); }
+    if (this.backend.busy || this.discovering || this.setupController || this.reviewing) { throw new Error('Finish or cancel the current request/review first.'); }
     if (this.result?.proposal && this.result.decision === 'pending') {
       const replace = await vscode.window.showWarningMessage('Starting a new request replaces the saved pending proposal.', { modal: true }, 'Replace proposal');
       if (replace !== 'Replace proposal') { return; }
@@ -205,7 +280,7 @@ export class Agent implements vscode.WebviewViewProvider, vscode.Disposable {
     await this.save();
     this.notify(this.result.proposal ? 'Analysis ready. Review the proposed diffs before applying changes.' : 'Analysis ready in the Thread sidebar.');
   }
-  cancel(): void { this.discoveryCancelled = true; this.backend.cancel(); }
+  cancel(): void { this.discoveryCancelled = true; this.setupController?.abort(); this.callController?.abort(); this.backend.cancel(); }
   async clear(): Promise<void> {
     if (this.reviewing) { throw new Error('Finish the current review first.'); }
     this.cancel(); this.result = undefined; this.snapshots.clear(); await this.save();

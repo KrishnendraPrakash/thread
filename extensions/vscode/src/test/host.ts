@@ -23,7 +23,9 @@ export async function run(): Promise<void> {
   const proposal = JSON.parse(execFileSync(python, ['-c', script, root], { encoding: 'utf8' }));
   const result: any = { proposal, decision: 'pending', root };
   const states = new Map<string, any>();
-  const context = { extensionPath: extension.extensionPath, workspaceState: {
+  const context = { extensionPath: extension.extensionPath,
+    globalStorageUri: vscode.Uri.file(path.join(root, 'extension-storage')),
+    globalState: { get: (_key: string, fallback: unknown) => fallback, update: async () => {} }, workspaceState: {
     get: (key: string) => states.get(key), update: async (key: string, value: any) => { states.set(key, structuredClone(value)); },
   } } as unknown as vscode.ExtensionContext;
   const agent: any = new Agent(context);
@@ -59,8 +61,11 @@ export async function run(): Promise<void> {
     automatic.notify = () => {};
     automatic.backend = setupAgent.backend;
     automatic.setting = () => '/nonexistent/stale-python';
+    let recovered = false;
+    automatic.recoverModelSetup = async () => { recovered = true; };
     try {
-      await assert.rejects(automatic.setup(), /Python is ready. Ollama setup failed/);
+      await automatic.setup();
+      assert.equal(recovered, true);
       assert.ok(path.isAbsolute(automatic.detectedPython.executable));
       assert.notEqual(automatic.detectedPython.executable, '/nonexistent/stale-python');
       console.log(`THREAD_AUTODETECT_PASSED: ${automatic.detectedPython.version}; no Python input dialog, stale override recovered`);

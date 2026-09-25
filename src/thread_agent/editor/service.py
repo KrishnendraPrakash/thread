@@ -4,9 +4,9 @@ import json
 import sys
 
 from thread_agent.domain.records import AgentError, canonical
-from thread_agent.editor.engine import run
+from thread_agent.editor.engine import Analyst, run
 from thread_agent.editor.proposals import validate
-from thread_agent.providers.ollama.client import Ollama
+from thread_agent.providers.ollama.client import DEFAULT_ENDPOINT, Ollama
 
 
 def main() -> None:
@@ -26,7 +26,9 @@ def main() -> None:
             result = {
                 "models": [
                     item["name"]
-                    for item in Ollama("").inventory()
+                    for item in Ollama(
+                        "", endpoint=request.get("endpoint", DEFAULT_ENDPOINT)
+                    ).inventory()
                     if isinstance(item.get("name"), str)
                     and "cloud" not in item["name"].lower()
                     and not item.get("remote_host")
@@ -36,7 +38,12 @@ def main() -> None:
         elif operation == "validate":
             result = validate(request["root"], request["proposal"])
         elif operation == "run":
-            result = run(request)
+            result = run(
+                request,
+                analyst_factory=lambda model: Analyst(
+                    model, endpoint=request.get("endpoint", DEFAULT_ENDPOINT)
+                ),
+            )
         else:
             raise AgentError("Unknown editor operation.")
         print(canonical({"ok": True, "result": result}), flush=True)

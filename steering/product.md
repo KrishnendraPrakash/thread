@@ -23,7 +23,7 @@ Human-in-the-loop is part of the first version. Present a recommendation with a 
 
 ## Delivery boundaries
 
-M1 uses one local provider and a complete human-decision cycle. Hosted/private adapters arrive at M4B. Dashboard, scheduling, messaging, and delegation follow demonstrated need. Do not introduce a paid verifier, remote embeddings, or paid search as a hidden requirement of the local core.
+M1 uses one local provider and a complete human-decision cycle. Hosted/private adapters arrive at M4B. Dashboard, scheduling, messaging, and delegation follow demonstrated need. Do not introduce a paid verifier, remote embeddings, or paid search as a hidden requirement of the local core. The user requested less developer-side setup: optional confirmed managed local runtime/model installation now reduces manual Ollama configuration on supported Macs; an initial download and adequate local resources are still required.
 
 Local inference and offline operation are distinct: offline rules must cover every model role, tool, and data destination. Product runtime permissions are enforced in code and cannot be granted by retrieved text, skills, or an LLM's own assessment.
 

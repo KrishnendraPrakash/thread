@@ -10,7 +10,7 @@ Thread now has an experimental **VS Code extension** for repository questions, d
 
 ## Start with VS Code
 
-**Using an installed extension:** you need Python 3.9+, local Ollama and an installed text model. Thread detects Python automatically and bundles its Python libraries. See the [extension dependency table](extensions/vscode/README.md#dependencies--what-you-need) for required and bundled components.
+**Using an installed extension:** you need Python 3.9+. Thread detects it automatically and bundles its Python libraries. On Apple Silicon macOS 14+, Thread can download and manage Ollama plus a starter model after your confirmation; no separate Ollama installation or terminal commands are needed. Other supported systems use an existing local Ollama installation. See the [extension dependency table](extensions/vscode/README.md#dependencies--what-you-need) for required and bundled components.
 
 From your checkout, with Python 3.11+, uv, Node.js 22+ and npm installed:
 
@@ -21,7 +21,7 @@ mkdir -p artifacts
 npm run package --prefix extensions/vscode
 ```
 
-In VS Code, choose **Extensions → … → Install from VSIX…** and select `artifacts/thread-agent-0.1.3.vsix`. Open your repository, run **Thread: Setup Local Model**, let Thread detect Python 3.9+ automatically and select an installed local Ollama text model, then open the **Thread** sidebar. Python itself, Ollama and model weights must already be installed; the extension bundles its Python libraries. No project virtual environment or manual Python path is needed for standard installations. Models are not downloaded automatically.
+In VS Code, choose **Extensions → … → Install from VSIX…** and select `artifacts/thread-agent-0.2.0.vsix`. Open your repository, run **Thread: Setup Local Model**, let Thread detect Python 3.9+ automatically and select an installed local Ollama text model, then open the **Thread** sidebar. If local AI is missing on a supported Mac, choose **Set up local AI for me (Recommended)**, select a starter model, and confirm the displayed download. Python itself is still required; no project virtual environment or manual Python path is needed for standard installations. See [managed setup and limits](docs/local-setup.md).
 
 See the [step-by-step guide](docs/vscode.md) for prerequisites, examples, approval options, document formats, storage and troubleshooting. The extension is tested on macOS; Linux uses the same secure backend primitives but its editor UI remains untested. Windows is not supported by the secure backend yet.
 

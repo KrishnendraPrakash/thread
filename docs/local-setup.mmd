@@ -1,0 +1,17 @@
+flowchart TD
+    Start[Run Thread setup] --> Python[Detect Python]
+    Python --> Existing{Local AI ready?}
+    Existing -->|Yes| Select[Select installed model]
+    Existing -->|No| Choice{Human choice}
+    Choice -->|Managed setup| Model[Choose starter; review size and terms]
+    Choice -->|Retry existing| Existing
+    Choice -->|More| Help[Setup guide or custom installed model name]
+    Choice -->|Cancel| Stop[No setup changes]
+    Model --> Confirm{Confirm download?}
+    Confirm -->|No| Stop
+    Confirm -->|Yes| Runtime[Download pinned runtime; verify checksum]
+    Runtime --> Server[Start owned loopback server]
+    Server --> Pull[Download model with progress and cancellation]
+    Pull --> Check[Check local completion capability]
+    Check --> Ready[Save selection; ready for a repository request]
+    Select --> Ready
