@@ -9,7 +9,8 @@ flowchart TD
     Scan --> Retrieve["Lexical excerpts with paths, lines and hashes"]
     Retrieve --> Local["Selected local Ollama model through Python subprocess"]
     Extract --> Local
-    Local --> Validate["Validate schema, source IDs and edit preconditions"]
+    Local --> Validate["Validate 1–12 claims, source IDs and edit preconditions"]
+    Validate -->|Invalid response| Invalid["Reject; suggest narrower question or another installed model"]
     Validate --> Answer["Unverified model analysis with source snapshots"]
     Validate --> Proposal{"Changes proposed?"}
     Proposal -->|Yes| Review["Review exact diffs; alternatives, More, custom text, pause/cancel"]

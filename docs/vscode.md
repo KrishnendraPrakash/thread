@@ -21,14 +21,14 @@ Without uv, create `.venv` and install `python -m pip install -e '.[dev,editor]'
 
 1. Open VS Code → Extensions.
 2. Open the **…** menu → **Install from VSIX…**.
-3. Select `artifacts/thread-agent-0.1.0.vsix` from your checkout.
+3. Select `artifacts/thread-agent-0.1.1.vsix` from your checkout.
 4. Open the repository you want help with and trust it if appropriate.
 5. Open the command palette and run **Thread: Setup Local Model**.
 6. Enter your Python 3.11+ executable. Use an absolute path if VS Code cannot find `python3`; `python3 -c 'import sys; print(sys.executable)'` prints it in your terminal.
 7. Select an installed local Ollama text model. Embedding-only and detected cloud-backed models cannot run analysis. No model is preselected or certified.
 8. Open the **Thread** activity-bar icon, choose a workflow, write your request and click **Send**.
 
-You can alternatively install with `code --install-extension artifacts/thread-agent-0.1.0.vsix` when the VS Code shell command is configured. This is a local VSIX build; the extension is not published to the Marketplace. The repository license decision remains open. For Marketplace distribution, use the [public preview publishing guide](publishing.md); the checked public-package command requires the owner license and matching publisher identity.
+You can alternatively install with `code --install-extension artifacts/thread-agent-0.1.1.vsix` when the VS Code shell command is configured. This builds a local VSIX patch. The owner reported publishing version 0.1.0; a local build does not update the Marketplace listing. The repository license decision remains open. For Marketplace distribution, use the [public preview publishing guide](publishing.md); the checked public-package command requires the owner license and matching publisher identity.
 
 ## Four workflows
 
@@ -82,6 +82,7 @@ The latest completed analysis is stored in VS Code workspace state, including so
 **Stop** / **Thread: Cancel Current Request** terminates the client subprocess and rejects its result. Ollama may briefly finish server-side inference after disconnection. It cannot apply source changes. A task already explicitly launched is a separate VS Code task: stop it with VS Code's task controls.
 
 - **Python cannot start / version too old:** rerun Setup with an absolute Python 3.11+ path.
+- **Model must return 1–12 scoped claims / invalid statement count:** version 0.1.0 allowed empty claims in the generation schema despite rejecting them afterward. Update to 0.1.1, which aligns those constraints. If a model still returns an invalid answer, open the relevant source file and ask a narrower question or select another installed completion model. Invalid answers remain rejected; format validation does not establish accuracy.
 - **Cannot use local Ollama:** start your Ollama server and verify its installed model list. Thread uses `http://127.0.0.1:11434` on the extension host.
 - **Embedding model / cloud model rejected:** choose an installed local text completion model.
 - **Input too large / malformed or truncated output:** use a more focused request or smaller document range; no partial patch is accepted.
@@ -106,7 +107,8 @@ flowchart TD
     Scan --> Retrieve["Lexical excerpts with paths, lines and hashes"]
     Retrieve --> Local["Selected local Ollama model through Python subprocess"]
     Extract --> Local
-    Local --> Validate["Validate schema, source IDs and edit preconditions"]
+    Local --> Validate["Validate 1–12 claims, source IDs and edit preconditions"]
+    Validate -->|Invalid response| Invalid["Reject; suggest narrower question or another installed model"]
     Validate --> Answer["Unverified model analysis with source snapshots"]
     Validate --> Proposal{"Changes proposed?"}
     Proposal -->|Yes| Review["Review exact diffs; alternatives, More, custom text, pause/cancel"]

@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.1 — Claim schema fix
+
+- Require at least one claim in the Ollama generation schema, matching independent validation.
+- Clarify cited statement and uncertainty instructions without allowing fabricated claims.
+- Show the invalid statement count and recovery steps when a model response is rejected.
+
+Validated with deterministic provider-response cases; this patch is not a model accuracy benchmark.
+
 ## 0.1.0 — Preview candidate
 
 - Ask questions across eligible saved repository files with captured source references.

@@ -4,7 +4,7 @@ As of: 2026-09-25. Inspect current files and outputs before relying on this snap
 
 ## Active phase and authorization
 
-**Experimental VS Code developer slice plus the existing field CLI; full milestone gates remain open.** The user explicitly requested a VS Code extension for repository understanding, debugging assistance, writing features and document summaries. That authorizes this interface, backend workflows and approved bounded edits. The user subsequently requested public installation/distribution. Preview publication is now authorized; the owner has supplied Marketplace publisher ID `Krishnendra`; license selection and successful Marketplace upload remain pending. Model downloads and hosted fallback remain outside this scope.
+**Experimental VS Code developer slice plus the existing field CLI; full milestone gates remain open.** The user explicitly requested a VS Code extension for repository understanding, debugging assistance, writing features and document summaries. That authorizes this interface, backend workflows and approved bounded edits. The user subsequently requested public installation/distribution. Preview publication is now authorized; the owner has supplied Marketplace publisher ID `Krishnendra`; the owner subsequently reported successful publication of 0.1.0 and supplied screenshots of its installed commands. License selection remains unresolved. Model downloads and hosted fallback remain outside this scope.
 
 ## Implemented
 
@@ -22,11 +22,11 @@ See [VS Code usage](../docs/vscode.md), [editor Mermaid source](../docs/vscode-w
 
 Local environment: macOS arm64, Python 3.12.13, Node 25.6.1 and VS Code 1.138.0.
 
-- Python deterministic/workflow tests cover the original field behavior plus retrieval/ignore boundaries, linked files, source locators, immutable/stale proposals, mode/citation rejection, UTF-8 ranges, PDF text/blank/malformed cases, DOCX/entity rejection and the subprocess protocol. The runtime suite has 45 tests; three additional release-check tests cover publisher/license requirements and package identity/channel/content checks; it includes synthetic model responses and is not a model benchmark.
+- Python deterministic/workflow tests cover the original field behavior plus retrieval/ignore boundaries, linked files, source locators, immutable/stale proposals, mode/citation rejection, UTF-8 ranges, PDF text/blank/malformed cases, DOCX/entity rejection and the subprocess protocol. The runtime suite has 46 tests; three additional release-check tests cover publisher/license requirements and package identity/channel/content checks; it includes synthetic model responses and is not a model benchmark.
 - Three Node subprocess tests pass: invalid operations, executable failures, cancellation/concurrency. TypeScript compiles.
 - An isolated VS Code Extension Host fixture passed activation, command registration, sidebar activation, macOS path-alias handling, approved native buffer edits, file creation, persisted decision state and duplicate/stale rejection. Approvals were scripted in a temporary synthetic repository, not exercised on user source. Visual layout and every interactive HIL branch have not been manually certified.
 - One live editor smoke case used the existing Ollama 0.34.2 / llama3.1:8b Q4_K_M. It identified an add function's subtraction bug, returned the expected replacement proposal and left the fixture source unchanged. It is one synthetic example, not model certification, repeated-trial accuracy or a benchmark. The earlier CLI field smoke remains documented separately.
-- A local VSIX built with the Python core and dependency notices, excluding node_modules, tests and workspace sources. No Marketplace publication or installation into the user's normal VS Code profile occurred.
+- A local VSIX built with the Python core and dependency notices, excluding node_modules, tests and workspace sources. The owner subsequently reported Marketplace publication of 0.1.0 and supplied screenshots from their normal VS Code profile; publication was not performed by this agent.
 - CI now includes Python checks plus Node compilation/subprocess checks and VSIX packaging. Hosted results for this commit are not yet verified. Linux UI, Windows and remote-host support are not certified.
 
 ## Outstanding limits and next work
@@ -37,7 +37,7 @@ Filesystem/editor checks support ordinary trusted local development, not hostile
 
 ## Repository preferences
 
-Git origin is https://github.com/KrishnendraPrakash/thread.git. The user requests detailed commit messages and pushes for completed work. Check actual Git status before claiming a commit/push. No Marketplace release, model download or license selection has occurred. Public-distribution preparation is implemented: preview metadata, changelog/privacy notes, checked target-specific packaging with SHA-256/provenance, and a manual CI artifact workflow. The configured Marketplace identity is `Krishnendra.thread-agent`; the license and successful authenticated upload remain unresolved.
+Git origin is https://github.com/KrishnendraPrakash/thread.git. The user requests detailed commit messages and pushes for completed work. Check actual Git status before claiming a commit/push. The owner reports 0.1.0 is published. No model download or license selection was performed in this patch task. Public-distribution preparation is implemented: preview metadata, changelog/privacy notes, checked target-specific packaging with SHA-256/provenance, and a manual CI artifact workflow. The configured Marketplace identity is `Krishnendra.thread-agent`; the license remains unresolved; publication of patch 0.1.1 has not been performed.
 
 ## Publication-preparation checks — 2026-09-24
 
@@ -46,3 +46,7 @@ All 48 Python tests and three Node subprocess tests pass; TypeScript, Ruff and d
 ## Publisher correction — 2026-09-25
 
 The owner reported a Marketplace upload rejection because the VSIX used publisher KrishnendraPrakash while the selected Marketplace publisher is Krishnendra. The extension manifest and Extension Host fixture now use Krishnendra / Krishnendra.thread-agent. Rebuilt artifacts/thread-agent-0.1.0.vsix and verified publisher Krishnendra in both its embedded package.json and XML identity. TypeScript compilation, three Node subprocess tests and diff checks passed. GitHub repository URLs retain KrishnendraPrakash/thread. This correction does not select a license or establish that publication succeeded.
+
+## Claim schema correction — 2026-09-25
+
+The owner encountered “Model must return 1–12 scoped claims” during a repository question. Inspection found that the Ollama generation schema permitted an empty claims list while validation rejected it. Version 0.1.1 requires minItems=1, clarifies source-bound claims and uncertainty, and reports invalid counts with recovery steps. Raw output from the reported failure is unavailable, so its exact contents are not established. Validation remains strict; no fabricated claims or automatic retry were introduced. All 49 Python tests, three Node subprocess tests, TypeScript compilation, Ruff and diff checks pass. Built artifacts/thread-agent-0.1.1.vsix and checked its publisher/version and bundled backend. No new live-model trial or Marketplace patch upload was performed.

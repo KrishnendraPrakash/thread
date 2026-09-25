@@ -170,6 +170,50 @@ class EditorTests(unittest.TestCase):
         with self.assertRaises(AgentError):
             validate_answer(answer, [{"id": "S1"}], "ask")
 
+    def test_model_claim_count_contract_and_rejection(self):
+        # Exercise the actual provider payload and independent response validation.
+        for count in (0, 1, 12, 13):
+            with self.subTest(count=count):
+                answer = {
+                    "claims": [{"text": "add subtracts.", "source_ids": ["S1"]}] * count,
+                    "uncertainties": [],
+                    "suggested_checks": [],
+                    "changes": [],
+                }
+                requests = []
+
+                class Client:
+                    def request(self, path, payload):
+                        requests.append(copy.deepcopy(payload))
+                        data = {
+                            "done": True,
+                            "done_reason": "stop",
+                            "message": {"content": json.dumps(answer)},
+                        }
+                        return data, json.dumps(data)
+
+                analyst = Analyst.__new__(Analyst)
+                analyst.client = Client()
+                analyst.model, analyst.template, analyst.trace = "fake", "", []
+                context = {
+                    "mode": "ask",
+                    "question": "Explain add",
+                    "sources": [{"id": "S1", "text": "def add(a, b): return a - b"}],
+                }
+                if count in (0, 13):
+                    with self.assertRaisesRegex(AgentError, f"returned {count} statements"):
+                        analyst.analyze(context)
+                else:
+                    self.assertEqual(analyst.analyze(context), answer)
+                self.assertEqual(len(requests), 1)
+                schema = requests[0]["format"]["properties"]["claims"]
+                self.assertEqual((schema["minItems"], schema["maxItems"]), (1, 12))
+                self.assertEqual(len(analyst.trace), 2)
+                self.assertIn("raw", analyst.trace[1])
+                self.assertEqual(
+                    (self.root / "app.py").read_text(), "def add(a, b):\n    return a - b\n"
+                )
+
     def test_mocked_repository_workflow_is_scoped_and_has_no_effect(self):
         class FakeAnalyst:
             def __init__(self, model):
