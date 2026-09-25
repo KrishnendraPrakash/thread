@@ -27,6 +27,39 @@ export async function run(): Promise<void> {
     get: (key: string) => states.get(key), update: async (key: string, value: any) => { states.set(key, structuredClone(value)); },
   } } as unknown as vscode.ExtensionContext;
   const agent: any = new Agent(context);
+  const config = vscode.workspace.getConfiguration('thread');
+  const previousPython = config.inspect<string>('pythonPath')?.globalValue;
+  const setupAgent: any = new Agent(context);
+  setupAgent.notify = () => {};
+  const calls: { python: string; operation: string }[] = [];
+  setupAgent.backend = {
+    busy: false, cancel: () => {},
+    call: async (selected: string, folder: string, request: any) => {
+      calls.push({ python: selected, operation: request.operation });
+      if (request.operation === 'models') { throw new Error('Fixture: Ollama unavailable'); }
+      return backend.call(selected, folder, request);
+    },
+  };
+  try {
+    await config.update('pythonPath', '/nonexistent/old-python', vscode.ConfigurationTarget.Global);
+    // Simulate stale configuration reads during setup; both calls must use explicit input.
+    setupAgent.setting = () => '/nonexistent/old-python';
+    await assert.rejects(setupAgent.configurePython(python), /Python is ready.*setting was saved.*Ollama unavailable/);
+    assert.deepEqual(calls, [{ python, operation: 'python' }, { python, operation: 'models' }]);
+    assert.equal(config.inspect<string>('pythonPath')?.globalValue, python);
+    const reloaded: any = new Agent(context);
+    try { assert.equal(reloaded.setting('pythonPath', 'python3'), python); }
+    finally { reloaded.dispose(); }
+    await assert.rejects(setupAgent.configurePython('/nonexistent/new-python'), /Cannot start Python/);
+    assert.equal(config.inspect<string>('pythonPath')?.globalValue, python);
+    const count = calls.length;
+    await assert.rejects(setupAgent.configurePython('.venv/bin/python'), /absolute Python/);
+    assert.equal(calls.length, count);
+    console.log('THREAD_SETUP_TESTS_PASSED: exact input despite stale settings, real Python probe, persistence despite missing Ollama, invalid path preserves settings, relative path rejection');
+  } finally {
+    setupAgent.dispose();
+    await config.update('pythonPath', previousPython, vscode.ConfigurationTarget.Global);
+  }
   agent.result = result; agent.notify = () => {};
   agent.call = (request: object) => backend.call(python, extension.extensionPath, request);
   try {

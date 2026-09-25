@@ -18,7 +18,11 @@ def main() -> None:
         if not isinstance(request, dict):
             raise AgentError("Expected a JSON request object.")
         operation = request.get("operation")
-        if operation == "models":
+        if operation == "python":
+            if sys.version_info < (3, 11):  # noqa: UP036 - probe may use an older interpreter
+                raise AgentError("Thread requires Python 3.11 or later.")
+            result = {"executable": sys.executable, "version": sys.version.split()[0]}
+        elif operation == "models":
             result = {
                 "models": [
                     item["name"]

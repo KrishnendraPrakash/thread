@@ -19,7 +19,7 @@ mkdir -p artifacts
 npm run package --prefix extensions/vscode
 ```
 
-In VS Code, choose **Extensions → … → Install from VSIX…** and select `artifacts/thread-agent-0.1.1.vsix`. Open your repository, run **Thread: Setup Local Model**, select your Python executable and an installed local Ollama text model, then open the **Thread** sidebar. Models are not downloaded automatically.
+In VS Code, choose **Extensions → … → Install from VSIX…** and select `artifacts/thread-agent-0.1.2.vsix`. Open your repository, run **Thread: Setup Local Model**, select your Python executable and an installed local Ollama text model, then open the **Thread** sidebar. Models are not downloaded automatically.
 
 See the [step-by-step guide](docs/vscode.md) for prerequisites, examples, approval options, document formats, storage and troubleshooting. The extension is tested on macOS; Linux uses the same secure backend primitives but its editor UI remains untested. Windows is not supported by the secure backend yet.
 

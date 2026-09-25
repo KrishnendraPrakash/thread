@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.2 — Python setup recovery
+
+- Probe the exact Python path entered during setup before saving it; use the same input for the model check instead of rereading settings.
+- Report the detected Python version/path and distinguish missing Ollama from a failed Python launch. Preserve a valid Python setting even when Ollama is unavailable.
+- Reject relative interpreter paths and explain that Thread setup is separate from the Python extension’s interpreter selection.
+
 ## 0.1.1 — Claim schema fix
 
 - Require at least one claim in the Ollama generation schema, matching independent validation.

@@ -314,3 +314,16 @@ class EditorTests(unittest.TestCase):
         )
         self.assertEqual(proc.returncode, 1)
         self.assertFalse(json.loads(proc.stdout)["ok"])
+
+    def test_python_probe_reports_runtime_without_ollama(self):
+        proc = subprocess.run(
+            [sys.executable, "-m", "thread_agent.editor.service"],
+            input=json.dumps({"operation": "python"}) + "\n",
+            text=True,
+            capture_output=True,
+        )
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        result = json.loads(proc.stdout)
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["result"]["executable"], sys.executable)
+        self.assertEqual(result["result"]["version"], sys.version.split()[0])

@@ -58,9 +58,9 @@ export class Agent implements vscode.WebviewViewProvider, vscode.Disposable {
     // A repository cannot choose which Python executable or model to run.
     return vscode.workspace.getConfiguration('thread').inspect<string>(name)?.globalValue ?? fallback;
   }
-  private async call(request: object): Promise<any> {
+  private async call(request: object, python = this.setting('pythonPath', 'python3')): Promise<any> {
     this.trusted(); this.view?.webview.postMessage({ type: 'busy', value: true });
-    try { return await this.backend.call(this.setting('pythonPath', 'python3'), this.context.extensionPath, request); }
+    try { return await this.backend.call(python, this.context.extensionPath, request); }
     finally { this.view?.webview.postMessage({ type: 'busy', value: false }); }
   }
   private async save(): Promise<void> {
@@ -76,14 +76,28 @@ export class Agent implements vscode.WebviewViewProvider, vscode.Disposable {
     this.view?.webview.postMessage({ type: 'notice', message });
     void vscode.window.showErrorMessage('Thread: ' + message);
   }
+  private async configurePython(input: string): Promise<any> {
+    const python = input.trim();
+    if (!python || (!path.isAbsolute(python) && /[\\/]/.test(python))) {
+      throw new Error('Enter an absolute Python executable path, or a command such as python3. Relative .venv paths are not supported.');
+    }
+    // Probe the exact user input before saving it. Do not reread a potentially stale setting.
+    const runtime = await this.call({ operation: 'python' }, python);
+    await vscode.workspace.getConfiguration('thread').update('pythonPath', python, vscode.ConfigurationTarget.Global);
+    this.notify(`Python ${runtime.version} is ready at ${runtime.executable}. Checking local Ollama next.`);
+    try { return await this.call({ operation: 'models' }, python); }
+    catch (error) {
+      throw new Error(`Python is ready at ${runtime.executable}, and its setting was saved. Local model setup failed: ${error instanceof Error ? error.message : String(error)} Install/start Ollama on this machine, then run Thread: Setup Local Model again.`);
+    }
+  }
   async setup(): Promise<void> {
     this.trusted();
+    if (this.backend.busy) { throw new Error('Finish or cancel the current request before changing setup.'); }
     const python = await vscode.window.showInputBox({ title: 'Thread · Python 3.11+',
-      prompt: 'Python executable (an absolute path is recommended). The extension bundles its Python dependencies.',
+      prompt: 'Enter Python on THIS machine (absolute path recommended). This is separate from Python: Select Interpreter. Python itself and Ollama are not bundled.',
       value: this.setting('pythonPath', 'python3'), ignoreFocusOut: true });
     if (!python?.trim()) { return; }
-    await vscode.workspace.getConfiguration('thread').update('pythonPath', python.trim(), vscode.ConfigurationTarget.Global);
-    const result = await this.call({ operation: 'models' });
+    const result = await this.configurePython(python);
     if (!result.models.length) { throw new Error('No local Ollama models found. Install a text model separately, then run Setup again.'); }
     const chosen = await vscode.window.showQuickPick(result.models as string[], {
       title: 'Thread · Choose an installed local Ollama model',

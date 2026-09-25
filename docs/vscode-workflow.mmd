@@ -1,5 +1,8 @@
 flowchart TD
-    User["Developer in trusted VS Code workspace"] --> Mode{"Choose workflow"}
+    Setup["Setup: enter Python executable on this machine"] --> Probe["Probe exact input; save only after Python succeeds"]
+    Probe --> Models["Check Ollama with same executable; report model setup failures separately"]
+    Models --> User["Developer in trusted VS Code workspace"]
+    User --> Mode{"Choose workflow"}
     Mode -->|Repository question| Scan["Scan eligible saved files with gitignore and bounds"]
     Mode -->|Debugging assistance| Diagnostics["Error description and VS Code diagnostics"]
     Diagnostics --> Scan

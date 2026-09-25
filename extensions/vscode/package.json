@@ -2,7 +2,7 @@
   "name": "thread-agent",
   "displayName": "Thread \u2014 Local Developer Agent",
   "description": "Local repository questions, debugging assistance, reviewable feature edits and document summaries.",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "publisher": "Krishnendra",
   "license": "UNLICENSED",
   "repository": {
@@ -112,7 +112,7 @@
     "test:host": "node scripts/test-host.cjs",
     "bundle": "../../.venv/bin/python scripts/bundle.py",
     "vscode:prepublish": "npm run compile && npm run bundle",
-    "package": "vsce package --allow-missing-repository --skip-license --out ../../artifacts/thread-agent-0.1.1.vsix",
+    "package": "vsce package --allow-missing-repository --skip-license --out ../../artifacts/thread-agent-0.1.2.vsix",
     "release:check": "../../.venv/bin/python scripts/release.py check",
     "package:preview": "../../.venv/bin/python scripts/release.py package"
   },
