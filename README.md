@@ -10,6 +10,8 @@ Thread now has an experimental **VS Code extension** for repository questions, d
 
 ## Start with VS Code
 
+**Using an installed extension:** you need Python 3.9+, local Ollama and an installed text model. Thread detects Python automatically and bundles its Python libraries. See the [extension dependency table](extensions/vscode/README.md#dependencies--what-you-need) for required and bundled components.
+
 From your checkout, with Python 3.11+, uv, Node.js 22+ and npm installed:
 
 ```bash

@@ -35,4 +35,6 @@ Updated: 2026-09-22. The experimental field CLI and VS Code developer slice are 
 
 Use detailed commit messages for this project, as requested by the user. Include a concise subject and a body explaining the problem, changes, validation performed, and material limitations. Apply this to every commit prepared for a push; the preference does not itself authorize unrelated changes or publication.
 
+For every delivered project update, update README.md to reflect the change and keep extensions/vscode/README.md aligned whenever extension usage, setup, dependencies or limits are affected. The latter supplies the Marketplace Details page. Include relevant README updates in the same descriptive commit as the change, then push completed authorized work and verify the remote commit. Do not claim the Marketplace page changed until the updated extension is published.
+
 Explain the concrete change and why it matters. Keep the user informed during longer work. Respect existing authorization and reserve questions for material missing information. Preserve unrelated work; avoid unnecessary rewrites or formatting churn. End with the result, actual validation, and unresolved limits.
