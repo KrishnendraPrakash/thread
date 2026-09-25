@@ -35,6 +35,23 @@ jobs:
           thread-agent --version
           thread-agent status --json
 
+  editor-compatibility:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.9', '3.10', '3.11', '3.12', '3.13', '3.14']
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install bundled editor libraries (not the separate field CLI)
+        run: python -m pip install pathspec==0.12.1 pypdf==6.19.0
+      - name: Exercise editor backend on each supported Python version
+        env:
+          PYTHONPATH: src
+        run: python -m unittest tests.editor.test_editor -v
+
   vscode:
     runs-on: ubuntu-latest
     steps:

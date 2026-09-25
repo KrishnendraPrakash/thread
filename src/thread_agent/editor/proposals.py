@@ -1,5 +1,7 @@
 """Deterministic, snapshot-bound edit proposals; this module never writes source files."""
 
+from __future__ import annotations
+
 from pathlib import Path
 
 from thread_agent.domain.records import AgentError, canonical, digest

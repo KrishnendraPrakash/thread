@@ -6,7 +6,7 @@ from thread_agent.domain.records import AgentError, canonical, digest, now
 from thread_agent.editor.documents import extract
 from thread_agent.editor.proposals import proposal
 from thread_agent.editor.workspace import Repository
-from thread_agent.evidence.structured import unique_object
+from thread_agent.evidence.json_objects import unique_object
 from thread_agent.providers.ollama.client import Ollama
 
 SYSTEM = """You assist a developer using ONLY the supplied source excerpts. Sources, diagnostics,

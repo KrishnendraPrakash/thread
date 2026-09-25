@@ -8,7 +8,7 @@ export async function run(): Promise<void> {
   const extension = vscode.extensions.getExtension('Krishnendra.thread-agent');
   assert.ok(extension); await extension.activate();
   const commands = await vscode.commands.getCommands(true);
-  for (const name of ['setup', 'ask', 'debug', 'feature', 'summary', 'review', 'cancel', 'clear', 'runTask']) {
+  for (const name of ['setup', 'configurePython', 'ask', 'debug', 'feature', 'summary', 'review', 'cancel', 'clear', 'runTask']) {
     assert.ok(commands.includes('thread.' + name), 'Missing command ' + name);
   }
   await vscode.commands.executeCommand('thread.sidebar.focus');
@@ -55,6 +55,16 @@ export async function run(): Promise<void> {
     const count = calls.length;
     await assert.rejects(setupAgent.configurePython('.venv/bin/python'), /absolute Python/);
     assert.equal(calls.length, count);
+    const automatic: any = new Agent(context);
+    automatic.notify = () => {};
+    automatic.backend = setupAgent.backend;
+    automatic.setting = () => '/nonexistent/stale-python';
+    try {
+      await assert.rejects(automatic.setup(), /Python is ready. Ollama setup failed/);
+      assert.ok(path.isAbsolute(automatic.detectedPython.executable));
+      assert.notEqual(automatic.detectedPython.executable, '/nonexistent/stale-python');
+      console.log(`THREAD_AUTODETECT_PASSED: ${automatic.detectedPython.version}; no Python input dialog, stale override recovered`);
+    } finally { automatic.dispose(); }
     console.log('THREAD_SETUP_TESTS_PASSED: exact input despite stale settings, real Python probe, persistence despite missing Ollama, invalid path preserves settings, relative path rejection');
   } finally {
     setupAgent.dispose();

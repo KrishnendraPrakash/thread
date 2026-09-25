@@ -3,6 +3,7 @@ import * as path from 'node:path';
 import { randomBytes } from 'node:crypto';
 import { realpathSync } from 'node:fs';
 import { Backend } from './backend';
+import { discoverPython, pythonCandidates, PythonRuntime } from './python';
 import { Result, Mode, FileChange } from './types';
 
 class Snapshots implements vscode.TextDocumentContentProvider {
@@ -20,7 +21,8 @@ export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(agent, vscode.workspace.registerTextDocumentContentProvider('thread-snapshot', agent.snapshots),
     vscode.window.registerWebviewViewProvider('thread.sidebar', agent));
   const commands: Record<string, () => unknown> = {
-    setup: () => agent.setup(), ask: () => agent.request('ask'), debug: () => agent.request('debug'),
+    setup: () => agent.setup(), configurePython: () => agent.configurePythonManually(),
+    ask: () => agent.request('ask'), debug: () => agent.request('debug'),
     feature: () => agent.request('feature'), summary: () => agent.request('summary'),
     review: () => agent.review(), cancel: () => agent.cancel(), clear: () => agent.clear(),
     runTask: () => agent.runTask(),
@@ -35,6 +37,9 @@ export function activate(context: vscode.ExtensionContext): void {
 export class Agent implements vscode.WebviewViewProvider, vscode.Disposable {
   readonly snapshots = new Snapshots();
   private backend = new Backend();
+  private detectedPython?: PythonRuntime & { setting: string };
+  private discovering = false;
+  private discoveryCancelled = false;
   private view?: vscode.WebviewView;
   private result?: Result;
   private reviewing = false;
@@ -49,7 +54,7 @@ export class Agent implements vscode.WebviewViewProvider, vscode.Disposable {
       }
     });
   }
-  dispose(): void { this.backend.cancel(); this.taskListener.dispose(); }
+  dispose(): void { this.cancel(); this.taskListener.dispose(); }
   private trusted(): void {
     if (!vscode.workspace.isTrusted) { throw new Error('Trust this workspace before using Thread.'); }
     if (process.platform === 'win32') { throw new Error('This experimental backend currently supports macOS and Linux.'); }
@@ -58,9 +63,34 @@ export class Agent implements vscode.WebviewViewProvider, vscode.Disposable {
     // A repository cannot choose which Python executable or model to run.
     return vscode.workspace.getConfiguration('thread').inspect<string>(name)?.globalValue ?? fallback;
   }
-  private async call(request: object, python = this.setting('pythonPath', 'python3')): Promise<any> {
+  private async resolvePython(): Promise<PythonRuntime> {
+    const setting = this.setting('pythonPath', '').trim();
+    if (this.detectedPython?.setting === setting) { return this.detectedPython; }
+    if (this.discovering) { throw new Error('Python discovery is already running.'); }
+    this.discovering = true; this.discoveryCancelled = false;
+    try {
+      const candidates = pythonCandidates(process.env.PATH ?? '',
+        (vscode.workspace.workspaceFolders ?? []).map(folder => folder.uri.fsPath),
+        ['/opt/homebrew/bin', '/usr/local/bin', '/usr/bin']);
+      // Only a user-level absolute override can opt in to a repository-local executable.
+      if (setting && path.isAbsolute(setting)) { candidates.unshift(setting); }
+      else if (setting && !/[\\/]/.test(setting)) {
+        candidates.sort((a, b) => Number(path.basename(b) === setting) - Number(path.basename(a) === setting));
+      }
+      const runtime = await discoverPython(candidates,
+        python => this.backend.call(python, this.context.extensionPath, { operation: 'python' }, 5000),
+        () => this.discoveryCancelled);
+      if (this.discoveryCancelled) { throw new Error('Python discovery cancelled.'); }
+      this.detectedPython = { ...runtime, setting };
+      if (setting && path.isAbsolute(setting) && runtime.executable !== setting) {
+        this.notify(`Configured Python was unavailable; using detected Python ${runtime.version} at ${runtime.executable}.`);
+      }
+      return runtime;
+    } finally { this.discovering = false; }
+  }
+  private async call(request: object, python?: string): Promise<any> {
     this.trusted(); this.view?.webview.postMessage({ type: 'busy', value: true });
-    try { return await this.backend.call(python, this.context.extensionPath, request); }
+    try { return await this.backend.call(python ?? (await this.resolvePython()).executable, this.context.extensionPath, request); }
     finally { this.view?.webview.postMessage({ type: 'busy', value: false }); }
   }
   private async save(): Promise<void> {
@@ -84,6 +114,7 @@ export class Agent implements vscode.WebviewViewProvider, vscode.Disposable {
     // Probe the exact user input before saving it. Do not reread a potentially stale setting.
     const runtime = await this.call({ operation: 'python' }, python);
     await vscode.workspace.getConfiguration('thread').update('pythonPath', python, vscode.ConfigurationTarget.Global);
+    this.detectedPython = { ...runtime, setting: python };
     this.notify(`Python ${runtime.version} is ready at ${runtime.executable}. Checking local Ollama next.`);
     try { return await this.call({ operation: 'models' }, python); }
     catch (error) {
@@ -92,12 +123,28 @@ export class Agent implements vscode.WebviewViewProvider, vscode.Disposable {
   }
   async setup(): Promise<void> {
     this.trusted();
-    if (this.backend.busy) { throw new Error('Finish or cancel the current request before changing setup.'); }
-    const python = await vscode.window.showInputBox({ title: 'Thread · Python 3.11+',
+    if (this.backend.busy || this.discovering) { throw new Error('Finish or cancel the current request before changing setup.'); }
+    this.detectedPython = undefined;
+    const runtime = await this.resolvePython();
+    this.notify(`Detected Python ${runtime.version} at ${runtime.executable}. No Python path configuration is needed.`);
+    let result: any;
+    try { result = await this.call({ operation: 'models' }, runtime.executable); }
+    catch (error) {
+      throw new Error(`Python is ready. Ollama setup failed: ${error instanceof Error ? error.message : String(error)} Install/start Ollama and an installed text model, then run Thread: Setup Local Model again.`);
+    }
+    await this.chooseModel(result);
+  }
+  async configurePythonManually(): Promise<void> {
+    this.trusted();
+    if (this.backend.busy || this.discovering) { throw new Error('Finish or cancel the current request before changing setup.'); }
+    const python = await vscode.window.showInputBox({ title: 'Thread · Python 3.9+ (advanced override)',
       prompt: 'Enter Python on THIS machine (absolute path recommended). This is separate from Python: Select Interpreter. Python itself and Ollama are not bundled.',
-      value: this.setting('pythonPath', 'python3'), ignoreFocusOut: true });
+      value: this.setting('pythonPath', '') || this.detectedPython?.executable || 'python3', ignoreFocusOut: true });
     if (!python?.trim()) { return; }
     const result = await this.configurePython(python);
+    await this.chooseModel(result);
+  }
+  private async chooseModel(result: any): Promise<void> {
     if (!result.models.length) { throw new Error('No local Ollama models found. Install a text model separately, then run Setup again.'); }
     const chosen = await vscode.window.showQuickPick(result.models as string[], {
       title: 'Thread · Choose an installed local Ollama model',
@@ -119,7 +166,7 @@ export class Agent implements vscode.WebviewViewProvider, vscode.Disposable {
   }
   async request(mode: Mode, supplied?: string): Promise<void> {
     this.trusted();
-    if (this.backend.busy || this.reviewing) { throw new Error('Finish or cancel the current request/review first.'); }
+    if (this.backend.busy || this.discovering || this.reviewing) { throw new Error('Finish or cancel the current request/review first.'); }
     if (this.result?.proposal && this.result.decision === 'pending') {
       const replace = await vscode.window.showWarningMessage('Starting a new request replaces the saved pending proposal.', { modal: true }, 'Replace proposal');
       if (replace !== 'Replace proposal') { return; }
@@ -158,7 +205,7 @@ export class Agent implements vscode.WebviewViewProvider, vscode.Disposable {
     await this.save();
     this.notify(this.result.proposal ? 'Analysis ready. Review the proposed diffs before applying changes.' : 'Analysis ready in the Thread sidebar.');
   }
-  cancel(): void { this.backend.cancel(); }
+  cancel(): void { this.discoveryCancelled = true; this.backend.cancel(); }
   async clear(): Promise<void> {
     if (this.reviewing) { throw new Error('Finish the current review first.'); }
     this.cancel(); this.result = undefined; this.snapshots.clear(); await this.save();

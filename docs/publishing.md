@@ -1,6 +1,6 @@
 # Publish the Thread VS Code preview
 
-A Marketplace listing makes Thread searchable and installable from VS Code. Thread does not need a hosted server: each user runs Python 3.11+, local Ollama and their selected text model. A GitHub code push alone does not create a Marketplace listing.
+A Marketplace listing makes Thread searchable and installable from VS Code. Thread does not need a hosted server: each user runs automatically detected Python 3.9+, local Ollama and their selected text model. A GitHub code push alone does not create a Marketplace listing.
 
 The owner has requested public distribution. The release candidate remains an experimental preview; full quality/M1/M6 gates are incomplete. Marketplace account setup and the project's license decision must be completed before this repository's public-package command will proceed. The publisher ID is `Krishnendra`, supplied by the owner from the Marketplace upload screen. The extension ID is `Krishnendra.thread-agent`; this is separate from the GitHub repository owner `KrishnendraPrakash`.
 
@@ -30,9 +30,9 @@ npm run package:preview --prefix extensions/vscode -- --publisher YOUR_PUBLISHER
 
 Replace `YOUR_PUBLISHER_ID` with the actual ID; do not use that literal placeholder. The check verifies local configuration, not Marketplace identity ownership. The packaging command uses the pre-release channel, checks manifest/target/license consistency and dependency notices, and writes:
 
-- `artifacts/thread-agent-0.1.2-darwin-arm64.vsix`
-- `artifacts/thread-agent-0.1.2-darwin-arm64.vsix.sha256`
-- `artifacts/thread-agent-0.1.2-darwin-arm64.release.json`
+- `artifacts/thread-agent-0.1.3-darwin-arm64.vsix`
+- `artifacts/thread-agent-0.1.3-darwin-arm64.vsix.sha256`
+- `artifacts/thread-agent-0.1.3-darwin-arm64.release.json`
 
 Versioned names follow package.json if the version changes. The release record contains the commit, dirty-worktree indicator, package identity and SHA-256. Build from a clean checkout for an attributable public artifact. Test the **exact packaged VSIX** in a fresh VS Code profile, including local setup and the four workflows, before upload. Install it through **Extensions → … → Install from VSIX…**. Do not substitute the older generic local-development VSIX for this checked release package.
 
@@ -55,7 +55,7 @@ Only after that verification should README installation instructions point users
 The checked package can also be published with the repository's installed vsce:
 
 ```bash
-extensions/vscode/node_modules/.bin/vsce publish --azure-credential --packagePath artifacts/thread-agent-0.1.2-darwin-arm64.vsix --pre-release
+extensions/vscode/node_modules/.bin/vsce publish --azure-credential --packagePath artifacts/thread-agent-0.1.3-darwin-arm64.vsix --pre-release
 ```
 
 This requires a configured Microsoft Entra identity with permission on the publisher. It is not configured by this repository. The [official publishing guide](https://code.visualstudio.com/api/working-with-extensions/publishing-extension) documents Microsoft Entra authentication and the browser-upload route. It currently states that global Azure DevOps PATs retire on December 1, 2026; do not build a new long-term publishing pipeline around copied PATs. Do not pass tokens in command arguments or commit them.

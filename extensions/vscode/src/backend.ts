@@ -6,7 +6,7 @@ export class Backend {
   private cancelled = false;
   get busy(): boolean { return this.child !== undefined; }
   cancel(): void { this.cancelled = true; this.child?.kill('SIGTERM'); }
-  async call(python: string, extensionPath: string, request: object): Promise<any> {
+  async call(python: string, extensionPath: string, request: object, timeoutMs = 650_000): Promise<any> {
     if (this.child) { throw new Error('A request is already running. Cancel it or wait.'); }
     this.cancelled = false;
     return new Promise((resolve, reject) => {
@@ -14,7 +14,7 @@ export class Backend {
         { cwd: extensionPath, shell: false, env: { ...process.env, PYTHONPATH: '', PYTHONSTARTUP: '' } });
       this.child = child;
       let output = '', errors = '', bytes = 0, settled = false;
-      const timer = setTimeout(() => { this.cancelled = true; child.kill('SIGKILL'); }, 650_000);
+      const timer = setTimeout(() => { this.cancelled = true; child.kill('SIGKILL'); }, timeoutMs);
       const finish = (error?: Error, value?: unknown) => {
         if (settled) { return; } settled = true; clearTimeout(timer); this.child = undefined;
         error ? reject(error) : resolve(value);
@@ -34,7 +34,7 @@ export class Backend {
           const envelope = JSON.parse(output);
           if (!envelope.ok || code !== 0) { finish(new Error(envelope.error || errors || 'Backend failed.')); }
           else { finish(undefined, envelope.result); }
-        } catch { finish(new Error(errors || 'Python returned an invalid response. Check Python 3.11+ and the bundled backend.')); }
+        } catch { finish(new Error(errors || 'Python returned an invalid response. Check Python 3.9+ and the bundled backend.')); }
       });
       child.stdin.end(JSON.stringify(request) + '\n');
     });

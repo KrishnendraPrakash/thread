@@ -6,6 +6,8 @@ Updated: 2026-09-24. Basis: the user's planning instructions, subsequent scaffol
 
 Build a public, reusable personal AI agent that completes useful tasks, makes important conclusions checkable, and gives the human meaningful choices. The main access path runs locally without a paid LLM API account. Optional hosted free tiers, paid APIs using the user's keys, and private on-premises endpoints use the same runtime.
 
+The user requested automatic Python detection and visible extension dependencies: the installed editor should not require a manual interpreter path for standard installations. Python 3.9+ is the implemented editor compatibility floor, not a promise to support all historical Python 3 versions.
+
 The first application is one user per installation, with a Python core, VS Code developer interface, a separate field CLI with SQLite persistence, and scoped local tools. Keep the design understandable and portable; publish support claims only for configurations actually tested. A public repository does not imply a hosted multi-tenant service.
 
 Accuracy includes answering the intended question, using applicable evidence, preserving scope, covering the requested result, and checking actual action outcomes. Do not promise perfect accuracy or equate a passing schema/citation check with truth.

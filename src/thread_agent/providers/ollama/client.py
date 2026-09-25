@@ -1,5 +1,7 @@
 """Explicit local Ollama access for suggesting a field, never generating its value."""
 
+from __future__ import annotations
+
 import http.client
 import json
 import time
@@ -7,7 +9,7 @@ from collections.abc import Callable
 from urllib.parse import urlsplit
 
 from thread_agent.domain.records import AgentError, canonical, digest
-from thread_agent.evidence.structured import unique_object
+from thread_agent.evidence.json_objects import unique_object
 
 DEFAULT_ENDPOINT = "http://127.0.0.1:11434"
 MAX_RESPONSE = 1_048_576

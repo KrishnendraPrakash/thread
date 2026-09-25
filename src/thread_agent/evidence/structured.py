@@ -6,17 +6,9 @@ import tomllib
 from datetime import date, datetime, time
 
 from thread_agent.domain.records import AgentError
+from thread_agent.evidence.json_objects import unique_object
 
 MAX_FIELDS = 64
-
-
-def unique_object(pairs: list[tuple[str, object]]) -> dict:
-    result = {}
-    for key, value in pairs:
-        if key in result:
-            raise AgentError("Duplicate JSON keys are ambiguous; correct the source first.")
-        result[key] = value
-    return result
 
 
 def fields(text: str, path: str) -> dict[str, object]:

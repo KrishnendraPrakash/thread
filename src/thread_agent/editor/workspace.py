@@ -1,5 +1,7 @@
 """Repository discovery and bounded text retrieval without executing repository code."""
 
+from __future__ import annotations
+
 import math
 import os
 import re

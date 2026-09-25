@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.3 — Automatic Python setup and public dependencies
+
+- Detect installed Python automatically; recover from stale paths without the normal interpreter input prompt. Manual configuration is an advanced fallback.
+- Support Python 3.9+ for the bundled editor runtime; the separate field CLI and build tooling still require 3.11+.
+- Bound and allow cancellation of discovery; exclude repository executables, relative PATH entries and workspace symlink aliases.
+- Show prerequisites, bundled dependency versions, setup and troubleshooting in the extension Details page.
+- Compatibility checks passed on Python 3.9.6, 3.12.13 and 3.14.7, plus an isolated macOS VS Code setup test. These are not model accuracy benchmarks.
+
 ## 0.1.2 — Python setup recovery
 
 - Probe the exact Python path entered during setup before saving it; use the same input for the model check instead of rereading settings.

@@ -113,3 +113,9 @@ Text, PDF and DOCX cover common documents with explicit extraction limits. Large
 ## Public preview distribution — 2026-09-24
 
 The owner requested that others can install Thread publicly. This authorizes publication work, but does not supply a license grant or Marketplace account identity. The first publication path uses a clearly marked pre-release VSIX and manual Marketplace upload, avoiding a new long-lived token dependency. Package checks bind publisher/version/license/target/channel and retain dependency notices and a checksum/provenance sidecar. A manual Actions workflow builds artifacts with read-only repository permission and no publishing secrets. These packaging checks do not certify model accuracy or satisfy M6.
+
+## Automatic Python setup and compatibility — 2026-09-25
+
+The user requested a Python 3 extension that does not require each developer to configure an interpreter path, with dependencies visible in the extension details. The installed editor now supports Python 3.9+, matching the bundled pypdf requirement, and detects an existing interpreter through bounded probes. It keeps manual configuration as an advanced fallback. Shared strict JSON parsing is separated from the field CLI’s TOML parser so the editor no longer imports Python 3.11-only tomllib; shared timestamps use timezone.utc and editor union annotations are postponed. The separately packaged field CLI and build tooling remain Python 3.11+.
+
+Discovery avoids repository-supplied executables, relative PATH entries and aliases into the workspace. Explicit user overrides can select a project virtual environment. No interpreter, package or model is silently downloaded, and no project environment is modified. A newer maintained Python is preferable to the compatibility floor; supporting Python 3.9 does not imply supporting every historical Python 3 release. The Marketplace README distinguishes installed prerequisites from bundled libraries.

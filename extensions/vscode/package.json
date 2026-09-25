@@ -2,7 +2,7 @@
   "name": "thread-agent",
   "displayName": "Thread \u2014 Local Developer Agent",
   "description": "Local repository questions, debugging assistance, reviewable feature edits and document summaries.",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "publisher": "Krishnendra",
   "license": "UNLICENSED",
   "repository": {
@@ -68,6 +68,10 @@
       {
         "command": "thread.runTask",
         "title": "Thread: Run a Workspace Task"
+      },
+      {
+        "command": "thread.configurePython",
+        "title": "Thread: Configure Python (Advanced)"
       }
     ],
     "viewsContainers": {
@@ -93,9 +97,9 @@
       "properties": {
         "thread.pythonPath": {
           "type": "string",
-          "default": "python3",
+          "default": "",
           "scope": "machine",
-          "description": "Python 3.11+ executable. Set an absolute path if VS Code cannot find python3. Workspace overrides are ignored."
+          "description": "Optional Python 3.9+ override. Empty automatically detects Python on this machine. No project environment or pip install is needed. Workspace overrides are ignored."
         },
         "thread.model": {
           "type": "string",
@@ -112,7 +116,7 @@
     "test:host": "node scripts/test-host.cjs",
     "bundle": "../../.venv/bin/python scripts/bundle.py",
     "vscode:prepublish": "npm run compile && npm run bundle",
-    "package": "vsce package --allow-missing-repository --skip-license --out ../../artifacts/thread-agent-0.1.2.vsix",
+    "package": "vsce package --allow-missing-repository --skip-license --out ../../artifacts/thread-agent-0.1.3.vsix",
     "release:check": "../../.venv/bin/python scripts/release.py check",
     "package:preview": "../../.venv/bin/python scripts/release.py package"
   },

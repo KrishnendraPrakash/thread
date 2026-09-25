@@ -19,8 +19,8 @@ def main() -> None:
             raise AgentError("Expected a JSON request object.")
         operation = request.get("operation")
         if operation == "python":
-            if sys.version_info < (3, 11):  # noqa: UP036 - probe may use an older interpreter
-                raise AgentError("Thread requires Python 3.11 or later.")
+            if sys.version_info < (3, 9):  # noqa: UP036 - probe may use an older interpreter
+                raise AgentError("Thread requires Python 3.9 or later.")
             result = {"executable": sys.executable, "version": sys.version.split()[0]}
         elif operation == "models":
             result = {

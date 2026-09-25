@@ -6,7 +6,7 @@ Thread itself has no analytics service, advertising, account system, hosted back
 
 Repository requests inspect eligible saved workspace files. Root/nested .gitignore rules and path/size/type exclusions apply. Selected source excerpts, your request, and—for diagnosis—VS Code diagnostics may enter the model prompt. Secret-name exclusions are not a general secret scanner. Summaries read the document you explicitly choose, including documents outside the workspace when selected by you.
 
-The Python executable and model name are user-level machine settings; workspace overrides are ignored. No model weights or API keys are distributed in this extension.
+Python is discovered from absolute PATH directories and common local installation locations using bounded subprocess probes. Executables inside the inspected workspace (including symlink aliases) are excluded from automatic discovery. An optional explicit user-level Python override can select a project environment; the model name is also a user-level machine setting. Workspace overrides are ignored. No model weights or API keys are distributed in this extension.
 
 ## Local storage
 

@@ -3,7 +3,7 @@
 import hashlib
 import json
 from dataclasses import asdict, dataclass
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 
 
 class AgentError(Exception):
@@ -21,7 +21,7 @@ def digest(data: bytes) -> str:
 
 
 def now() -> str:
-    return datetime.now(UTC).isoformat()
+    return datetime.now(timezone.utc).isoformat()
 
 
 @dataclass(frozen=True)
