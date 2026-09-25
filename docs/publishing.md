@@ -2,7 +2,7 @@
 
 A Marketplace listing makes Thread searchable and installable from VS Code. Thread does not need a hosted server: each user runs Python 3.11+, local Ollama and their selected text model. A GitHub code push alone does not create a Marketplace listing.
 
-The owner has requested public distribution. The release candidate remains an experimental preview; full quality/M1/M6 gates are incomplete. Marketplace account setup and the project's license decision must be completed before this repository's public-package command will proceed. The existing publisher value in package.json is an unverified placeholder, not proof of ownership.
+The owner has requested public distribution. The release candidate remains an experimental preview; full quality/M1/M6 gates are incomplete. Marketplace account setup and the project's license decision must be completed before this repository's public-package command will proceed. The publisher ID is `Krishnendra`, supplied by the owner from the Marketplace upload screen. The extension ID is `Krishnendra.thread-agent`; this is separate from the GitHub repository owner `KrishnendraPrakash`.
 
 ## One-time owner setup
 

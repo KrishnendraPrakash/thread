@@ -5,7 +5,7 @@ import { Agent, contained } from '../extension';
 import { Backend } from '../backend';
 
 export async function run(): Promise<void> {
-  const extension = vscode.extensions.getExtension('KrishnendraPrakash.thread-agent');
+  const extension = vscode.extensions.getExtension('Krishnendra.thread-agent');
   assert.ok(extension); await extension.activate();
   const commands = await vscode.commands.getCommands(true);
   for (const name of ['setup', 'ask', 'debug', 'feature', 'summary', 'review', 'cancel', 'clear', 'runTask']) {

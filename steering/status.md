@@ -1,10 +1,10 @@
 # Current project status
 
-As of: 2026-09-24. Inspect current files and outputs before relying on this snapshot.
+As of: 2026-09-25. Inspect current files and outputs before relying on this snapshot.
 
 ## Active phase and authorization
 
-**Experimental VS Code developer slice plus the existing field CLI; full milestone gates remain open.** The user explicitly requested a VS Code extension for repository understanding, debugging assistance, writing features and document summaries. That authorizes this interface, backend workflows and approved bounded edits. The user subsequently requested public installation/distribution. Preview publication is now authorized; owner license selection, a confirmed Marketplace publisher and authenticated upload remain pending. Model downloads and hosted fallback remain outside this scope.
+**Experimental VS Code developer slice plus the existing field CLI; full milestone gates remain open.** The user explicitly requested a VS Code extension for repository understanding, debugging assistance, writing features and document summaries. That authorizes this interface, backend workflows and approved bounded edits. The user subsequently requested public installation/distribution. Preview publication is now authorized; the owner has supplied Marketplace publisher ID `Krishnendra`; license selection and successful Marketplace upload remain pending. Model downloads and hosted fallback remain outside this scope.
 
 ## Implemented
 
@@ -37,8 +37,12 @@ Filesystem/editor checks support ordinary trusted local development, not hostile
 
 ## Repository preferences
 
-Git origin is https://github.com/KrishnendraPrakash/thread.git. The user requests detailed commit messages and pushes for completed work. Check actual Git status before claiming a commit/push. No Marketplace release, model download or license selection has occurred. Public-distribution preparation is implemented: preview metadata, changelog/privacy notes, checked target-specific packaging with SHA-256/provenance, and a manual CI artifact workflow. It cannot publish until owner identity/license/authentication are resolved.
+Git origin is https://github.com/KrishnendraPrakash/thread.git. The user requests detailed commit messages and pushes for completed work. Check actual Git status before claiming a commit/push. No Marketplace release, model download or license selection has occurred. Public-distribution preparation is implemented: preview metadata, changelog/privacy notes, checked target-specific packaging with SHA-256/provenance, and a manual CI artifact workflow. The configured Marketplace identity is `Krishnendra.thread-agent`; the license and successful authenticated upload remain unresolved.
 
 ## Publication-preparation checks — 2026-09-24
 
 All 48 Python tests and three Node subprocess tests pass; TypeScript, Ruff and diff checks pass. The local development VSIX builds with preview metadata, changelog and privacy notes. The strict public-package check stops as intended while the license is unset; no public-package or publisher-authentication success is claimed. Checked 131 local documentation link targets. The prior temporary Mermaid parser dependencies were unavailable, so the new publication diagram has not had a fresh automated parse. The new manual preview workflow has not run on GitHub yet.
+
+## Publisher correction — 2026-09-25
+
+The owner reported a Marketplace upload rejection because the VSIX used publisher KrishnendraPrakash while the selected Marketplace publisher is Krishnendra. The extension manifest and Extension Host fixture now use Krishnendra / Krishnendra.thread-agent. Rebuilt artifacts/thread-agent-0.1.0.vsix and verified publisher Krishnendra in both its embedded package.json and XML identity. TypeScript compilation, three Node subprocess tests and diff checks passed. GitHub repository URLs retain KrishnendraPrakash/thread. This correction does not select a license or establish that publication succeeded.
