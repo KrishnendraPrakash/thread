@@ -1,0 +1,189 @@
+# INACTIVE DESIGN DRAFT: not under .github/workflows and not executable by Actions.
+# Requires a reviewed six-target native-release-candidates builder, complete
+# release gates, approved Azure federation and protected environment setup.
+name: Publish approved Thread preview
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Exact manifest version (must be newer than published 0.2.0)
+        required: true
+        type: string
+      candidate_run_id:
+        description: Successful reviewed native-release-candidates run for this exact commit
+        required: true
+        type: string
+      recovery_run_id:
+        description: Prior publishing run whose exact-release ledger should be resumed
+        required: false
+        type: string
+      recovery_attempt:
+        description: Exact prior run attempt containing the recovery ledger
+        required: false
+        type: string
+      publish:
+        description: Request Marketplace upload after protected environment approval
+        required: true
+        default: false
+        type: boolean
+permissions:
+  contents: read
+concurrency:
+  group: thread-marketplace-release
+  cancel-in-progress: false
+jobs:
+  verify:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: '3.12'
+      - name: Fail before fetching candidates or requesting an identity
+        run: python extensions/vscode/scripts/marketplace_preflight.py
+      - name: Verify the candidate builder and exact successful commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CANDIDATE_RUN: ${{ inputs.candidate_run_id }}
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os, urllib.request
+          run = os.environ['CANDIDATE_RUN']
+          if not run.isascii() or not run.isdecimal():
+              raise SystemExit('Candidate run ID must be numeric')
+          repo = os.environ['GITHUB_REPOSITORY']
+          request = urllib.request.Request(
+              f'https://api.github.com/repos/{repo}/actions/runs/{run}',
+              headers={'Authorization': 'Bearer ' + os.environ['GH_TOKEN']})
+          data = json.load(urllib.request.urlopen(request, timeout=30))
+          if (data['repository']['full_name'] != repo
+                  or data['head_sha'] != os.environ['GITHUB_SHA']
+                  or data['status'] != 'completed' or data['conclusion'] != 'success'
+                  or data['path'] != '.github/workflows/native-release-candidates.yml'):
+              raise SystemExit('Expected successful reviewed native builder at this exact commit')
+          PY
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          name: thread-release-inventory
+          path: candidates
+          run-id: ${{ inputs.candidate_run_id }}
+          github-token: ${{ github.token }}
+      - name: Verify exact native VSIXs, companion fingerprints and same-commit gates
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
+        run: python extensions/vscode/scripts/marketplace_preflight.py --artifacts candidates --commit "$GITHUB_SHA" --version "$RELEASE_VERSION"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: verified-thread-release
+          path: candidates/*
+          if-no-files-found: error
+          retention-days: 7
+  publish:
+    needs: verify
+    if: inputs.publish && github.ref == 'refs/heads/main'
+    environment: marketplace-publish
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      actions: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: '22'
+          package-manager-cache: false
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          name: verified-thread-release
+          path: candidates
+      - name: Validate recovery run and latest completed attempt before restoring a ledger
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RECOVERY_RUN: ${{ inputs.recovery_run_id }}
+          RECOVERY_ATTEMPT: ${{ inputs.recovery_attempt }}
+        shell: bash
+        run: |
+          python - <<'PYTHON'
+          import json, os, urllib.request
+          run, attempt = os.environ['RECOVERY_RUN'], os.environ['RECOVERY_ATTEMPT']
+          if bool(run) != bool(attempt):
+              raise SystemExit('Recovery requires both run ID and attempt')
+          if not run:
+              raise SystemExit(0)
+          if not run.isascii() or not run.isdecimal() or not attempt.isascii() or not attempt.isdecimal():
+              raise SystemExit('Recovery identifiers must be ASCII decimal numbers')
+          repo = os.environ['GITHUB_REPOSITORY']
+          request = urllib.request.Request(
+              f'https://api.github.com/repos/{repo}/actions/runs/{run}',
+              headers={'Authorization': 'Bearer ' + os.environ['GH_TOKEN']})
+          with urllib.request.urlopen(request, timeout=30) as response:
+              data = json.load(response)
+          if (data['repository']['full_name'] != repo
+                  or data['head_sha'] != os.environ['GITHUB_SHA']
+                  or data['head_branch'] != 'main'
+                  or data['event'] != 'workflow_dispatch'
+                  or data['status'] != 'completed'
+                  or data['run_attempt'] != int(attempt)
+                  or data['path'] != '.github/workflows/marketplace-publish.yml'):
+              raise SystemExit('Recovery requires latest completed same-commit publishing attempt')
+          PYTHON
+      - name: Restore explicitly selected prior upload ledger
+        if: inputs.recovery_run_id != '' && inputs.recovery_attempt != ''
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          name: marketplace-upload-ledger-${{ inputs.recovery_run_id }}-${{ inputs.recovery_attempt }}
+          path: recovery
+          run-id: ${{ inputs.recovery_run_id }}
+          github-token: ${{ github.token }}
+      - name: Use restored ledger without replacing an existing local record
+        if: inputs.recovery_run_id != '' && inputs.recovery_attempt != ''
+        shell: bash
+        run: |
+          test ! -e upload-ledger.json
+          cp recovery/upload-ledger.json upload-ledger.json
+      - name: Recheck approved bytes before authentication
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
+          ENVIRONMENT_ENABLED: ${{ vars.THREAD_MARKETPLACE_ENABLED }}
+        run: |
+          test "$ENVIRONMENT_ENABLED" = reviewed-and-enabled
+          python extensions/vscode/scripts/marketplace_preflight.py --artifacts candidates --commit "$GITHUB_SHA" --version "$RELEASE_VERSION"
+          npm ci --prefix extensions/vscode --ignore-scripts
+      - uses: azure/login@a641126d1b8aa4d1fa005f4f92df94a3a4c4c906 # v3; reviewed identity lookup pin
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          allow-no-subscriptions: true
+      - name: Resume approved uploads and verify exact Marketplace listings
+        env:
+          THREAD_MARKETPLACE_ENABLED: ${{ vars.THREAD_MARKETPLACE_ENABLED }}
+          RELEASE_VERSION: ${{ inputs.version }}
+        run: |
+          python extensions/vscode/scripts/marketplace_upload.py --artifacts candidates --commit "$GITHUB_SHA" --version "$RELEASE_VERSION" --ledger upload-ledger.json --execute
+      - name: Preserve recovery ledger even when upload or listing verification fails
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: marketplace-upload-ledger-${{ github.run_id }}-${{ github.run_attempt }}
+          path: upload-ledger.json
+          if-no-files-found: warn
+          retention-days: 90
+      # Before any retry, the operator must restore the latest ledger from the
+      # previous attempt. A missing ledger plus an existing version fails closed;
+      # an uploading/uncertain state requires owner reconciliation, never replay.
+      # Offline companions stay verified artifacts; no GitHub Release write granted.

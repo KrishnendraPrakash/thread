@@ -1,0 +1,37 @@
+{
+  "verified_at": "2026-10-11",
+  "method": "Official GitHub repository tag refs dereferenced to commits; commit API verification. No remote writes.",
+  "actions": {
+    "actions/checkout": {
+      "tag": "v7",
+      "commit": "3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "verified_signature": true
+    },
+    "actions/setup-python": {
+      "tag": "v7",
+      "commit": "5fda3b95a4ea91299a34e894583c3862153e4b97",
+      "verified_signature": true
+    },
+    "actions/setup-node": {
+      "tag": "v7",
+      "commit": "949feb2413d6458794dcd2491c4babbbce0c15c1",
+      "verified_signature": true
+    },
+    "actions/download-artifact": {
+      "tag": "v7",
+      "commit": "37930b1c2abaa49bbe596cd826c3c89aef350131",
+      "verified_signature": true
+    },
+    "actions/upload-artifact": {
+      "tag": "v7",
+      "commit": "cf430e030ddbb5b0abf93d22962f4752f3646cd9",
+      "verified_signature": true
+    },
+    "azure/login": {
+      "tag": "v3",
+      "commit": "a641126d1b8aa4d1fa005f4f92df94a3a4c4c906",
+      "verified_signature": false,
+      "note": "Official v3 annotated tag resolves to this commit; GitHub reports commit signature unverified. Pin provenance verified, signature not asserted."
+    }
+  }
+}

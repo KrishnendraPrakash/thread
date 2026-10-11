@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "publisher": "Krishnendra",
+  "extension": "thread-agent",
+  "environment": "marketplace-publish",
+  "targets": ["darwin-arm64", "darwin-x64", "linux-x64", "linux-arm64", "win32-x64", "win32-arm64"],
+  "gates": {
+    "project_license": "pending",
+    "complete_third_party_notices": "pending",
+    "all_target_editor_and_inference_checks": "pending",
+    "windows_editor_activation": "pending",
+    "clean_machine_setup": "pending",
+    "signing_decision_and_validation": "pending",
+    "offline_companion_distribution_review": "pending"
+  }
+}
