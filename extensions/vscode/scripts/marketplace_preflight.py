@@ -41,6 +41,16 @@ def checked_file(root: Path, record: dict) -> Path:
     return path
 
 
+def verify_packaged_license(archive, license_text):
+    names = [
+        name
+        for name in archive.namelist()
+        if name in {"extension/LICENSE", "extension/LICENSE.txt"}
+    ]
+    if len(names) != 1 or archive.read(names[0]) != license_text:
+        raise ValueError("Packaged project license mismatch or ambiguous license files.")
+
+
 def readiness(root: Path) -> dict:
     policy = json.loads((root / "release/marketplace-policy.json").read_text())
     manifest = json.loads((root / "extensions/vscode/package.json").read_text())
@@ -133,8 +143,7 @@ def inventory(root: Path, folder: Path, commit: str, version: str) -> dict:
             executable = "thread-backend.exe" if target.startswith("win32-") else "thread-backend"
             if f"extension/native/{target}/thread-backend/{executable}" not in archive.namelist():
                 raise ValueError("Matching bundled native backend missing.")
-            if archive.read("extension/LICENSE") != (root / "LICENSE").read_bytes():
-                raise ValueError("Packaged project license mismatch.")
+            verify_packaged_license(archive, (root / "LICENSE").read_bytes())
         companion = checked_file(folder, item["companion"])
         if companion.suffix != ".zip":
             raise ValueError("Prepared companion transport must be ZIP.")

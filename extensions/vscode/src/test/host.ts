@@ -1,13 +1,17 @@
 import * as vscode from 'vscode';
 import * as assert from 'node:assert/strict';
 import * as path from 'node:path';
+import { existsSync, realpathSync } from 'node:fs';
 import { Agent, contained } from '../extension';
-import { Backend } from '../backend';
+import { Backend, bundledBackend } from '../backend';
 import { offlineCommandFixture } from './offlineHost';
 
 export async function run(): Promise<void> {
   const extension = vscode.extensions.getExtension('Krishnendra.thread-agent');
   assert.ok(extension); await extension.activate();
+  if (process.env.THREAD_TEST_VERSION) {
+    assert.equal(extension.packageJSON.version, process.env.THREAD_TEST_VERSION);
+  }
   const commands = await vscode.commands.getCommands(true);
   for (const name of ['importOffline', 'setup', 'configurePython', 'ask', 'debug', 'feature', 'summary', 'review', 'cancel', 'clear', 'runTask']) {
     assert.ok(commands.includes('thread.' + name), 'Missing command ' + name);
@@ -16,7 +20,7 @@ export async function run(): Promise<void> {
   assert.equal(contained('/repo', '/repo2/file.py'), false);
   assert.equal(contained('/repo', '/repo/file.py'), true);
   const root = vscode.workspace.workspaceFolders![0].uri.fsPath;
-  const python = path.resolve(extension.extensionPath, '../../.venv/bin/python');
+  const python = process.env.THREAD_TEST_PYTHON || path.resolve(extension.extensionPath, '../../.venv/bin/python');
   const backend = new Backend();
   // Build a real immutable proposal from the synthetic file without invoking a model.
   const { execFileSync } = await import('node:child_process');
@@ -43,21 +47,45 @@ export async function run(): Promise<void> {
       return backend.call(selected, folder, request);
     },
   };
-  try {
-    await config.update('pythonPath', '/nonexistent/old-python', vscode.ConfigurationTarget.Global);
-    // Simulate stale configuration reads during setup; both calls must use explicit input.
-    setupAgent.setting = () => '/nonexistent/old-python';
-    await assert.rejects(setupAgent.configurePython(python), /Python is ready.*setting was saved.*Ollama unavailable/);
-    assert.deepEqual(calls, [{ python, operation: 'python' }, { python, operation: 'models' }]);
-    assert.equal(config.inspect<string>('pythonPath')?.globalValue, python);
-    const reloaded: any = new Agent(context);
-    try { assert.equal(reloaded.setting('pythonPath', 'python3'), python); }
-    finally { reloaded.dispose(); }
-    await assert.rejects(setupAgent.configurePython('/nonexistent/new-python'), /Cannot start Python/);
-    assert.equal(config.inspect<string>('pythonPath')?.globalValue, python);
-    const count = calls.length;
-    await assert.rejects(setupAgent.configurePython('.venv/bin/python'), /absolute Python/);
-    assert.equal(calls.length, count);
+  if (existsSync(path.join(extension.extensionPath, 'python', 'bridge.py'))) {
+    try {
+      await config.update('pythonPath', '/nonexistent/old-python', vscode.ConfigurationTarget.Global);
+      // Simulate stale configuration reads during setup; both calls must use explicit input.
+      setupAgent.setting = () => '/nonexistent/old-python';
+      await assert.rejects(setupAgent.configurePython(python), /Python is ready.*setting was saved.*Ollama unavailable/);
+      assert.deepEqual(calls, [{ python, operation: 'python' }, { python, operation: 'models' }]);
+      assert.equal(config.inspect<string>('pythonPath')?.globalValue, python);
+      const reloaded: any = new Agent(context);
+      try { assert.equal(reloaded.setting('pythonPath', 'python3'), python); }
+      finally { reloaded.dispose(); }
+      await assert.rejects(setupAgent.configurePython('/nonexistent/new-python'), /Cannot start Python/);
+      assert.equal(config.inspect<string>('pythonPath')?.globalValue, python);
+      const count = calls.length;
+      await assert.rejects(setupAgent.configurePython('.venv/bin/python'), /absolute Python/);
+      assert.equal(calls.length, count);
+      const automatic: any = new Agent(context);
+      automatic.notify = () => {};
+      automatic.backend = setupAgent.backend;
+      automatic.setting = () => '/nonexistent/stale-python';
+      let recovered = false;
+      automatic.recoverModelSetup = async () => { recovered = true; };
+      try {
+        await automatic.setup();
+        assert.equal(recovered, true);
+        assert.ok(path.isAbsolute(automatic.detectedPython.executable));
+        assert.notEqual(automatic.detectedPython.executable, '/nonexistent/stale-python');
+        console.log(`THREAD_AUTODETECT_PASSED: ${automatic.detectedPython.version}; no Python input dialog, stale override recovered`);
+      } finally { automatic.dispose(); }
+      console.log('THREAD_SETUP_TESTS_PASSED: exact input despite stale settings, real Python probe, persistence despite missing Ollama, invalid path preserves settings, relative path rejection');
+    } finally {
+      setupAgent.dispose();
+      await config.update('pythonPath', previousPython, vscode.ConfigurationTarget.Global);
+    }
+  } else {
+    const native = bundledBackend(extension.extensionPath);
+    assert.ok(native, 'Installed package must contain its host-native backend');
+    const probe = await backend.call(native, extension.extensionPath, { operation: 'python' });
+    assert.equal(probe.bundled, true);
     const automatic: any = new Agent(context);
     automatic.notify = () => {};
     automatic.backend = setupAgent.backend;
@@ -67,17 +95,13 @@ export async function run(): Promise<void> {
     try {
       await automatic.setup();
       assert.equal(recovered, true);
-      assert.ok(path.isAbsolute(automatic.detectedPython.executable));
-      assert.notEqual(automatic.detectedPython.executable, '/nonexistent/stale-python');
-      console.log(`THREAD_AUTODETECT_PASSED: ${automatic.detectedPython.version}; no Python input dialog, stale override recovered`);
-    } finally { automatic.dispose(); }
-    console.log('THREAD_SETUP_TESTS_PASSED: exact input despite stale settings, real Python probe, persistence despite missing Ollama, invalid path preserves settings, relative path rejection');
-  } finally {
-    setupAgent.dispose();
-    await config.update('pythonPath', previousPython, vscode.ConfigurationTarget.Global);
+      assert.equal(realpathSync(automatic.detectedPython.executable), realpathSync(native));
+      assert.equal(calls[calls.length - 1].python, native, 'Model recovery must retain the exact native launch path');
+      console.log('THREAD_INSTALLED_NATIVE_SETUP_PASSED: exact installed native probe and missing-model recovery without legacy Python bridge');
+    } finally { automatic.dispose(); setupAgent.dispose(); }
   }
   agent.result = result; agent.notify = () => {};
-  agent.call = (request: object) => backend.call(python, extension.extensionPath, request);
+  agent.call = (request: object) => backend.call(bundledBackend(extension.extensionPath) || python, extension.extensionPath, request);
   try {
     await agent.apply(result); // Scripted fixture approval, never a real user authorization.
     const doc = await vscode.workspace.openTextDocument(path.join(root, 'app.py'));

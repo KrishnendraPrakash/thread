@@ -38,7 +38,7 @@ Thread reads a bounded selection of **saved files**, rather than understanding e
 A **VSIX** is a VS Code extension installer. A **model** is the downloaded AI data used to generate answers. A **companion bundle** contains the additional files needed for offline setup; it can be much larger than the extension.
 
 > [!NOTE]
-> The owner reported publishing version **0.1.0** as `Krishnendra.thread-agent`. This branch develops **0.2.0**; its local candidates have not been published to Marketplace. A public repository or passing CI does not make a new installer available. Check the [release checklist](docs/releasing.md) before distributing packages.
+> The owner reported publishing version **0.2.0** as `Krishnendra.thread-agent`. The next owner-approved preview is **0.2.1**; its local candidates have not been published to Marketplace. A public repository or passing CI does not make a new installer available. Check the [release checklist](docs/releasing.md) before distributing packages.
 
 ### Install and open the editor preview
 
@@ -137,7 +137,7 @@ Rerun **Thread: Setup Local Model** and check the reported backend/model status.
 <details>
 <summary>Is it a finished autonomous agent? Can I redistribute it?</summary>
 
-This is a bounded preview. Durable knowledge memory, independent semantic verification and optional hosted/private adapters remain planned. No full M0/M1/model benchmark gate has passed. The repository's owner license is **not selected** (`UNLICENSED` in extension metadata); public source visibility is not a license grant. Complete portable-Python notices and signing decisions remain open. [Roadmap](AGENT_PLAN.md) · [Release checklist](docs/releasing.md)
+This is a bounded preview. Durable knowledge memory, independent semantic verification and optional hosted/private adapters remain planned. No full M0/M1/model benchmark gate has passed. Thread-authored code and documentation use the owner-approved **MIT** license. Included dependencies, runtimes and models retain their own terms; complete binary notice review remains open. Complete portable-Python notices and signing decisions remain open. [Roadmap](AGENT_PLAN.md) · [Release checklist](docs/releasing.md)
 
 </details>
 
@@ -196,7 +196,7 @@ Tests and synthetic traces demonstrate specific behavior; they are not accuracy 
 
 An [inactive Marketplace automation draft](docs/marketplace-automation.md) now proposes protected GitHub environment approval and Entra OIDC publishing of exact six-target packages. It does not run or publish. Release gates remain pending, the native release builder is unfinished, and protected Azure/GitHub access and identity lookup are verified. Marketplace Contributor membership is owner-reported and awaits independent verification. The existing public extension is updated through the same `Krishnendra.thread-agent` identity.
 
-Local release automation now includes host-native candidate packaging and offline companion assembly, six-target inventory aggregation, and a resumable upload/listing controller with a durable exact-release ledger. Both production workflows remain inactive under `release/*.yml.disabled`. Production execution, license/version choices and all seven evidence gates remain pending; no new public package is provided by this preparation.
+Local release automation now includes host-native candidate packaging and offline companion assembly, six-target inventory aggregation, and a resumable upload/listing controller with a durable exact-release ledger. Both production workflows remain inactive under `release/*.yml.disabled`. Production execution and validation and six remaining evidence gates remain pending; no new public package is provided by this preparation.
 
 Both inactive release workflows now pin every Action to a verified official upstream commit and disable persisted checkout credentials. Recovery restores only a validated same-commit publishing attempt. A CI-only review can exercise native probes and synthetic recovery tests without enabling publishing or resolving production release gates.
 
@@ -205,3 +205,7 @@ Both inactive release workflows now pin every Action to a verified official upst
 The manual `Marketplace identity lookup` workflow resolves the publishing managed identity’s Marketplace User ID on `main` after owner approval in the protected `marketplace-publish` environment. It authenticates through GitHub OIDC and returns only the nonsecret profile ID. It does not publish extensions or assign Marketplace roles. The lookup is setup verification, not a completed release gate.
 
 Cross-platform validation found and corrected Windows upload-ledger lock cleanup: the file handle closes before lock deletion. Recovery still stops after uncertain uploads. This does not enable publishing.
+
+The owner approved **MIT** for Thread and **0.2.1** for the next preview. Root `LICENSE`, Python metadata and extension metadata now agree. Third-party components retain their own licenses; [licensing scope and notice review](docs/licensing.md) describes the remaining redistribution gates. These source changes are not published.
+
+Private Mac 0.2.1 installation checks passed for an offline-installed Python wheel and an isolated native VSIX profile. The local runtime produced a simple offline completion, but one structured Qwen 0.5B repository request was rejected as incomplete; model suitability and other-platform editor/inference checks remain open. Packaging preserves the exact MIT text and third-party notices. No new public installer is published.

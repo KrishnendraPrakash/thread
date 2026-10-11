@@ -8,6 +8,8 @@ dynamic = ["version"]
 description = "Local agent core with experimental VS Code workflows and exact source-field reports"
 readme = "README.md"
 requires-python = ">=3.11"
+license = "MIT"
+license-files = ["LICENSE"]
 dependencies = []
 classifiers = [
     "Development Status :: 2 - Pre-Alpha",

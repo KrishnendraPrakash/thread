@@ -18,6 +18,21 @@ SPEC.loader.exec_module(MODULE)
 
 
 class MarketplacePreflightTests(unittest.TestCase):
+    def test_normalized_vsix_license_retains_exact_bytes_and_rejects_ambiguity(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "license.vsix"
+            with zipfile.ZipFile(path, "w") as archive:
+                archive.writestr("extension/LICENSE.txt", "approved MIT fixture")
+            with zipfile.ZipFile(path) as archive:
+                MODULE.verify_packaged_license(archive, b"approved MIT fixture")
+                with self.assertRaisesRegex(ValueError, "license mismatch"):
+                    MODULE.verify_packaged_license(archive, b"different license")
+            with zipfile.ZipFile(path, "a") as archive:
+                archive.writestr("extension/LICENSE", "approved MIT fixture")
+            with zipfile.ZipFile(path) as archive:
+                with self.assertRaisesRegex(ValueError, "ambiguous"):
+                    MODULE.verify_packaged_license(archive, b"approved MIT fixture")
+
     def release_fixture(self, root):
         (root / "release").mkdir()
         extension = root / "extensions/vscode"
@@ -250,7 +265,7 @@ class MarketplacePreflightTests(unittest.TestCase):
 
     def test_current_release_is_blocked_before_artifact_access(self):
         with self.assertRaisesRegex(ValueError, "Release gates pending"):
-            MODULE.inventory(ROOT, Path("/nonexistent/thread-candidates"), "a" * 40, "0.2.0")
+            MODULE.inventory(ROOT, Path("/nonexistent/thread-candidates"), "a" * 40, "0.2.1")
 
     def test_removing_release_gate_is_not_a_bypass(self):
         with tempfile.TemporaryDirectory() as folder:
