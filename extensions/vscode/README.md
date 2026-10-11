@@ -94,3 +94,5 @@ Both inactive release workflows now pin every Action to a verified official upst
 ## Publishing identity lookup
 
 The manual `Marketplace identity lookup` workflow resolves the publishing managed identity’s Marketplace User ID on `main` after owner approval in the protected `marketplace-publish` environment. It authenticates through GitHub OIDC and returns only the nonsecret profile ID. It does not publish extensions or assign Marketplace roles. The lookup is setup verification, not a completed release gate.
+
+Cross-platform validation found and corrected Windows upload-ledger lock cleanup: the file handle closes before lock deletion. Recovery still stops after uncertain uploads. This does not enable publishing.

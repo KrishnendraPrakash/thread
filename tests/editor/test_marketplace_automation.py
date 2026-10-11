@@ -143,6 +143,38 @@ class MarketplaceAutomationTests(unittest.TestCase):
                 UPLOAD.process(record, root, ledger, publisher, lambda _: False, True)
             publisher.assert_not_called()
 
+    def test_lock_handle_is_closed_before_removing_lock_on_failure(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            record = self.fixture(root)
+            ledger = root / "ledger.json"
+            lock = root / "ledger.json.lock"
+            original_open, original_unlink = Path.open, Path.unlink
+            handles = []
+
+            def opened(path, *args, **kwargs):
+                handle = original_open(path, *args, **kwargs)
+                if path == lock:
+                    handles.append(handle)
+                return handle
+
+            def removed(path, *args, **kwargs):
+                if path == lock:
+                    self.assertTrue(handles[0].closed)
+                return original_unlink(path, *args, **kwargs)
+
+            with patch.object(Path, "open", opened), patch.object(Path, "unlink", removed):
+                with self.assertRaisesRegex(RuntimeError, "connection lost"):
+                    UPLOAD.process(
+                        record,
+                        root,
+                        ledger,
+                        Mock(side_effect=RuntimeError("connection lost")),
+                        lambda _: False,
+                        True,
+                    )
+            self.assertFalse(lock.exists())
+
     def test_public_listing_requires_exact_platform_and_preview_channel(self):
         result = {
             "results": [

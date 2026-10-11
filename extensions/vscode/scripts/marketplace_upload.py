@@ -65,11 +65,12 @@ def process(record, folder, ledger_path, publish, visible, execute=False):
     if not execute:
         return _process(record, folder, ledger_path, publish, visible, False)
     lock = ledger_path.with_name(ledger_path.name + ".lock")
-    with lock.open("x"):
-        try:
+    handle = lock.open("x")
+    try:
+        with handle:
             return _process(record, folder, ledger_path, publish, visible, True)
-        finally:
-            lock.unlink()
+    finally:
+        lock.unlink()
 
 
 def _process(record, folder, ledger_path, publish, visible, execute=False):
