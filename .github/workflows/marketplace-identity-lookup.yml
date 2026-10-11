@@ -1,0 +1,37 @@
+name: Marketplace identity lookup
+
+on:
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  lookup:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: marketplace-publish
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Authenticate publishing identity through protected GitHub OIDC
+        uses: azure/login@a641126d1b8aa4d1fa005f4f92df94a3a4c4c906 # v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          allow-no-subscriptions: true
+      - name: Resolve Marketplace profile ID
+        shell: bash
+        env:
+          AZURE_CORE_COLLECT_TELEMETRY: '0'
+          AZURE_CORE_OUTPUT: none
+        run: |
+          set -euo pipefail
+          profile_id=$(az rest             --url https://app.vssps.visualstudio.com/_apis/profile/profiles/me             --resource 499b84ac-1321-427f-aa17-267ca6975798             --query id --output tsv)
+          if [[ ! "$profile_id" =~ ^[[:xdigit:]]{8}-[[:xdigit:]]{4}-[[:xdigit:]]{4}-[[:xdigit:]]{4}-[[:xdigit:]]{12}$ ]]; then
+            echo 'Profile lookup did not return a valid identity ID.' >&2
+            exit 1
+          fi
+          printf 'Marketplace User ID: %s\n' "$profile_id"
+          printf 'Marketplace User ID: `%s`\n' "$profile_id" >> "$GITHUB_STEP_SUMMARY"

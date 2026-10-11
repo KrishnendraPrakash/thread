@@ -82,3 +82,7 @@ The isolated VS Code host fixture now exercises the production offline command w
 ## Native candidate validation update
 
 Native CI for commit `3e436ad` passed all six targets (macOS ARM64/x64, Linux ARM64/x64 and Windows ARM64/x64): native builds, JSON/dependency probes, distribution tests and synthetic offline-import tests. Both Windows runners executed and passed the regular-read/enumeration/limits and hardlink/junction-rejection tests. [Verified run](https://github.com/KrishnendraPrakash/thread/actions/runs/38142298112). These are backend/fixture checks, not full editor, clean-machine or model-inference certification. Windows editor activation remains gated pending broader document/edit integration validation. The repository now offers a [beginner guide with clickable setup choices and expandable help](https://github.com/KrishnendraPrakash/thread/blob/native-distribution-validation/README.md). This source documentation update does not update the Marketplace page or provide an official offline release.
+
+## Publishing identity lookup
+
+The manual `Marketplace identity lookup` workflow resolves the publishing managed identity’s Marketplace User ID on `main` after owner approval in the protected `marketplace-publish` environment. It authenticates through GitHub OIDC and returns only the nonsecret profile ID. It does not publish extensions or assign Marketplace roles. The lookup is setup verification, not a completed release gate.
