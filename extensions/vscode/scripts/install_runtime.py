@@ -1,15 +1,20 @@
-"""Install a pinned Ollama macOS runtime in extension-owned storage after UI consent."""
+"""Install a pinned native Ollama runtime in extension-owned storage after UI consent."""
 
 import hashlib
 import json
 import os
+import platform
+import re
 import shutil
 import signal
 import sys
 import tarfile
 import tempfile
 import urllib.request
+import zipfile
 from pathlib import Path, PurePosixPath
+
+from runtime_assets import ASSETS
 
 VERSION = "0.34.4"
 URL = f"https://github.com/ollama/ollama/releases/download/v{VERSION}/ollama-darwin.tgz"
@@ -18,15 +23,85 @@ SIZE = 160042307
 MAX_EXPANDED = 2 * 1024**3
 
 
-def unpack(archive, destination):
-    """Extract regular files/directories only; materialize safe internal links as copies."""
-    with tarfile.open(archive, "r:gz") as source:
-        members = source.getmembers()
-        if len(members) > 10000 or sum(m.size for m in members) > MAX_EXPANDED:
+def target():
+    arch = {"arm64": "arm64", "aarch64": "arm64", "x86_64": "x64", "amd64": "x64"}.get(
+        platform.machine().lower()
+    )
+    value = f"{sys.platform}-{arch}"
+    if value not in ASSETS:
+        raise ValueError("No pinned runtime for this OS/architecture.")
+    return value
+
+
+def unpack_zip(archive, destination):
+    with zipfile.ZipFile(archive) as source:
+        members = source.infolist()
+        if len(members) > 10000 or sum(item.file_size for item in members) > 8 * 1024**3:
             raise ValueError("Runtime archive exceeds extraction limits.")
         names = set()
-        links = []
         for member in members:
+            name = member.filename.rstrip("/")
+            relative = PurePosixPath(name)
+            if (
+                not name
+                or relative.is_absolute()
+                or "\\" in name
+                or ":" in name
+                or any(part in {"", ".", ".."} for part in name.split("/"))
+                or any(part.endswith((".", " ")) for part in relative.parts)
+                or any(
+                    re.match(
+                        r"^(con|prn|aux|nul|clock\$|com[1-9¹²³]|lpt[1-9¹²³])(?:\.|$)", part, re.I
+                    )
+                    for part in relative.parts
+                )
+                or ((member.external_attr >> 16) & 0o170000) == 0o120000
+                or name.casefold() in names
+            ):
+                raise ValueError("Unsafe runtime archive path or link.")
+            names.add(name.casefold())
+            output = destination.joinpath(*relative.parts)
+            if member.is_dir():
+                output.mkdir(parents=True, exist_ok=True)
+            else:
+                output.parent.mkdir(parents=True, exist_ok=True)
+                with source.open(member) as content, output.open("xb") as stream:
+                    shutil.copyfileobj(content, stream)
+
+
+def unpack_zstd(archive, destination):
+    try:
+        import zstandard
+    except ImportError as exc:
+        raise ValueError("The native Linux backend must bundle the zstandard decoder.") from exc
+    # Decode into bounded temporary storage, then use the existing safe tar extractor.
+    decoded = destination.parent / "decoded.tar"
+    expanded = 0
+    with (
+        archive.open("rb") as raw,
+        zstandard.ZstdDecompressor().stream_reader(raw) as source,
+        decoded.open("xb") as output,
+    ):
+        while chunk := source.read(1024 * 1024):
+            expanded += len(chunk)
+            if expanded > 8 * 1024**3:
+                raise ValueError("Runtime decompression exceeds limit.")
+            output.write(chunk)
+    unpack(decoded, destination, limit=8 * 1024**3)
+
+
+def unpack(archive, destination, limit=MAX_EXPANDED):
+    """Extract regular files/directories only; materialize safe internal links as copies."""
+    with tarfile.open(archive, "r:*") as source:
+        names = set()
+        links = []
+        expanded = 0
+        count = 0
+        for member in source:
+            count += 1
+            expanded += member.size
+            if count > 10000 or expanded > limit:
+                raise ValueError("Runtime archive exceeds extraction limits.")
             relative = PurePosixPath(member.name)
             if relative.is_absolute() or ".." in relative.parts or "\\" in member.name:
                 raise ValueError("Unsafe runtime archive path.")
@@ -58,6 +133,9 @@ def unpack(archive, destination):
             target.parent.mkdir(parents=True, exist_ok=True)
             if target.exists():
                 raise ValueError("Duplicate runtime archive link.")
+            expanded += resolved.stat().st_size
+            if expanded > limit:
+                raise ValueError("Runtime link copies exceed extraction limits.")
             shutil.copy2(resolved, target)
 
 
@@ -68,21 +146,54 @@ def install(root):
     root.mkdir(parents=True, exist_ok=True)
     lock = root / "install.lock"
     try:
+        profile = target()
+        asset_name, size, sha256, executable = ASSETS[profile]
+        # Preserve existing macOS fixture constants and pinned public behavior.
+        url = f"https://github.com/ollama/ollama/releases/download/v{VERSION}/{asset_name}"
+        if profile.startswith("darwin-"):
+            size, sha256, url = SIZE, SHA256, URL
         lock.mkdir()
     except FileExistsError as exc:
         raise ValueError("Another runtime install is active. Finish it before retrying.") from exc
     try:
         final = root / f"ollama-{VERSION}"
-        if (final / "installed.json").is_file():
+        marker = final / "installed.json"
+        if marker.is_file():
+            if marker.is_symlink() or marker.stat().st_size > 4096:
+                raise ValueError(
+                    "Invalid installed runtime marker; do not overwrite existing files."
+                )
+            installed = json.loads(marker.read_text())
+            if not isinstance(installed, dict):
+                raise ValueError("Invalid installed runtime marker object.")
+            binary = final / executable
+            if (
+                installed.get("version") != VERSION
+                or installed.get("sha256") != sha256
+                or installed.get("target", profile if profile.startswith("darwin-") else "")
+                != profile
+                or binary.is_symlink()
+                or not binary.is_file()
+            ):
+                raise ValueError(
+                    "Installed runtime identity or executable is invalid; inspect existing storage."
+                )
             return
         if final.exists():
             raise ValueError("Incomplete runtime directory; do not overwrite existing files.")
+        if asset_name.endswith(".zst"):
+            try:
+                import zstandard  # noqa: F401 - fail before any large download if decoder is absent
+            except ImportError as exc:
+                raise ValueError(
+                    "This backend lacks its bundled Linux Zstandard decoder; no runtime was downloaded."
+                ) from exc
         with tempfile.TemporaryDirectory(prefix="download-", dir=root) as temporary:
             temporary = Path(temporary)
-            archive = temporary / "runtime.tgz"
+            archive = temporary / asset_name
             digest = hashlib.sha256()
             received = 0
-            request = urllib.request.Request(URL, headers={"User-Agent": "Thread-Agent-Setup"})
+            request = urllib.request.Request(url, headers={"User-Agent": "Thread-Agent-Setup"})
             # A browser-style HTTPS download, never a remotely supplied shell script.
             with (
                 urllib.request.urlopen(request, timeout=30) as response,
@@ -92,22 +203,27 @@ def install(root):
                     raise ValueError("Runtime download must stay on HTTPS.")
                 while chunk := response.read(1024 * 1024):
                     received += len(chunk)
-                    if received > SIZE:
+                    if received > size:
                         raise ValueError("Runtime download exceeded its pinned size.")
                     digest.update(chunk)
                     output.write(chunk)
                     print(
-                        f"Runtime download: {received * 100 // SIZE}%", file=sys.stderr, flush=True
+                        f"Runtime download: {received * 100 // size}%", file=sys.stderr, flush=True
                     )
-            if received != SIZE or digest.hexdigest() != SHA256:
+            if received != size or digest.hexdigest() != sha256:
                 raise ValueError("Runtime checksum/size mismatch; nothing was installed.")
             extracted = temporary / "extracted"
             extracted.mkdir()
-            unpack(archive, extracted)
-            if not (extracted / "ollama").is_file():
+            if asset_name.endswith(".zip"):
+                unpack_zip(archive, extracted)
+            elif asset_name.endswith(".zst"):
+                unpack_zstd(archive, extracted)
+            else:
+                unpack(archive, extracted)
+            if not (extracted / executable).is_file():
                 raise ValueError("Official runtime archive has an unexpected layout.")
             (extracted / "installed.json").write_text(
-                json.dumps({"version": VERSION, "sha256": SHA256})
+                json.dumps({"version": VERSION, "sha256": sha256, "target": profile})
             )
             os.rename(extracted, final)
     finally:

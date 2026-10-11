@@ -1,6 +1,8 @@
 # Agent plan
 
 Status: experimental VS Code developer workflows and the exact-field CLI are implemented; full verification, model benchmarks and public release gates remain pending.
+
+The owner now requires minimal manual prerequisites on Windows, macOS and Linux with online and offline installation modes. Native backend launch/build configuration, pinned runtime acquisition, transactional companion import and Windows handle-relative access are implemented. A maintained portable Mac native build and one real offline import/inference trial passed; Windows/Linux native checks and public companion readiness remain pending; see [distribution progress](docs/distribution-modes.md).
 Updated: 2026-09-24. The user also requested public extension distribution; prepare a labeled preview while publisher identity, license and account authentication are resolved.
 
 ## Goal

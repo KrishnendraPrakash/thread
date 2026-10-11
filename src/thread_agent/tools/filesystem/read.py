@@ -18,6 +18,14 @@ def read_source(workspace: str, name: str) -> Evidence:
         or path.suffix.lower() not in {".json", ".toml"}
     ):
         raise AgentError("Select a relative, non-hidden .toml or .json file inside the workspace.")
+    if os.name == "nt":
+        from thread_agent.tools.filesystem.windows import read_bytes
+
+        try:
+            data = read_bytes(Path(workspace), path.as_posix(), MAX_BYTES)
+            return Evidence(path.as_posix(), data.decode("utf-8"), digest(data), now())
+        except (OSError, UnicodeError) as exc:
+            raise AgentError("Cannot securely read Windows source.") from exc
     if not hasattr(os, "O_NOFOLLOW") or not hasattr(os, "O_DIRECTORY"):
         raise AgentError("Secure source reads currently require macOS or Linux.")
     descriptors = []

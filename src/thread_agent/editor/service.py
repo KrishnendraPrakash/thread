@@ -21,7 +21,11 @@ def main() -> None:
         if operation == "python":
             if sys.version_info < (3, 9):  # noqa: UP036 - probe may use an older interpreter
                 raise AgentError("Thread requires Python 3.9 or later.")
-            result = {"executable": sys.executable, "version": sys.version.split()[0]}
+            result = {
+                "executable": sys.executable,
+                "version": sys.version.split()[0],
+                "bundled": bool(getattr(sys, "frozen", False)),
+            }
         elif operation == "models":
             result = {
                 "models": [

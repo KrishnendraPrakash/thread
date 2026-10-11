@@ -34,6 +34,10 @@
   "contributes": {
     "commands": [
       {
+        "command": "thread.importOffline",
+        "title": "Thread: Import Offline Local AI"
+      },
+      {
         "command": "thread.setup",
         "title": "Thread: Setup Local Model"
       },

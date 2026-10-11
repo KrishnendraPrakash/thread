@@ -1,10 +1,12 @@
 import { spawn, ChildProcess } from 'node:child_process';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { mkdir, statfs } from 'node:fs/promises';
 import * as http from 'node:http';
 import * as net from 'node:net';
 import * as path from 'node:path';
 import * as os from 'node:os';
+import { bundledBackend, BACKEND_TARGETS } from './backend';
+import { OfflineInstallation } from './offline';
 
 export const RUNTIME_VERSION = '0.34.4';
 export const STARTER_MODELS = [
@@ -86,19 +88,35 @@ export function pullModel(endpoint: string, model: string, signal: AbortSignal, 
 export class LocalRuntime {
   private server?: ChildProcess;
   endpoint = 'http://127.0.0.1:11434';
-  constructor(readonly directory: string) {}
-  get installed(): boolean { return existsSync(path.join(this.directory, `ollama-${RUNTIME_VERSION}`, 'installed.json')); }
-  get supported(): boolean { return process.platform === 'darwin' && process.arch === 'arm64' && Number(os.release().split('.')[0]) >= 23; }
+  constructor(readonly directory: string, private offline?: OfflineInstallation) {}
+  get storageDirectory(): string { return this.offline?.directory ?? this.directory; }
+  setOffline(installation: OfflineInstallation): void { this.stop(); this.offline = installation; }
+  get installed(): boolean {
+    if (this.offline) { return existsSync(this.offline.executable); }
+    try {
+      const marker = JSON.parse(readFileSync(path.join(this.directory, `ollama-${RUNTIME_VERSION}`, 'installed.json'), 'utf8'));
+      return marker.version === RUNTIME_VERSION && (marker.target === `${process.platform}-${process.arch}` || (!marker.target && process.platform === 'darwin'));
+    } catch { return false; }
+  }
+  get supported(): boolean { return (BACKEND_TARGETS as readonly string[]).includes(`${process.platform}-${process.arch}`) && (process.platform !== 'darwin' || Number(os.release().split('.')[0]) >= 23); }
+  get downloadBytes(): number {
+    return process.platform === 'darwin' ? 160042307 : process.platform === 'linux'
+      ? (process.arch === 'arm64' ? 1549684612 : 1427703051)
+      : (process.arch === 'arm64' ? 208009666 : 1461155106);
+  }
   async checkDisk(required: number): Promise<void> {
-    await mkdir(this.directory, { recursive: true });
-    const disk = await statfs(this.directory);
+    await mkdir(this.storageDirectory, { recursive: true });
+    const disk = await statfs(this.storageDirectory);
     if (disk.bavail * disk.bsize < required) { throw new Error(`Allow at least ${required / 1e9} GB free disk space for this setup.`); }
   }
   async install(python: string, extension: string, signal: AbortSignal, progress: (message: string) => void): Promise<void> {
-    if (!this.supported) { throw new Error('Managed runtime installation currently supports Apple Silicon on macOS 14+. Use existing Ollama on other supported systems.'); }
-    await this.checkDisk(4e9);
+    if (!this.supported) { throw new Error('No managed runtime profile for this OS/architecture. macOS requires version 14+.'); }
+    await this.checkDisk(process.platform === 'linux' ? this.downloadBytes + 17e9
+      : process.platform === 'win32' ? this.downloadBytes + 9e9 : 4e9);
     await new Promise<void>((resolve, reject) => {
-      const child = spawn(python, ['-I', '-u', path.join(extension, 'python/install_runtime.py'), this.directory],
+      const args = python === bundledBackend(extension) ? ['install-runtime', this.directory]
+        : ['-I', '-u', path.join(extension, 'python/install_runtime.py'), this.directory];
+      const child = spawn(python, args,
         { shell: false, signal, cwd: extension, env: { ...process.env, PYTHONPATH: '', PYTHONSTARTUP: '' } });
       let errors = '';
       child.stderr.setEncoding('utf8');
@@ -118,8 +136,9 @@ export class LocalRuntime {
     });
     signal?.throwIfAborted();
     this.endpoint = `http://127.0.0.1:${port}`;
-    const child = spawn(path.join(this.directory, `ollama-${RUNTIME_VERSION}`, 'ollama'), ['serve'], {
-      cwd: this.directory, shell: false, env: { ...process.env, OLLAMA_HOST: this.endpoint, OLLAMA_MODELS: path.join(this.directory, 'models'),
+    const executable = process.platform === 'win32' ? 'ollama.exe' : process.platform === 'linux' ? 'bin/ollama' : 'ollama';
+    const child = spawn(this.offline?.executable ?? path.join(this.directory, `ollama-${RUNTIME_VERSION}`, executable), ['serve'], {
+      cwd: this.offline?.directory ?? this.directory, shell: false, env: { ...process.env, OLLAMA_HOST: this.endpoint, OLLAMA_MODELS: this.offline?.models ?? path.join(this.directory, 'models'),
         OLLAMA_NO_CLOUD: '1', OLLAMA_CONTEXT_LENGTH: '16384', OLLAMA_NUM_PARALLEL: '1' },
       stdio: ['ignore', 'ignore', 'pipe'],
     });
@@ -133,7 +152,7 @@ export class LocalRuntime {
         if (failure || child.exitCode !== null || child.signalCode !== null) { throw new Error(failure || stderr || 'Managed runtime stopped.'); }
         try {
           const result = await ollamaJson(this.endpoint, '/api/version', undefined, signal);
-          if (result.version === RUNTIME_VERSION && child.exitCode === null) { return this.endpoint; }
+          if (result.version === (this.offline?.version ?? RUNTIME_VERSION) && child.exitCode === null) { return this.endpoint; }
         } catch { signal?.throwIfAborted(); }
         await new Promise(resolve => setTimeout(resolve, 250));
       }

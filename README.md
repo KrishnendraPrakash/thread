@@ -8,6 +8,8 @@ Thread now has an experimental **VS Code extension** for repository questions, d
 
 [Install the VS Code extension](docs/vscode.md) · [Publish a preview](docs/publishing.md) · [CLI quick start](#quick-start) · [Workflow diagrams](docs/workflows.md) · [Roadmap](#roadmap) · [Contributing](CONTRIBUTING.md)
 
+Cross-platform distribution with bundled backend executables, confirmed first-use downloads and offline companion bundles is [under development](docs/distribution-modes.md). Native launch, pinned platform archive acquisition and transactional offline import are implemented; two private Mac native candidates passed package probes; Windows source-access checks remain unverified, so no dependency-free release or Windows editor support is delivered yet.
+
 ## Start with VS Code
 
 **Using an installed extension:** you need Python 3.9+. Thread detects it automatically and bundles its Python libraries. On Apple Silicon macOS 14+, Thread can download and manage Ollama plus a starter model after your confirmation; no separate Ollama installation or terminal commands are needed. Other supported systems use an existing local Ollama installation. See the [extension dependency table](extensions/vscode/README.md#dependencies--what-you-need) for required and bundled components.
@@ -66,7 +68,7 @@ py -3 -m venv .venv
 .\.venv\Scripts\python.exe -m thread_agent status
 ```
 
-Ensure `py -3 --version` reports Python 3.11 or newer. The Windows commands use the environment's Python directly, so shell activation is unnecessary. Windows setup has not yet been tested by this project; secure file reads currently require macOS/Linux.
+Ensure `py -3 --version` reports Python 3.11 or newer. The Windows commands use the environment's Python directly, so shell activation is unnecessary. Windows setup has not yet been tested by this project. Handle-based Windows source reads are implemented but await native verification; Windows editor activation remains gated.
 
 If you already cloned the repository, start from its directory and skip the clone step. If your virtual environment already exists, reuse it.
 
@@ -301,3 +303,7 @@ For design context, read [SPEC.md](SPEC.md), [RATIONALE.md](RATIONALE.md), and [
 ## License and release status
 
 A repository license has **not yet been selected**. `thread-agent` is a working package name, not a published package or a verified registry-name reservation. Install from this repository using the commands above. License selection, model notices, compatibility reports, and measured limitations are tracked in the [release checklist](docs/releasing.md).
+
+The local-files-only offline companion assembler and exact pending download/CI proposal are documented in [distribution trial](docs/distribution-trial.md). The owner approved and completed a bounded Mac download/offline trial; the owner subsequently approved dedicated feature-branch cross-platform CI. A portable Python 3.12.15 candidate and a real offline companion passed local import/inference with external networking denied. These are private trial artifacts, not a public release.
+
+Local release review added the verified native Zstandard BSD notice and passed isolated production offline-command rollback checks. The owner project license remains UNLICENSED; complete portable-Python notices and signing decisions are still open.

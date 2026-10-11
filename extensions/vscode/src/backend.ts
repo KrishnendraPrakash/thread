@@ -1,5 +1,21 @@
 import { spawn, ChildProcessWithoutNullStreams } from 'node:child_process';
 import * as path from 'node:path';
+import { existsSync, lstatSync } from 'node:fs';
+
+export const BACKEND_TARGETS = ['darwin-arm64', 'darwin-x64', 'linux-x64', 'linux-arm64', 'win32-x64', 'win32-arm64'] as const;
+
+export function bundledBackend(extensionPath: string, platform = process.platform as string, arch = process.arch as string): string | undefined {
+  const target = `${platform}-${arch}`;
+  if (!(BACKEND_TARGETS as readonly string[]).includes(target)) { return undefined; }
+  const executable = path.join(extensionPath, 'native', target, 'thread-backend', platform === 'win32' ? 'thread-backend.exe' : 'thread-backend');
+  if (!existsSync(executable)) { return undefined; }
+  if (!lstatSync(executable).isFile() || lstatSync(executable).isSymbolicLink()) { throw new Error('Packaged backend must be a regular executable.'); }
+  return executable;
+}
+
+export function backendArguments(executable: string, extensionPath: string): string[] {
+  return executable === bundledBackend(extensionPath) ? [] : ['-I', '-u', path.join(extensionPath, 'python', 'bridge.py')];
+}
 
 export class Backend {
   private child?: ChildProcessWithoutNullStreams;
@@ -10,7 +26,7 @@ export class Backend {
     if (this.child) { throw new Error('A request is already running. Cancel it or wait.'); }
     this.cancelled = false;
     return new Promise((resolve, reject) => {
-      const child = spawn(python, ['-I', '-u', path.join(extensionPath, 'python', 'bridge.py')],
+      const child = spawn(python, backendArguments(python, extensionPath),
         { cwd: extensionPath, shell: false, env: { ...process.env, PYTHONPATH: '', PYTHONSTARTUP: '' } });
       this.child = child;
       let output = '', errors = '', bytes = 0, settled = false;

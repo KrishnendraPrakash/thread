@@ -3,12 +3,13 @@ import * as assert from 'node:assert/strict';
 import * as path from 'node:path';
 import { Agent, contained } from '../extension';
 import { Backend } from '../backend';
+import { offlineCommandFixture } from './offlineHost';
 
 export async function run(): Promise<void> {
   const extension = vscode.extensions.getExtension('Krishnendra.thread-agent');
   assert.ok(extension); await extension.activate();
   const commands = await vscode.commands.getCommands(true);
-  for (const name of ['setup', 'configurePython', 'ask', 'debug', 'feature', 'summary', 'review', 'cancel', 'clear', 'runTask']) {
+  for (const name of ['importOffline', 'setup', 'configurePython', 'ask', 'debug', 'feature', 'summary', 'review', 'cancel', 'clear', 'runTask']) {
     assert.ok(commands.includes('thread.' + name), 'Missing command ' + name);
   }
   await vscode.commands.executeCommand('thread.sidebar.focus');
@@ -100,4 +101,5 @@ export async function run(): Promise<void> {
     assert.equal(states.get('lastResult').decision, 'applied');
     console.log('THREAD_HOST_TESTS_PASSED: activation, commands, scoped path, approved native edit and file creation, saved decision, duplicate and stale rejection, sidebar activation');
   } finally { agent.dispose(); }
+  await offlineCommandFixture(context, root);
 }

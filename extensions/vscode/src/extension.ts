@@ -2,9 +2,11 @@ import * as vscode from 'vscode';
 import * as path from 'node:path';
 import { randomBytes } from 'node:crypto';
 import { realpathSync } from 'node:fs';
-import { Backend } from './backend';
+import { rm } from 'node:fs/promises';
+import { Backend, bundledBackend } from './backend';
 import { discoverPython, pythonCandidates, PythonRuntime } from './python';
 import { LocalRuntime, ollamaJson, pullModel, STARTER_MODELS } from './localRuntime';
+import { importOffline, inspectOffline, OfflineInstallation } from './offline';
 import { Result, Mode, FileChange } from './types';
 
 class Snapshots implements vscode.TextDocumentContentProvider {
@@ -22,7 +24,7 @@ export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(agent, vscode.workspace.registerTextDocumentContentProvider('thread-snapshot', agent.snapshots),
     vscode.window.registerWebviewViewProvider('thread.sidebar', agent));
   const commands: Record<string, () => unknown> = {
-    setup: () => agent.setup(), configurePython: () => agent.configurePythonManually(),
+    setup: () => agent.setup(), importOffline: () => agent.importOfflineBundle(), configurePython: () => agent.configurePythonManually(),
     ask: () => agent.request('ask'), debug: () => agent.request('debug'),
     feature: () => agent.request('feature'), summary: () => agent.request('summary'),
     review: () => agent.review(), cancel: () => agent.cancel(), clear: () => agent.clear(),
@@ -51,7 +53,7 @@ export class Agent implements vscode.WebviewViewProvider, vscode.Disposable {
   private taskExecutions = new Set<vscode.TaskExecution>();
   private taskListener: vscode.Disposable;
   constructor(private context: vscode.ExtensionContext) {
-    this.managed = new LocalRuntime(path.join(context.globalStorageUri.fsPath, 'local-runtime'));
+    this.managed = new LocalRuntime(path.join(context.globalStorageUri.fsPath, 'local-runtime'), context.globalState.get<OfflineInstallation>('offlineInstallation'));
     this.managedMode = context.globalState.get<boolean>('managedRuntime', false);
     this.result = context.workspaceState.get<Result>('lastResult');
     if (this.result?.decision === 'applying') { this.result.decision = 'uncertain'; }
@@ -76,6 +78,13 @@ export class Agent implements vscode.WebviewViewProvider, vscode.Disposable {
     if (this.discovering) { throw new Error('Python discovery is already running.'); }
     this.discovering = true; this.discoveryCancelled = false;
     try {
+      const packaged = bundledBackend(this.context.extensionPath);
+      if (packaged) {
+        const runtime = await this.backend.call(packaged, this.context.extensionPath, { operation: 'python' }, 30000);
+        if (this.discoveryCancelled) { throw new Error('Backend discovery cancelled.'); }
+        this.detectedPython = { ...runtime, setting };
+        return this.detectedPython!;
+      }
       const candidates = pythonCandidates(process.env.PATH ?? '',
         (vscode.workspace.workspaceFolders ?? []).map(folder => folder.uri.fsPath),
         ['/opt/homebrew/bin', '/usr/local/bin', '/usr/bin']);
@@ -97,6 +106,7 @@ export class Agent implements vscode.WebviewViewProvider, vscode.Disposable {
   }
   private async call(request: object, python?: string): Promise<any> {
     this.trusted();
+    if (this.setupController) { throw new Error('Finish or cancel local AI setup before starting a backend request.'); }
     if (this.callController) { throw new Error('A request is already starting or running.'); }
     const controller = new AbortController(); this.callController = controller;
     this.view?.webview.postMessage({ type: 'busy', value: true });
@@ -143,7 +153,8 @@ export class Agent implements vscode.WebviewViewProvider, vscode.Disposable {
     if (this.backend.busy || this.discovering || this.setupController) { throw new Error('Finish or cancel the current request before changing setup.'); }
     this.detectedPython = undefined;
     const runtime = await this.resolvePython();
-    this.notify(`Detected Python ${runtime.version} at ${runtime.executable}. No Python path configuration is needed.`);
+    this.notify(runtime.bundled ? `Using Thread's bundled backend (Python ${runtime.version}). No separate Python installation is needed.`
+      : `Detected Python ${runtime.version} at ${runtime.executable}. No Python path configuration is needed.`);
     let result: any;
     try { result = await this.call({ operation: 'models' }, runtime.executable); }
     catch { await this.recoverModelSetup(runtime.executable); return; }
@@ -183,9 +194,10 @@ export class Agent implements vscode.WebviewViewProvider, vscode.Disposable {
     })), { title: 'Choose a local starter model', placeHolder: 'Escape cancels. Existing models remain available through normal setup.', ignoreFocusOut: true });
     if (!selected) { return; }
     const confirm = await vscode.window.showInformationMessage(
-      `Download ${selected.model.name} (${selected.model.size})${this.managed.installed ? '' : ' and Ollama 0.34.4 (160 MB)'}? Internet is required for downloads from official Ollama/GitHub services. Runtime and models are stored in ${this.managed.directory}; Ollama may create its normal user configuration. No project changes, API key or admin access. Model details and terms: https://ollama.com/library/${selected.model.name}`,
+      `Download ${selected.model.name} (${selected.model.size})${this.managed.installed ? '' : ` and Ollama 0.34.4 (${(this.managed.downloadBytes / 1e6).toFixed(0)} MB)`}? Internet is required for downloads from official Ollama/GitHub services. Runtime and models are stored in ${this.managed.storageDirectory}; Ollama may create its normal user configuration. No project changes, API key or admin access. Model details and terms: https://ollama.com/library/${selected.model.name}`,
       { modal: true }, 'Download and set up');
     if (confirm !== 'Download and set up') { return; }
+    if (this.setupController || this.callController || this.backend.busy) { throw new Error('Another request started during setup review; finish or cancel it first.'); }
     const controller = new AbortController(); this.setupController = controller;
     try {
       await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, title: 'Thread: preparing local AI', cancellable: true }, async (progress, token) => {
@@ -209,6 +221,52 @@ export class Agent implements vscode.WebviewViewProvider, vscode.Disposable {
       throw error;
     } finally { this.setupController = undefined; }
   }
+  async importOfflineBundle(): Promise<void> {
+    this.trusted();
+    if (this.setupController || this.callController || this.backend.busy) { throw new Error('Finish or cancel the current request before importing local AI.'); }
+    const selected = await vscode.window.showOpenDialog({ canSelectFiles: false, canSelectFolders: true, canSelectMany: false, title: 'Choose an unpacked Thread offline companion bundle' });
+    if (!selected?.length) { return; }
+    const source = selected[0].fsPath, target = `${process.platform}-${process.arch}`;
+    const inspected = await inspectOffline(source, target);
+    const confirmation = await vscode.window.showInformationMessage(
+      `Import local AI for ${target}: ${inspected.manifest.model}, runtime ${inspected.manifest.runtimeVersion}, ${(inspected.bytes / 1e9).toFixed(2)} GB? This copies and then runs native code from your selected bundle. Use only a trusted distributor and compare its manifest SHA-256: ${inspected.digest}. Listed license identities are not independent legal verification. No internet download is performed.`,
+      { modal: true }, 'Import trusted bundle');
+    if (confirmation !== 'Import trusted bundle') { return; }
+    if (this.setupController || this.callController || this.backend.busy) { throw new Error('Another request started during offline review; finish or cancel it first.'); }
+    const controller = new AbortController(); this.setupController = controller;
+    const previous = this.context.globalState.get<OfflineInstallation>('offlineInstallation');
+    const previousModel = vscode.workspace.getConfiguration('thread').inspect<string>('model')?.globalValue;
+    const previousManagedMode = this.managedMode;
+    let installation: OfflineInstallation | undefined;
+    try {
+      await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, title: 'Thread: importing offline local AI', cancellable: true }, async (progress, token) => {
+        const cancellation = token.onCancellationRequested(() => controller.abort());
+        try {
+          installation = await importOffline(source, path.join(this.context.globalStorageUri.fsPath, 'offline-bundles'), target, inspected.digest, controller.signal, message => progress.report({ message }));
+          this.managed.setOffline(installation);
+          const endpoint = await this.managed.start(controller.signal);
+          const metadata = await ollamaJson(endpoint, '/api/show', { model: installation.model }, controller.signal);
+          if (!metadata.capabilities?.includes('completion') || metadata.remote_host || metadata.remote_model) { throw new Error('Offline model is missing or is not a local completion model.'); }
+          controller.signal.throwIfAborted();
+          await this.context.globalState.update('offlineInstallation', installation);
+          await vscode.workspace.getConfiguration('thread').update('model', installation.model, vscode.ConfigurationTarget.Global);
+          await this.context.globalState.update('managedRuntime', true);
+          this.managedMode = true;
+          this.notify('Offline local AI imported and checked. Run Thread: Ask About Repository.');
+        } finally { cancellation.dispose(); }
+      });
+    } catch (error) {
+      this.managed.stop();
+      this.managed = new LocalRuntime(path.join(this.context.globalStorageUri.fsPath, 'local-runtime'), previous);
+      this.managedMode = previousManagedMode;
+      if (installation) { await rm(installation.directory, { recursive: true, force: true }); }
+      await this.context.globalState.update('offlineInstallation', previous);
+      await this.context.globalState.update('managedRuntime', previousManagedMode);
+      await vscode.workspace.getConfiguration('thread').update('model', previousModel, vscode.ConfigurationTarget.Global);
+      if (controller.signal.aborted && error instanceof Error && error.name === 'AbortError') { this.notify('Offline import cancelled; staged assets were removed.'); return; }
+      throw error;
+    } finally { this.setupController = undefined; }
+  }
   async configurePythonManually(): Promise<void> {
     this.trusted();
     if (this.backend.busy || this.discovering || this.setupController) { throw new Error('Finish or cancel the current request before changing setup.'); }
@@ -226,6 +284,7 @@ export class Agent implements vscode.WebviewViewProvider, vscode.Disposable {
       placeHolder: 'Choose a coding-capable text model. No model is a certified default.', ignoreFocusOut: true,
     });
     if (chosen) {
+      if (this.setupController) { throw new Error('Local AI setup started during model selection; finish or cancel it first.'); }
       await vscode.workspace.getConfiguration('thread').update('model', chosen, vscode.ConfigurationTarget.Global);
       this.notify(`Using ${chosen} with ${this.managedMode ? 'Thread-managed local AI' : 'local Ollama'}. No paid API key is required.`);
     }

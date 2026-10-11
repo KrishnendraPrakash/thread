@@ -1,0 +1,75 @@
+# Proposed native and offline verification trial
+
+Status: the owner explicitly approved the bounded local downloads/execution trial and use under the linked PSF terms. The owner subsequently approved reviewed-source publication on a dedicated feature branch and cross-platform CI; main, merges, PRs, releases and Marketplace remain outside that approval. Only release metadata, manifests and license text were read. Apple CLT Python 3.9 is an experimental portability proof, not the release solution.
+
+## Local download and execution scope
+
+| Component | Exact source/version | Download | Planned local disk allowance |
+| --- | --- | --- | --- |
+| Portable build Python | Astral python-build-standalone release 20261009, CPython 3.12.15, aarch64-apple-darwin install_only_stripped | 25,030,095 bytes | 1 GB including isolated build environment and generated backend |
+| Inference runtime | Official Ollama v0.34.4 ollama-darwin.tgz | 160,042,307 bytes | 4 GB conservative extraction/setup allowance |
+| Trial model | Official Ollama registry qwen2.5-coder:0.5b, Q4_K_M, 494M parameters | 397,821,516 bytes across config/layers, plus a small manifest | 1.2 GB for original store, assembled companion and imported copy |
+
+Reserve approximately 8 GB free for the complete trial and generated candidates. Disk allowances are conservative estimates, not measured installed sizes. Total primary downloads are approximately 583 MB; isolated Python build dependencies may add tens of MB. Only previously approved PyInstaller/zstandard/editor dependencies and their necessary transitive dependencies would be installed from PyPI. No global interpreter/runtime installation is proposed.
+
+Python archive: https://github.com/astral-sh/python-build-standalone/releases/download/20261009/cpython-3.12.15%2B20261009-aarch64-apple-darwin-install_only_stripped.tar.gz
+
+SHA-256: `233f8e15255b3e1d1fd47ea5dd5230dfed803f371138e896e54d98c60ae19f6f` (official release API). The pinned [target configuration](https://raw.githubusercontent.com/astral-sh/python-build-standalone/20261009/cpython-unix/targets.yml) targets macOS 11.0 on ARM, making it a candidate for the requested macOS 14 baseline. Actual collected Mach-O requirements and runtime compatibility still need checks after approval.
+
+Ollama archive: https://github.com/ollama/ollama/releases/download/v0.34.4/ollama-darwin.tgz
+
+SHA-256: `e9c8fddaab5f48f47f2c4ae3d23d0732f5182417125353faeed2188e34a22799` (release API and checksum text). The trial would extract into project-owned temporary storage, start only an owned loopback server with cloud disabled, acquire only the pinned trial model, then stop that server. Existing Ollama stores/servers are preserved.
+
+Model manifest: https://registry.ollama.ai/v2/library/qwen2.5-coder/manifests/0.5b
+
+Manifest SHA-256: `4ff64a7f502a08b7616edb8ca0a79eb1853fc363d842b7df4b46915d11a3fb09`. Model weight layer: `20693aeb02c63304e263a72453b6ab89e1c700a87c6948cac523ac1e6f7cade0` (397,808,000 bytes). The tag must still match this manifest before acquisition; otherwise stop for an updated proposal. All config/layer digests and license layer must be retained in the local store and companion inventory. This is a small plumbing/inference trial, not a certified user default or accuracy benchmark.
+
+## Terms and notices
+
+[Python's PSF terms](https://docs.python.org/3.12/license.html) permit use/redistribution with retained license and copyright notices; copying/installing/using Python constitutes agreement to those terms. No separate gated click-through was found. The [Astral distribution documentation](https://gregoryszorc.com/docs/python-build-standalone/main/running.html#licensing) distinguishes build-script licensing from CPython and bundled dependency licenses, and describes retained archive license texts. Complete binary dependency notices must be inspected after the archive is approved and obtained.
+
+[Ollama v0.34.4](https://raw.githubusercontent.com/ollama/ollama/v0.34.4/LICENSE) is MIT, requiring retained copyright/license text. Archive dependency notices remain to be inspected; no separate runtime click-through was found in the official source/release.
+
+The [exact Ollama model](https://ollama.com/library/qwen2.5-coder:0.5b) includes an Apache-2.0 license layer, matching the [Qwen publisher's license](https://huggingface.co/Qwen/Qwen2.5-Coder-0.5B-Instruct/blob/main/LICENSE). [Apache redistribution terms](https://www.apache.org/licenses/LICENSE-2.0) require a license copy, applicable attributions/NOTICE and notices of modifications. No account-gated agreement or additional model acceptance was identified for this exact model. Public redistribution still requires complete retained notices and the unresolved Thread project license; this trial grants no public release readiness.
+
+## Bounded proposed remote verification
+
+The local environment has only macOS ARM. Read-only inspection confirms the public repository's default branch is main, and remote ci.yml/vscode-preview.yml exactly match this checkout (Git blob hashes). Existing ci.yml triggers on every push and pull_request and can run Linux checks on a dedicated feature branch without changing main. Existing vscode-preview.yml can be manually dispatched with a feature-branch ref because it already exists on main, but its license gate currently blocks packaging and it is not a six-native-target verifier.
+
+The new native-backend.yml is local-only and currently dispatch-only. GitHub requires default-branch presence for workflow_dispatch; this constraint does not require publishing feature implementation to main. Recommended proposed scope after separate approval: update the native workflow in the feature branch with a push trigger restricted to that exact dedicated validation branch, commit reviewed distribution files excluding unrelated owner instructions, and push that one branch. That would run native verification plus the existing nine CI jobs, without a PR or merge. A draft PR is optional for review but would cause an additional existing CI run unless trigger duplication is deliberately avoided. A branch-restricted push-trigger workflow is an inference from GitHub's documented push behavior; repository policy and authorization must still be checked at execution. No remote writes/dispatch have occurred.
+
+Branch source and Actions logs would be public. Candidate artifacts retained for seven days require a signed-in GitHub account with repository read access to download; they are not Marketplace or GitHub Releases publications. Standard public runners are currently free, subject to account policy/availability. If publishing a feature branch is not approved, Windows/Linux checks remain blocked pending suitable owner-provided native hosts. No default-branch publication is recommended for verification.
+
+The workflow runs six standard native jobs: macos-14 ARM, macos-15-intel, ubuntu-22.04 x64, ubuntu-24.04-arm, windows-2025 x64 and windows-11-arm. It installs Python 3.12/Node 22/build dependencies in disposable runners, runs source protection and synthetic distribution/import tests, builds/probes native backends, and retains unsigned candidate artifacts for seven days. It has contents-read permissions, no publishing tokens, no model/runtime acquisition or inference, and no Marketplace/release upload. No repository settings, signing identities or billing changes are proposed. Standard public-repository runners are currently free per [GitHub documentation](https://docs.github.com/en/actions/reference/runners/github-hosted-runners); account policy/quota/availability still apply.
+
+## Independent assembly tooling
+
+`offline_bundle.py --recipe <json> --output <new-directory>` now assembles only explicitly inventoried existing local files. Each asset adds an absolute `input` path to the production manifest fields (path, role, size, SHA-256, source, license and version). The recipe includes schema 1, target, runtimeExecutable, runtimeVersion, modelDirectory and model. The tool strips local input paths from the final manifest, verifies copied size/digests, preserves executable bits, rejects links/unsafe paths and existing outputs, and removes incomplete staging on failure. It never downloads or executes assets. The production TypeScript importer remains the final import-policy check; assembler/auditor success alone is not inference or distributor authenticity.
+
+## Completed local trial — 2026-10-11
+
+The owner approved this exact bounded trial and linked PSF terms. All pinned archive/model hashes matched; no source/version substitution occurred. Initial sequential GitHub transfers were slow; bounded validated HTTP ranges completed the same approved files, followed by whole-file checksums. Partial transfers and temporary range parts were removed afterward.
+
+The maintained native build uses CPython 3.12.15 and records maximum collected Mach-O minimum macOS 11.0. Actual execution was on macOS 27.0.1 ARM64. The private companion is `artifacts/thread-offline-darwin-arm64-trial-v2/`, 92 inventoried assets totaling 964,205,258 bytes, manifest SHA-256 `91b85eedc42641e6aef5da0dd374ddb79596c8f4c4b8d463950a518a925d8904`. It contains the backend, complete materialized runtime, pinned model manifest/config/blobs and supplied notices. This is a private trial with publicReleaseReady false.
+
+The first real inference found a concrete importer bug: llama-server lacked execute permission. Added reviewed manifest executable flags restricted to backend/runtime roles, a regression test, and a corrected companion. The failed imported copy and obsolete companion were removed; failure evidence remains in `build/local-offline-trial/offline-trial-helper-failure.json`.
+
+The production TypeScript importer verified/copied the corrected companion into isolated project storage. A temporary sandbox applied only to the trial process allowed localhost networking and denied external connections; an explicit external TCP probe failed with EPERM. No OS security settings or warning bypasses were used. PATH/PYTHONHOME/PYTHONPATH pointed to nonexistent external Python locations. Imported Ollama reported version 0.34.4, loaded the copied Qwen model and returned `READY` with completion status done. The copied frozen backend successfully listed that local model. Evidence: `build/local-offline-trial/offline-trial.json` and `offline-server.log`.
+
+The trial-owned server stopped; process inspection found no trial server/helper/download process remaining. Its isolated HOME avoided the user's Ollama configuration. Original verified archives/model store, the corrected companion and one successful imported copy remain for review; temporary range parts and failed copies were removed. Complete binary redistribution notices and Thread's project license remain release gates; no publication, remote push/dispatch or actual macOS 14/Windows/Linux execution occurred. This single prompt demonstrates setup/inference plumbing, not answer quality or a benchmark. The normal VS Code offline-import UI was not manually certified by this Node integration trial.
+
+Final portable VSIX: `artifacts/thread-agent-0.2.0-darwin-arm64-portable.vsix`, 11,536,478 bytes, SHA-256 `3d9a5951d57c6a247d179e84081d3d567f4255508bb2eca6a4b5759f4be8b735`. Its extracted native backend passed bounded JSON protocol and bundled dependency/decoder checks with external Python paths unavailable. Sidecar checksum and validation JSON are retained beside the VSIX. Final checks: 66 Python tests discovered, 64 passed and two Windows-native skips; 18 Node tests, TypeScript, Ruff and diff checks pass. A fresh isolated VS Code host fixture reports Python 3.12.15 and passes activation/setup/reviewed-edit tests. This fixture does not replace manual certification of the offline-import UI.
+
+## Local release-readiness follow-up
+
+The approved zstandard 0.25.0 wheel reports native ZSTD_VERSION 1.5.7, but its metadata includes only the wrapper's BSD notice. Added the matching upstream native-library BSD notice from the already installed Homebrew zstd 1.5.7_1 distribution, SHA-256 `7055266497633c9025b777c78eb7235af13922117480ed5c674677adc381c9d8`; native packaging now retains and checks this notice. No new download was made. The Ollama companion already retains all supplied runtime notices, including GO_LICENSE, vendor license texts and XGRAMMAR_NOTICE. The portable install-only Python archive lacks a complete dependency license inventory; OpenSSL 3.5.9 and other static dependency notice completeness remain unresolved. A different local OpenSSL distribution's notice was not substituted. See the source notice README for verified scope.
+
+An isolated VS Code host fixture calls production Agent.importOfflineBundle with scripted modal consent/decline and tiny synthetic inventory. It passed production copy/state activation, readiness failure rollback, persistence failure after model/state changes, cancellation cleanup and preservation of the prior installation/model. Startup/API metadata is a controlled loopback response, and no synthetic executable is run. This is fixture verification, not manual visual UI certification; the real inference check remains separate. The fixture restores its temporary-profile settings and dialog adapters, and installs nothing into the owner's normal profile.
+
+Owner decisions still needed before public release: select Thread's project license (UNLICENSED is unchanged), decide the desired Developer ID/notarization/signing route and authorize any account/credential work separately. Complete dependency notices and native platform results are technical gates alongside those decisions. The owner subsequently approved branch publication and cross-platform CI.
+
+After adding the verified native Zstd notice, rebuilt and probed the VSIX above and assembled `artifacts/thread-offline-darwin-arm64-trial-v3/`: 93 assets, 964,206,992 bytes, manifest SHA-256 `acd7ee2b9193502a02f0abbe50ddcdbb75c2d88a4dca42e1597c2a49aa40d5c8`. The refreshed companion again returned READY under the localhost-only sandbox, with external network denied and bundled-backend model inventory passing. Evidence is `build/local-offline-trial/offline-trial-notices.json`; its trial server stopped. The earlier v2 companion remains available as the previously reviewed trial snapshot.
+
+## Approved feature-branch CI scope
+
+The owner explicitly approved `native-distribution-validation` branch-only publication and CI. The native workflow now triggers only on pushes to that branch, with six native jobs capped at 20 minutes each and contents-read permissions. It retains probe text and notice provenance for seven days; binaries/model assets are excluded from the commit and CI artifact uploads while redistribution review is unfinished. Existing push CI also runs nine Linux checks. No PR, merge, main update, release, Marketplace upload, model acquisition in CI or account/security changes are authorized. Source and test logs are public in this public repository; native validation metadata requires a signed-in account with repository read access for artifact download.

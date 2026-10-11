@@ -2,6 +2,12 @@
 
 Ask questions about your repository, diagnose errors, review proposed code changes, and summarize documents using a local Ollama model. Thread can manage the runtime and initial model setup on supported Macs. No paid API key is required.
 
+Bundled backend packages and online/offline distribution for Windows, macOS and Linux are under development. Current published/built packages still require Python unless they include a native backend asset. Windows repository access remains blocked pending secure platform implementation. See [distribution progress](https://github.com/KrishnendraPrakash/thread/blob/main/docs/distribution-modes.md).
+
+**Thread: Import Offline Local AI** imports an unpacked, trusted companion bundle after review of its manifest SHA-256, platform, model, native runtime and size. Copying is cancellable and checksum-verified; Thread checks the local model before activating it. Official companion bundles and real offline inference validation are still pending. Windows remains gated pending native validation of its new handle-based source reader.
+
+Use one Thread window during offline setup. Copying is serialized with an import lock; cancelled or failed copies remove their staging data. Completed repeat imports preserve separate copies. See the distribution guide for crash recovery and retained manifests.
+
 ## Dependencies — what you need
 
 | Dependency | Requirement | Installed by Thread? |
@@ -66,3 +72,9 @@ The bundled editor suite has been run locally on Python 3.9.6, 3.12.13 and 3.14.
 [Full usage and troubleshooting](https://github.com/KrishnendraPrakash/thread/blob/main/docs/vscode.md) · [Privacy and local data storage](https://github.com/KrishnendraPrakash/thread/blob/main/extensions/vscode/PRIVACY.md) · [Changelog](https://github.com/KrishnendraPrakash/thread/blob/main/extensions/vscode/CHANGELOG.md)
 
 This is an experimental preview. Included Python dependencies retain their notices under `python/*dist-info`. Source updates and a local VSIX do not update the Marketplace listing until a new version is published. See the [publishing guide](https://github.com/KrishnendraPrakash/thread/blob/main/docs/publishing.md).
+
+Private Apple Silicon native candidates now pass extracted-package probes without external Python. A maintained portable Python 3.12.15 build and real offline companion trial now pass on the current Mac with external networking denied; see [distribution trial](https://github.com/KrishnendraPrakash/thread/blob/main/docs/distribution-trial.md). The offline assembler uses already acquired, inventoried files and does not download or execute them.
+
+The real trial exposed and corrected execute permissions for runtime helpers such as llama-server. Reviewed companion inventories now record executable flags for native backend/runtime assets. Other platforms and complete redistribution/signing gates remain pending.
+
+The isolated VS Code host fixture now exercises the production offline command with scripted consent/decline, successful activation, missing-model and state-persistence rollback, cancellation cleanup and prior-installation preservation. Startup metadata is synthetic in that fixture; real copied-model inference was checked separately. Zstandard native-library notices are now retained separately from its Python wrapper notice; full portable-Python dependency notices, owner license selection and platform signing remain release gates.
