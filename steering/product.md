@@ -4,6 +4,8 @@ Updated: 2026-09-24. Basis: the user's planning instructions, subsequent scaffol
 
 ## Established direction
 
+The owner now requires dependency reduction across Windows, macOS and Linux from the start, with both consented first-use downloads and an offline distribution option. Bundle the backend so a separate user Python installation is unnecessary; preserve local inference and existing approval/security boundaries. Target support remains subject to native implementation and validation.
+
 Build a public, reusable personal AI agent that completes useful tasks, makes important conclusions checkable, and gives the human meaningful choices. The main access path runs locally without a paid LLM API account. Optional hosted free tiers, paid APIs using the user's keys, and private on-premises endpoints use the same runtime.
 
 The user requested automatic Python detection and visible extension dependencies: the installed editor should not require a manual interpreter path for standard installations. Python 3.9+ is the implemented editor compatibility floor, not a promise to support all historical Python 3 versions.

@@ -3,7 +3,34 @@ import * as assert from 'node:assert/strict';
 import { mkdtemp, mkdir, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import * as path from 'node:path';
-import { Backend } from '../backend';
+import { Backend, BACKEND_TARGETS, bundledBackend, backendArguments } from '../backend';
+
+test('native backend selection is bounded to the six packaging targets', async () => {
+  const folder = await mkdtemp(path.join(tmpdir(), 'thread-native-test-'));
+  try {
+    assert.equal(bundledBackend(folder), undefined);
+    for (const target of BACKEND_TARGETS) {
+      const [platform, arch] = target.split('-');
+      const executable = path.join(folder, 'native', target, 'thread-backend', platform === 'win32' ? 'thread-backend.exe' : 'thread-backend');
+      await mkdir(path.dirname(executable), { recursive: true });
+      await writeFile(executable, 'fixture, never executed');
+      assert.equal(bundledBackend(folder, platform, arch), executable);
+    }
+    assert.equal(bundledBackend(folder, 'win32', 'ia32'), undefined);
+    assert.deepEqual(backendArguments(bundledBackend(folder)!, folder), []);
+    assert.deepEqual(backendArguments('python3', folder), ['-I', '-u', path.join(folder, 'python', 'bridge.py')]);
+  } finally { await rm(folder, { recursive: true, force: true }); }
+});
+
+test('packaged executable uses the JSON protocol without Python flags', { skip: process.platform === 'win32' }, async () => {
+  const folder = await mkdtemp(path.join(tmpdir(), 'thread-native-launch-'));
+  try {
+    const executable = path.join(folder, 'native', `${process.platform}-${process.arch}`, 'thread-backend', 'thread-backend');
+    await mkdir(path.dirname(executable), { recursive: true });
+    await writeFile(executable, '#!/bin/sh\nif [ "$#" -ne 0 ]; then exit 3; fi\nread request\nprintf \'{"ok":true,"result":{"packaged":true}}\\n\'\n', { mode: 0o755 });
+    assert.deepEqual(await new Backend().call(executable, folder, { operation: 'python' }), { packaged: true });
+  } finally { await rm(folder, { recursive: true, force: true }); }
+});
 
 test('bridge rejects unknown operations without calling a model', async () => {
   const backend = new Backend();

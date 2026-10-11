@@ -16,7 +16,7 @@ The experimental [direct-field workflow](first-workflow.md) implements the compo
 | providers/hosted | Optional M4B hosted free-tier and paid adapters; no SDK dependencies yet. |
 | providers/private | Optional M4B private endpoint adapter; endpoint and auth policy remain required. |
 | tools | Reserved for typed tool registration and dispatch after runtime policy checks. |
-| tools/filesystem | Descriptor-based bounded reads of explicitly selected TOML/JSON files. Listing, search, and edits remain pending. |
+| tools/filesystem | Descriptor-based bounded reads of explicitly selected TOML/JSON files; Windows handle-relative reads/enumeration are implemented but await native verification. Generic tool listing/search/edit dispatch remains pending. |
 | tools/calculation | Reserved for bounded deterministic calculations; never execute arbitrary model text. |
 | policy | Reserved for authority, workspace boundaries, network rules, and action preconditions. |
 | evidence | Scalar field extraction with exact JSON pointers; snapshots are retained in the session store. |

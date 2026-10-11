@@ -1,7 +1,7 @@
 import { accessSync, constants, readdirSync, realpathSync } from 'node:fs';
 import * as path from 'node:path';
 
-export interface PythonRuntime { executable: string; version: string }
+export interface PythonRuntime { executable: string; version: string; bundled?: boolean }
 
 // Never auto-discover executables supplied by the repository being inspected.
 export function pythonCandidates(searchPath: string, roots: string[], extraDirectories: string[] = []): string[] {

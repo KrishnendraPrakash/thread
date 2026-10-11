@@ -1,5 +1,7 @@
 # Local AI setup managed by Thread
 
+Development update: the source now includes pinned native runtime acquisition for the six Windows/macOS/Linux targets and **Thread: Import Offline Local AI**. The approved Apple Silicon portable build and real offline import/inference trial now pass on the current Mac; all six native backend build/probe jobs now pass CI, including Windows handle-reader tests. Full platform acquisition/editor integration and real offline inference beyond the local Mac remain unverified; Windows editor activation is still gated. Linux's decoder is bundled by native builds. See [current distribution modes and pending checks](distribution-modes.md) before treating the broader target list as support.
+
 Version 0.2.0 adds an optional managed setup for **Apple Silicon Macs running macOS 14 or newer**. It avoids asking developers to install Ollama with Homebrew, run Docker, configure a server, or type model-download commands. Python 3.9+ still needs to exist on the machine; Thread detects it automatically. Linux and Intel Mac users can continue using an existing local Ollama server.
 
 ## Developer workflow

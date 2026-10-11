@@ -1,51 +1,152 @@
 # Thread Agent
 
-**A local-first personal AI agent project designed around checkable answers and human control.**
+### Understand your project. Review AI suggestions. Stay in control.
 
-Thread now has an experimental **VS Code extension** for repository questions, debugging assistance, reviewable feature edits and document summaries. It uses a model you select from local Ollama, without paid API credentials. The original exact-field CLI also remains available.
+Thread is a local AI assistant inside **Visual Studio Code (VS Code)**, the app you use to open and edit code. Ask where something happens, get help investigating a bug, review a suggested change, or summarize a document. Thread uses a model running on your computer through **Ollama**; the main workflow needs no paid AI account or API key.
 
-> **Usable developer preview, not a finished autonomous agent.** General answers are model interpretations with inspectable sources, not independently verified facts. Edits require explicit review and approval. Full model-quality and M1 release gates have not passed.
+> [!IMPORTANT]
+> **Experimental developer preview.** Answers and generated code can be wrong. Thread shows source excerpts and asks you to review changes. The new bundled-backend and offline paths are development candidates, not a finished release for every operating system.
 
-[Install the VS Code extension](docs/vscode.md) · [Publish a preview](docs/publishing.md) · [CLI quick start](#quick-start) · [Workflow diagrams](docs/workflows.md) · [Roadmap](#roadmap) · [Contributing](CONTRIBUTING.md)
+**Explore:** [What it does](#what-can-i-do) · [Choose setup](#choose-your-setup) · [First task](#try-your-first-task) · [Platform status](#platform-status) · [FAQ](#questions-and-help) · [For contributors](#for-contributors)
 
-## Start with VS Code
+| 🔎 Understand | 🛠️ Investigate | ✍️ Change | 📄 Summarize |
+| --- | --- | --- | --- |
+| Ask how your project works, with source references. | Describe an error and inspect a proposed explanation or fix. | Review changes to up to four eligible text files. | Choose text, PDF text or a Word document's main body. |
 
-**Using an installed extension:** you need Python 3.9+. Thread detects it automatically and bundles its Python libraries. On Apple Silicon macOS 14+, Thread can download and manage Ollama plus a starter model after your confirmation; no separate Ollama installation or terminal commands are needed. Other supported systems use an existing local Ollama installation. See the [extension dependency table](extensions/vscode/README.md#dependencies--what-you-need) for required and bundled components.
+## What can I do?
 
-From your checkout, with Python 3.11+, uv, Node.js 22+ and npm installed:
+| You ask | Thread helps by | Your part |
+| --- | --- | --- |
+| “Where does this project read its database settings?” | Finding relevant saved source excerpts and explaining them. | Open the sources and check the explanation. |
+| “This function gives the wrong result. Why?” | Using your description, source and VS Code diagnostics. | Check the diagnosis; review any proposed fix. |
+| “Add input validation to this function.” | Proposing bounded file changes with before/after diffs. | Review each diff, explicitly approve, then inspect/save/test. |
+| “Summarize the requirements in this document.” | Summarizing a selected file or range with extraction notes. | Check what was included or omitted. |
 
-```bash
-uv sync --locked --extra dev --extra editor
-npm ci --prefix extensions/vscode --ignore-scripts
-mkdir -p artifacts
-npm run package --prefix extensions/vscode
+Thread reads a bounded selection of **saved files**, rather than understanding every file at once. Save relevant files and open the one you are asking about. It cannot operate debugger breakpoints, silently run generated commands, or remember all earlier conversations. [Detailed limits →](docs/vscode.md#files-documents-and-model-limits)
+
+## Choose your setup
+
+**New here? Start with the VS Code guide.** The existing Python-based preview is the practical route today; the native lightweight and offline routes below are being validated.
+
+| Route | What you need | Where to start |
+| --- | --- | --- |
+| **Existing editor preview** | VS Code 1.95+, Python 3.9+ and a local text-generation model. On Apple Silicon macOS 14+, confirmed managed setup can install Ollama/model assets. | [Build/install and first setup](docs/vscode.md#build-and-install-from-this-public-repository) |
+| **Lightweight native candidate** | A matching platform VSIX containing the backend; local runtime/model assets acquired after confirmation, or an existing local server. A correctly built native package removes the separate Python requirement. | [Distribution paths and prerequisites](docs/distribution-modes.md) |
+| **Offline native candidate** | Matching VSIX **and** a trusted companion folder containing runtime/model assets and notices, transferred from a connected computer. | [Offline import steps](#offline-setup-in-plain-english) |
+| **Simple field lookup** | Git and Python 3.11+. No AI model or GPU required. This is a separate command-line tool. | [Try a field lookup](#try-a-field-lookup-without-ai) |
+
+A **VSIX** is a VS Code extension installer. A **model** is the downloaded AI data used to generate answers. A **companion bundle** contains the additional files needed for offline setup; it can be much larger than the extension.
+
+> [!NOTE]
+> The owner reported publishing version **0.1.0** as `Krishnendra.thread-agent`. This branch develops **0.2.0**; its local candidates have not been published to Marketplace. A public repository or passing CI does not make a new installer available. Check the [release checklist](docs/releasing.md) before distributing packages.
+
+### Install and open the editor preview
+
+1. Follow the [build/install guide](docs/vscode.md#build-and-install-from-this-public-repository) to obtain the local VSIX. Building from source needs developer tools and internet access for dependencies.
+2. In VS Code, open **Extensions → … → Install from VSIX…** and select your installer.
+3. Open a project you trust. From the Command Palette, run **Thread: Setup Local Model**. The Python-based preview automatically detects Python 3.9+.
+4. Select an installed local text model. On a supported Apple Silicon Mac, you can choose **Set up local AI for me (Recommended)** and review/confirm the downloads instead.
+5. Open the **Thread** sidebar and choose a workflow.
+
+Downloads need internet and sufficient storage/memory. They do not happen because an AI answer tells Thread to install something. [Setup sizes, terms and recovery →](docs/local-setup.md)
+
+### Offline setup in plain English
+
+1. On a connected computer, obtain the matching VSIX and companion folder from a **trusted distributor**. Official ready-to-download companion releases are not available yet.
+2. Transfer both to the offline computer and install the VSIX.
+3. Run **Thread: Import Offline Local AI**, select the unpacked companion folder, and compare the shown manifest SHA-256 with the distributor's trusted record. SHA-256 is a fingerprint used to detect changed bytes; it does not prove who made the bundle.
+4. Review and explicitly approve the native programs being imported. Thread copies/checks the files, starts its local model server and checks the selected model before activating it.
+5. Keep one Thread window active during import. Cancel or a failed import preserves the previous selection and removes incomplete copied files.
+
+One real Apple Silicon Mac import and model response passed with external networking denied. Clean-machine setup and model inference on the other platforms remain to be verified. The companion assembler is a developer tool, not a download service. [Trust boundaries and complete bundle requirements →](docs/distribution-modes.md)
+
+## Try your first task
+
+**Example walkthrough — not a screenshot or a guarantee of model output.** Suppose your saved project contains a small `add` function that subtracts instead of adding:
+
+```python
+def add(a, b):
+    return a - b
 ```
 
-In VS Code, choose **Extensions → … → Install from VSIX…** and select `artifacts/thread-agent-0.2.0.vsix`. Open your repository, run **Thread: Setup Local Model**, let Thread detect Python 3.9+ automatically and select an installed local Ollama text model, then open the **Thread** sidebar. If local AI is missing on a supported Mac, choose **Set up local AI for me (Recommended)**, select a starter model, and confirm the displayed download. Python itself is still required; no project virtual environment or manual Python path is needed for standard installations. See [managed setup and limits](docs/local-setup.md).
+1. Open that file and run **Thread: Diagnose a Problem**.
+2. Enter: “`add(2, 3)` returns `-1`; I expected `5`. Explain why and propose a fix.”
+3. Read the explanation and captured source excerpts. If Thread proposes a change, choose **Review proposed changes** and **Review a diff (recommended)**.
+4. Inspect every proposed diff and explicitly mark it reviewed. Choose **Apply to editor buffers**, then confirm **Apply reviewed changes**.
+5. Inspect/save the result and run your project checks. Thread can run an existing VS Code task only after you select and confirm it; inspect its terminal output yourself.
 
-See the [step-by-step guide](docs/vscode.md) for prerequisites, examples, approval options, document formats, storage and troubleshooting. The extension is tested on macOS; Linux uses the same secure backend primitives but its editor UI remains untested. Windows is not supported by the secure backend yet.
+```mermaid
+flowchart LR
+    A["Ask about saved files"] --> B["Inspect answer and sources"]
+    B --> C{"Change proposed?"}
+    C -->|Yes| D["Review every diff"]
+    D --> E["Explicitly approve apply"]
+    E --> F["Inspect, save and test"]
+    C -->|No| G["Use the explanation with care"]
+```
 
-## What can I use today?
+You can also refine the proposal with your own instructions, choose **More options**, **Pause review**, or **Cancel proposal**. Custom text and silence do not approve a change. Changed source files invalidate an old proposal. Thread does not automatically save existing-file edits, commit or push; creating an approved new file may write it to disk. [Review controls →](docs/vscode.md#review-and-apply-a-feature-or-fix)
 
-| Capability | Current scope |
-| --- | --- |
-| Repository questions | Bounded lexical search over eligible saved files; cited model interpretations. |
-| Debugging assistance | User errors + VS Code diagnostics + source excerpts; optional fix proposals. No breakpoint control. |
-| Feature edits | Up to four eligible files, exact diffs, explicit approval, stale-source checks and observed editor-buffer outcomes. |
-| Document summaries | UTF-8 text, extracted PDF text and DOCX main body; range selection and explicit limits, no OCR. |
-| Human choices | Recommended diff review, apply, alternatives, More, custom instructions, pause and cancel. |
-| Run checks | Explicitly select and confirm an existing VS Code task; inspect its terminal output. |
-| Exact TOML/JSON reports | Separate deterministic CLI workflow, with optional local model field suggestions. |
-| Durable knowledge memory / semantic verification | Planned. |
-| Hosted free tiers, paid keys and private endpoints | Optional, planned for M4B. |
+## Platform status
 
-“Repository understanding” means retrieving relevant context across the chosen workspace. It does not mean every file is sent to the model or every conclusion is correct. [Coverage and limitations](docs/vscode.md#files-documents-and-model-limits) are part of the result.
+**Native backend CI passed on all six targets** for [commit `3e436ad`](https://github.com/KrishnendraPrakash/thread/commit/3e436adaaa625b26831c8d8a8148f18245d7ee30): builds, JSON/dependency probes, source-boundary tests and synthetic offline-import tests. [Inspect the native run →](https://github.com/KrishnendraPrakash/thread/actions/runs/38142298112)
 
-## Quick start
+| Computer | Native backend check | Full editor / real offline AI |
+| --- | --- | --- |
+| Apple Silicon Mac (ARM64) | Passed on macOS 14 runner | Local editor fixtures and real offline AI trial passed on the development Mac; clean-machine certification pending. |
+| Intel Mac (x64) | Passed on macOS 15 Intel runner | Full editor and real model trial pending. |
+| Linux x64 | Passed on Ubuntu 22.04 runner | Full editor and real model trial pending. |
+| Linux ARM64 | Passed on Ubuntu 24.04 ARM runner | Full editor and real model trial pending. |
+| Windows x64 | Passed on Windows 2025 runner, including native handle-read tests | **Editor activation remains gated** pending broader document/edit integration validation. |
+| Windows ARM64 | Passed on Windows 11 ARM runner, including native handle-read tests | **Editor activation remains gated** pending broader document/edit integration validation. |
 
-You need **Git and Python 3.11 or newer**. No GPU, model download, or API key is needed for exact-field reports. Installation may download Python build tooling. The CLI base package has no third-party runtime dependencies; the optional editor extra adds document/ignore parsers.
+These runner versions are test environments, not a certified minimum OS list. Native CI does not download/run a model. Web, 32-bit and remote-host profiles are outside this initial target matrix. Signing, complete third-party notices and the owner license remain release blockers. [Current evidence and remaining gates →](steering/status.md)
 
-### macOS or Linux
+## Questions and help
+
+Click a question to expand it.
+
+<details>
+<summary>Does my code go to a cloud AI service?</summary>
+
+The implemented AI path calls a local Ollama server on loopback (your own computer). There is no silent paid/cloud fallback. Confirmed setup downloads runtime/model assets; VS Code and tasks you explicitly run can have their own network behavior. Thread's process boundary is not an OS sandbox. [Privacy details](extensions/vscode/PRIVACY.md)
+
+</details>
+
+<details>
+<summary>What does Thread store, and how can I stop it?</summary>
+
+The latest completed editor analysis is saved in workspace state, including source excerpts, proposals and model inputs/outputs. **Thread: Clear Saved Analysis** clears the active entry; it does not erase VS Code backups or undo history. **Thread: Cancel Current Request** stops the client request; a local model server may briefly finish its work. Stop an already approved VS Code task using VS Code task controls. Runtime/model files are separate from analysis. [Storage and cancellation](docs/vscode.md#storage-cancellation-and-troubleshooting)
+
+</details>
+
+<details>
+<summary>Can it summarize any PDF or Word file?</summary>
+
+It extracts PDF text and DOCX main-body text, plus supported UTF-8 text files. It does not perform OCR on scans or inspect document images, and Word headers/footnotes may be omitted. Select a smaller page/paragraph/line range when needed. Check extraction notes. [Formats and limits](docs/vscode.md#files-documents-and-model-limits)
+
+</details>
+
+<details>
+<summary>Setup or a request failed. What next?</summary>
+
+Rerun **Thread: Setup Local Model** and check the reported backend/model status. For the Python-based package, install a maintained Python 3.9+ if none is detected. Choose a local text-completion model rather than an embedding/cloud model. For rejected output, ask a narrower question; for stale changes, inspect the current files and request a new proposal. [Troubleshooting guide](docs/vscode.md#storage-cancellation-and-troubleshooting)
+
+</details>
+
+<details>
+<summary>Is it a finished autonomous agent? Can I redistribute it?</summary>
+
+This is a bounded preview. Durable knowledge memory, independent semantic verification and optional hosted/private adapters remain planned. No full M0/M1/model benchmark gate has passed. The repository's owner license is **not selected** (`UNLICENSED` in extension metadata); public source visibility is not a license grant. Complete portable-Python notices and signing decisions remain open. [Roadmap](AGENT_PLAN.md) · [Release checklist](docs/releasing.md)
+
+</details>
+
+## Try a field lookup without AI
+
+This separate CLI reports an exact TOML/JSON value and its source fingerprint. It does not provide general chat. You need Git and Python **3.11+**; installation may download build tooling.
+
+<details>
+<summary>macOS or Linux commands</summary>
 
 ```bash
 git clone https://github.com/KrishnendraPrakash/thread.git
@@ -53,251 +154,40 @@ cd thread
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install -e .
-thread-agent status
+thread-agent ask --file examples/projects/minimal/settings.toml --field /database/default
 ```
 
-### Windows PowerShell
+</details>
+
+<details>
+<summary>Windows PowerShell commands</summary>
+
+Verify `py -3 --version` reports 3.11+ first. Full Windows CLI installation remains to be tested; native source-read CI is a narrower check.
 
 ```powershell
 git clone https://github.com/KrishnendraPrakash/thread.git
 cd thread
 py -3 -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -e .
-.\.venv\Scripts\python.exe -m thread_agent status
+.\.venv\Scripts\python.exe -m thread_agent ask --file examples/projects/minimal/settings.toml --field /database/default
 ```
 
-Ensure `py -3 --version` reports Python 3.11 or newer. The Windows commands use the environment's Python directly, so shell activation is unnecessary. Windows setup has not yet been tested by this project; secure file reads currently require macOS/Linux.
+</details>
 
-If you already cloned the repository, start from its directory and skip the clone step. If your virtual environment already exists, reuse it.
+Already cloned? Skip the first two commands and reuse your environment. The report includes **`"value": "sqlite"`**, a source path, field and hash. This describes captured file content, not a running database. [Full CLI guide, sessions and replay →](docs/first-workflow.md)
 
-Expected output:
+## For contributors
 
-```text
-Thread Agent 0.0.0.dev0: experimental local field lookup.
-Available: exact TOML/JSON fields, local model suggestions, saved choices, and replay.
-VS Code extension: repository analysis, reviewed edits, and document summaries.
-Not yet available: semantic verification, durable memory, or hosted models.
-Full M1 acceptance and model accuracy are not established.
-Try: thread-agent ask --file examples/projects/minimal/settings.toml --field /database/default
-```
-
-Now try a real source report on macOS/Linux, with no model required:
-
-```bash
-thread-agent ask --file examples/projects/minimal/settings.toml --field /database/default
-```
-
-The report contains `"value": "sqlite"`, the source path, field, and source hash. It describes the captured file, not a running application.
-
-For local-model suggestions, saved choices, and replay, follow the [step-by-step guide](docs/first-workflow.md). `status` reports implementation progress; `doctor` checks local Ollama connectivity.
-
-```mermaid
-flowchart LR
-    clone["Clone repository"] --> env["Create Python environment"]
-    env --> install["Install package"]
-    install --> status["Run thread-agent status"]
-    status --> lookup["Try an exact field report"]
-    lookup --> explore["Explore the design and contribute"]
-```
-
-### Optional: use uv
-
-If you already use uv, run this from the checkout:
-
-```bash
-uv sync --locked --extra dev
-uv run --locked thread-agent status
-```
-
-This installs the recorded development dependencies from [uv.lock](uv.lock). The pip instructions use the dependency ranges in [pyproject.toml](pyproject.toml), rather than the uv lock.
-
-## Available commands
-
-Run these with your virtual environment activated:
-
-| Command | What it does |
+| I want to… | Read this |
 | --- | --- |
-| `thread-agent` | Show help |
-| `thread-agent --help` | List supported commands |
-| `thread-agent --version` | Show the installed package version |
-| `thread-agent status` | Explain which parts are implemented |
-| `thread-agent status --json` | Return the same implementation status as JSON |
-| `thread-agent ask --file FILE --field POINTER` | Report an exact scalar field with its source hash |
-| `thread-agent ask --file FILE` | Choose a field interactively; optional question and `--model` |
-| `thread-agent doctor` | List installed local Ollama models without generating text |
-| `thread-agent sessions` | List locally saved sessions |
-| `thread-agent resume SESSION_ID` | Resume a saved field choice |
-| `thread-agent trace SESSION_ID` | Inspect local records, including captured source content |
-| `thread-agent replay SESSION_ID` | Verify a stored source report without live tools or models |
+| Build and run checks | [Development guide](docs/development.md) · [Contributing](CONTRIBUTING.md) |
+| Understand the code layout | [Component map](docs/structure.md) |
+| Explore the design | [Workflow diagrams](docs/workflows.md) · [Specification](SPEC.md) · [Rationale](RATIONALE.md) |
+| See implemented vs planned work | [Current status](steering/status.md) · [Roadmap](AGENT_PLAN.md) |
+| Work on native/offline packaging | [Distribution modes](docs/distribution-modes.md) · [Trial evidence](docs/distribution-trial.md) |
+| Prepare a public preview | [Publishing guide](docs/publishing.md) · [Release checklist](docs/releasing.md) |
+| Report a problem | [GitHub issues](https://github.com/KrishnendraPrakash/thread/issues) — include your OS, version and reproducible steps; remove secrets. |
 
-You can also use `python -m thread_agent` in place of `thread-agent`. On Windows, use `.\.venv\Scripts\python.exe -m thread_agent` if the environment is not activated.
+Tests and synthetic traces demonstrate specific behavior; they are not accuracy benchmarks. Keep the primary path usable without paid API credentials. Follow [AGENTS.md](AGENTS.md) for project agreements.
 
-There is **no general `run`, `chat`, or model download command**. The `ask` command currently supports exact source-field reports only. Files in [configs](configs/README.md), [prompts](prompts/README.md), and `.env.example` are design examples; the CLI does not load them.
-
-## What Thread is being built to do
-
-These are the broader intended use cases. Exact field reports and reviewed editor changes have experimental implementations; durable memory and general semantic verification remain planned:
-
-| Example request | Intended behavior |
-| --- | --- |
-| “What database default is checked into this project?” | Read the relevant file, check the exact value, and cite the source with its scope. |
-| “These two documents disagree. Which applies here?” | Compare versions and context, investigate within scope, and explain any remaining uncertainty. |
-| “Remember that this project uses SQLite for development.” | Store an explicit attributed decision that you can later correct or delete. |
-| “Update this setting in the project.” | Present the concrete change when approval is required, validate current state, apply the authorized edit, and check the result. |
-
-### Planned answer workflow
-
-The amount of checking depends on the task. A direct configuration lookup should take a shorter path than resolving conflicting evidence or changing files.
-
-```mermaid
-flowchart TD
-    request["Your request"] --> scope["Define scope and required result"]
-    scope --> clear{"Enough information?"}
-    clear -->|No| human["Ask with recommendations, alternatives, and custom input"]
-    human -->|Validated reply| scope
-    clear -->|Yes| route["Choose transformation, direct lookup, or investigation"]
-    route --> work["Use supplied input or policy-controlled tools"]
-    work --> checks["Bind factual claims to evidence and check required results"]
-    checks --> sufficient{"Enough support?"}
-    sufficient -->|Yes| render["Render answer from checked content"]
-    sufficient -->|No| limited["Prepare supported partial content or explain the evidence gap"]
-    limited --> render
-    render --> fidelity{"Output preserves checked facts and limits?"}
-    fidelity -->|Yes| deliver["Deliver that exact answer"]
-    fidelity -->|No| repair["Repair within budget or stop with a limitation"]
-```
-
-This overview shows the answer path; [the workflow guide](docs/workflows.md) expands investigation, clarification, retries, and actions. Boxes represent responsibilities, not a fixed number of model calls. Checks improve inspectability; they do not guarantee truth.
-
-### Planned human choices
-
-When an essential detail is missing or an action needs approval, Thread will pause dependent work and offer choices. For example, a **future clarification screen** might look like this:
-
-```text
-Which configuration should this answer describe?
-
-1. Checked-in default — Recommended: the file is available to inspect.
-2. Running service — Requires an authorized runtime observation.
-3. More options
-4. Write your own scope
-5. Pause
-6. Cancel
-
-Waiting for your explicit response…
-```
-
-Recommendations and silence will never approve an action. Ambiguous custom replies stay pending. Approvals will apply to the exact proposal and current state; changed proposals need revalidation. Optional questions may also offer Skip.
-
-## Models and deployment options
-
-**Local Ollama powers the experimental editor analysis and the separate CLI field-suggestion workflow.** The editor can propose changes; only explicit human review can apply them. The broader provider choices are:
-
-| Mode | Planned setup | Stage |
-| --- | --- | --- |
-| Local, primary path | Editor analysis and CLI field suggestions use explicit local model selection; full capability/task gates remain pending | Experimental pre-M1 |
-| Hosted free tier | Your provider credentials, with visible quota and data terms | M4B, optional |
-| Hosted paid API | Your provider credentials and an explicit budget | M4B, optional |
-| Private / on-premises | Your endpoint, model ID, authentication, and verified TLS | M4B, optional |
-
-Qwen3.5-9B and Qwen3.5-4B are **evaluation candidates**, not tested defaults. Exact model artifacts, quantization, hardware requirements, and compatibility remain open. Local inference still requires suitable hardware; hosted free-tier availability is provider-dependent.
-
-The design prohibits silent fallback to a cloud or paid provider. Offline policy must also cover tools, search, embeddings, and telemetry. See [model requirements](SPEC.md#8-model-access-and-public-distribution).
-
-## Workflow diagrams
-
-For the implemented editor path, see [the VS Code diagram](docs/vscode.md#architecture-and-validation). For the CLI, see [the first workflow diagram](docs/first-workflow.md#implemented-path). The [broader workflow guide](docs/workflows.md) illustrates the target architecture:
-
-| Diagram | What it explains |
-| --- | --- |
-| [Architecture](docs/workflows.md#architecture) | Interfaces, runtime, providers, storage, and policy |
-| [Task routing](docs/workflows.md#task-routing) | T0 transformations, T1 lookups, and T2 investigations/actions |
-| [Evidence to answer](docs/workflows.md#evidence-to-answer) | Claims, checks, coverage, rendering, and output fidelity |
-| [Human decisions](docs/workflows.md#human-decisions) | Recommendations, free text, pause/cancel, and resumption |
-| [Model selection](docs/workflows.md#model-selection) | Local and optional providers, capability checks, and failures |
-| [Approved actions](docs/workflows.md#approved-actions) | Policy, exact approvals, changed state, execution, and outcome checks |
-| [Memory and cache](docs/workflows.md#memory-and-cache) | Attributed facts, corrections, deletion, and invalidation |
-| [Failure and recovery](docs/workflows.md#failure-and-recovery) | Safe retries, uncertain effects, budgets, and stopping |
-| [Replay and evaluation](docs/workflows.md#replay-and-evaluation) | Reproducible checks without replaying live actions |
-| [Contribution workflow](docs/workflows.md#contribution-workflow) | How to make and validate a change today |
-
-The [full architecture Mermaid source](AGENT_ARCHITECTURE.mmd) contains the detailed cross-links. [SPEC.md](SPEC.md) defines the requirements; diagrams illustrate them.
-
-## Project layout
-
-```text
-thread/
-├── src/thread_agent/    Python CLI, editor backend and reserved components
-├── extensions/vscode/  VS Code interface, review/edit controls and packaging
-├── configs/            Draft local, hosted, and private profiles
-├── prompts/            Draft role prompts
-├── schemas/            Record and trace schema design locations
-├── tests/              Behavior tests and development reference checks
-├── evals/              Evaluation cases, fixtures, and grader locations
-├── examples/           Synthetic sample projects
-├── planning_examples/  Synthetic traces and deliberately negative cases
-├── docs/               Workflow diagrams and development guides
-├── steering/           Persistent project context for contributors
-└── .github/            Scaffold CI and contribution templates
-```
-
-The first workflow implements the CLI, scoped reads, field parsing, local suggestions, SQLite sessions, and deterministic replay. The editor backend adds repository retrieval, document extraction and immutable proposals; TypeScript provides the editor integration. Other modules remain responsibility placeholders. See the [component map](docs/structure.md) for ownership. The [synthetic traces](planning_examples/README.md) demonstrate intended records and failure cases; they are not real executions or benchmarks.
-
-## Roadmap
-
-| Stage | Deliverable | Current status |
-| --- | --- | --- |
-| Editor preview | Repository questions, debugging assistance, reviewed features and document summaries | Experimental; local VSIX available |
-| Scaffold | Package, information CLI, docs, examples, and CI configuration | Implemented |
-| M0 | Freeze initial tasks, fixtures, schemas, and baseline hardware profile | Ten deterministic development cases added; full freeze pending |
-| M1 | Local model workflow, terminal decisions, scoped reads, sessions, and basic replay | Narrow field workflow implemented; full M1 acceptance pending |
-| M2 | Evidence-bound claims and answer verification | Planned |
-| M3 | Investigation, task promotion, bounded repair, and recovery | Planned |
-| M4 | Attributed memory, skills, cache invalidation, and approved edits | Planned |
-| M4B | Optional hosted and private model adapters | Planned |
-| M5 | External research with source and freshness checks | Planned |
-| M6 | Reproducible public release with measured results and license | Planned |
-
-See the [plan](AGENT_PLAN.md) for sequencing and [specification](SPEC.md#10-milestone-gates) for acceptance gates. Proposed numerical targets are not measured results.
-
-## Troubleshooting
-
-| Problem | What to do |
-| --- | --- |
-| `thread-agent: command not found` | Activate `.venv`, then install with `python -m pip install -e .`. You can also use `python -m thread_agent status`. |
-| `No module named thread_agent` | Install the checkout using the same environment's Python that runs the command. |
-| Installation rejects your Python version | Check `python --version` inside the environment; Python 3.11+ is required. |
-| Status still says “scaffold only” | You have an older checkout/install. Check your source version and reinstall the current checkout. |
-| `run` or `chat` is rejected | These commands do not exist yet. Use `--help` for available commands. |
-| Editing a config or adding an API key has no effect | Draft TOML profiles are not loaded. The current adapter uses explicit `--model` with loopback Ollama; hosted keys are unsupported. |
-| A field choice remains pending | Answer the menu or resume the printed session. Exit code 2 can mean a pending decision. |
-
-For a source-only smoke check on macOS/Linux, without installing the package:
-
-```bash
-PYTHONPATH=src python3 -m thread_agent status --json
-```
-
-## Contributing
-
-Start with [CONTRIBUTING.md](CONTRIBUTING.md), [project status](steering/status.md), and the [development guide](docs/development.md). Useful early contributions include acceptance fixtures, design review, and the narrow M1 local workflow.
-
-Install development tools and run the current checks:
-
-```bash
-python -m pip install -e '.[dev,editor]'
-python -m ruff check .
-python -m ruff format --check .
-python -m compileall -q src
-python -m unittest discover -s tests -v
-thread-agent --help
-thread-agent --version
-thread-agent status --json
-```
-
-These check style, syntax, the CLI, source-read boundaries, persisted choices, provider validation, and deterministic reference outcomes. They require no model server or paid credentials. A zero-test run is not a pass. Local checks used Python 3.12.13; CI is configured for Python 3.11 and 3.12 on Linux. See [validation and limits](docs/first-workflow.md#validation-and-remaining-work) for the field workflow, and [current validation](steering/status.md) for the editor checks and incomplete M1 gates.
-
-For design context, read [SPEC.md](SPEC.md), [RATIONALE.md](RATIONALE.md), and [AGENTS.md](AGENTS.md). The steering Markdown guides project development; it is separate from the planned agent's runtime memory.
-
-## License and release status
-
-A repository license has **not yet been selected**. `thread-agent` is a working package name, not a published package or a verified registry-name reservation. Install from this repository using the commands above. License selection, model notices, compatibility reports, and measured limitations are tracked in the [release checklist](docs/releasing.md).
+[↑ Back to top](#thread-agent)

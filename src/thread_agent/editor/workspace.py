@@ -103,11 +103,19 @@ def safe_relative(name: str) -> PurePosixPath:
         or (path.suffix.lower() not in TEXT_EXTENSIONS and path.name not in TEXT_NAMES)
     ):
         raise AgentError("Path is outside the permitted source-file policy.")
+    if os.name == "nt":
+        from thread_agent.tools.filesystem.windows import components
+
+        components(name)
     return path
 
 
 def read_bytes(root: Path, name: str, limit: int = MAX_FILE, *, internal: bool = False) -> bytes:
     path = PurePosixPath(name) if internal else safe_relative(name)
+    if os.name == "nt":
+        from thread_agent.tools.filesystem.windows import read_bytes as windows_read
+
+        return windows_read(root, path.as_posix(), limit)
     if not hasattr(os, "O_NOFOLLOW") or not hasattr(os, "O_DIRECTORY"):
         raise AgentError("Secure repository access currently requires macOS or Linux.")
     descriptors = []
@@ -155,6 +163,10 @@ def decode(data: bytes) -> str:
 
 def entries(root: Path, directory: Path) -> list[tuple[str, bool, bool]]:
     """Enumerate through descriptors so a swapped directory cannot escape the root."""
+    if os.name == "nt":
+        from thread_agent.tools.filesystem.windows import entries as windows_entries
+
+        return windows_entries(root, directory)
     descriptors = []
     try:
         descriptors.append(os.open(root, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW))

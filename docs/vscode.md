@@ -6,6 +6,8 @@ It is a bounded assistant: retrieved sources make its answers inspectable, but e
 
 ## Build and install from this public repository
 
+Native backend builds and offline companion import are under development; see [distribution modes](distribution-modes.md). The existing build steps below generate the legacy Python-based package. They do not yet produce a verified package with no separate Python requirement on all platforms.
+
 Build requirements: macOS or Linux, Python 3.11+, Node.js 22+, npm, VS Code 1.95+, and access to local Ollama (existing or managed) for inference. Building requires internet access for dependencies. After setup, Thread calls only literal loopback Ollama; VS Code and user-selected tasks have their own network behavior.
 
 From the repository root:

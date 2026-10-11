@@ -4,19 +4,69 @@ import hashlib
 import importlib.util
 import io
 import json
+import sys
 import tarfile
 import tempfile
 import unittest
+import zipfile
 from pathlib import Path
 from unittest.mock import patch
 
 SCRIPT = Path(__file__).resolve().parents[2] / "extensions/vscode/scripts/install_runtime.py"
 SPEC = importlib.util.spec_from_file_location("thread_runtime_install", SCRIPT)
 installer = importlib.util.module_from_spec(SPEC)
+sys.path.insert(0, str(SCRIPT.parent))
 SPEC.loader.exec_module(installer)
+sys.path.remove(str(SCRIPT.parent))
 
 
 class RuntimeInstallTests(unittest.TestCase):
+    @unittest.skipUnless(importlib.util.find_spec("zstandard"), "Requires the native build decoder")
+    def test_real_zstandard_decoder_with_synthetic_tar(self):
+        import zstandard
+
+        archive = self.root / "synthetic.tar.zst"
+        archive.write_bytes(zstandard.ZstdCompressor().compress(self.archive()))
+        destination = self.root / "decoded"
+        destination.mkdir()
+        installer.unpack_zstd(archive, destination)
+        self.assertEqual((destination / "ollama").read_bytes(), b"synthetic executable")
+
+    def test_missing_linux_decoder_stops_before_download_and_releases_lock(self):
+        with (
+            patch.object(installer, "target", return_value="linux-x64"),
+            patch.dict(sys.modules, {"zstandard": None}),
+            patch.object(installer.urllib.request, "urlopen") as download,
+        ):
+            with self.assertRaisesRegex(ValueError, "no runtime was downloaded"):
+                installer.install(self.root)
+            download.assert_not_called()
+        self.assertFalse((self.root / "install.lock").exists())
+
+    def test_invalid_existing_marker_is_not_reused_or_overwritten(self):
+        final = self.root / f"ollama-{installer.VERSION}"
+        final.mkdir()
+        (final / "installed.json").write_text('{"version":"wrong"}')
+        with patch.object(installer.urllib.request, "urlopen") as download:
+            with self.assertRaisesRegex(ValueError, "identity"):
+                installer.install(self.root)
+            download.assert_not_called()
+        self.assertEqual((final / "installed.json").read_text(), '{"version":"wrong"}')
+        self.assertFalse((self.root / "install.lock").exists())
+
+    def test_zip_traversal_streams_and_duplicate_names_rejected(self):
+        for names in (("../escape",), ("file:stream",), ("COM¹.txt",), ("a", "A")):
+            with self.subTest(names=names), tempfile.TemporaryDirectory() as folder:
+                root = Path(folder)
+                archive = root / "runtime.zip"
+                with zipfile.ZipFile(archive, "w") as output:
+                    for name in names:
+                        output.writestr(name, "fixture")
+                destination = root / "output"
+                destination.mkdir()
+                with self.assertRaises(ValueError):
+                    installer.unpack_zip(archive, destination)
+
     def setUp(self):
         self.temporary = tempfile.TemporaryDirectory()
         self.addCleanup(self.temporary.cleanup)
@@ -59,6 +109,7 @@ class RuntimeInstallTests(unittest.TestCase):
             url = "https://official.example/test"
 
         with (
+            patch.object(installer, "target", return_value="darwin-arm64"),
             patch.object(installer.urllib.request, "urlopen", return_value=Response(content)),
             patch.object(installer, "SIZE", len(content)),
         ):
@@ -74,6 +125,7 @@ class RuntimeInstallTests(unittest.TestCase):
             url = "https://official.example/test"
 
         with (
+            patch.object(installer, "target", return_value="darwin-arm64"),
             patch.object(
                 installer.urllib.request, "urlopen", return_value=Response(content)
             ) as download,

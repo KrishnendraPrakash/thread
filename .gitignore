@@ -43,6 +43,7 @@ evals/reports/*
 node_modules/
 extensions/vscode/out/
 extensions/vscode/python/
+extensions/vscode/native/
 *.vsix
 .vscode-test/
 artifacts/
