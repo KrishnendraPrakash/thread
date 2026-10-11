@@ -17,11 +17,11 @@ Offline copying uses an exclusive `import.lock` in extension-owned storage. Conc
 | Target | Packaging foundation | Current repository access | Managed AI acquisition |
 | --- | --- | --- | --- |
 | darwin-arm64 | Native launch/build configuration | Existing macOS-tested POSIX path | Existing macOS 14+ installer |
-| darwin-x64 | Native launch/build configuration | POSIX path; no new native validation | Pinned archive installer; unverified on Intel Mac |
-| linux-x64 | Native launch/build configuration | POSIX path; no local Linux execution in this task | Pinned Zstandard archive installer; unverified |
-| linux-arm64 | Native launch/build configuration | POSIX path; no local Linux execution in this task | Pinned Zstandard archive installer; unverified |
-| win32-x64 | Native launch/build configuration | Handle-relative implementation; editor gate remains blocked pending native checks | Pinned ZIP installer; unverified |
-| win32-arm64 | Native launch/build configuration | Handle-relative implementation; editor gate remains blocked pending native checks | Official ARM64 ZIP verified in metadata; execution unverified |
+| darwin-x64 | Native launch/build configuration | POSIX backend build/probe CI passed; full editor pending | Pinned archive installer; unverified on Intel Mac |
+| linux-x64 | Native launch/build configuration | POSIX backend build/probe CI passed; full editor pending | Pinned Zstandard archive installer; unverified |
+| linux-arm64 | Native launch/build configuration | POSIX backend build/probe CI passed; full editor pending | Pinned Zstandard archive installer; unverified |
+| win32-x64 | Native launch/build configuration | Native handle-read tests passed; broader editor gate remains blocked | Pinned ZIP installer; unverified |
+| win32-arm64 | Native launch/build configuration | Native handle-read tests passed; broader editor gate remains blocked | Official ARM64 ZIP verified in metadata; execution unverified |
 
 32-bit, web and remote-host profiles are excluded from this initial target matrix. Listing a target does not certify its OS minimum, hardware suitability or inference support.
 
@@ -32,7 +32,7 @@ flowchart TD
     Install[Platform VSIX with native backend: planned release] --> Choice{AI assets available?}
     Choice -->|Existing local server| Existing[Select installed local model]
     Choice -->|Online setup| Consent[Review identity and terms; confirm downloads]
-    Consent --> Download[Pinned platform archive installer; native checks pending]
+    Consent --> Download[Pinned platform archive installer; full editor/inference checks pending]
     Choice -->|Offline companion| Audit[Inventory validator implemented]
     Audit --> Import[Stage verified bytes; check local model; activate]
     Existing --> Native[Native source-access and inference validation required]
@@ -40,7 +40,7 @@ flowchart TD
     Import --> Native
 ```
 
-The extension prefers `native/<target>/thread-backend/thread-backend` (`.exe` on Windows), probes it through the existing bounded JSON protocol, and launches it without interpreter flags. Packages without that asset retain existing Python discovery. Managed macOS installation can call the packaged backend's explicit `install-runtime` command. Windows remains blocked rather than replacing descriptor-based reads with weaker path checks.
+The extension prefers `native/<target>/thread-backend/thread-backend` (`.exe` on Windows), probes it through the existing bounded JSON protocol, and launches it without interpreter flags. Packages without that asset retain existing Python discovery. Managed macOS installation can call the packaged backend's explicit `install-runtime` command. Windows editor activation remains blocked pending broader document/edit integration; native handle-read CI now passes.
 
 `extensions/vscode/scripts/freeze.py --target <target>` describes a native one-folder build using **already installed** PyInstaller plus the editor dependencies. It refuses a target different from the build host. With explicit owner approval, pinned PyInstaller and zstandard were installed in project-local environments, and two darwin-arm64 native candidates were built and probed. Signing, provenance, notices, platform-specific VSIX verification and executable permissions must be validated before distribution. Current release checking still accepts only the existing POSIX profiles and is not yet a frozen-package release gate.
 
@@ -71,3 +71,7 @@ The macOS 14 candidate SHA-256 is `094732f7cd609ef41ad683efdd92382e166615c196d0f
 See [the exact pending download and remote CI proposal](distribution-trial.md). Local assembly fixtures verify copying, hash mismatch cleanup and preservation of existing bundles.
 
 The maintained portable Python 3.12.15 Mac backend records a macOS 11.0 binary minimum and passed local native/package checks. The corrected 92-asset companion passed real offline import/inference. Executable flags for native helpers are included in the reviewed manifest; see [trial evidence and remaining limits](distribution-trial.md#completed-local-trial--2026-10-11).
+
+## Verified native CI snapshot
+
+Native CI for commit `3e436ad` passed all six targets (macOS ARM64/x64, Linux ARM64/x64 and Windows ARM64/x64): native builds, JSON/dependency probes, distribution tests and synthetic offline-import tests. Both Windows runners executed and passed the regular-read/enumeration/limits and hardlink/junction-rejection tests. [Verified run](https://github.com/KrishnendraPrakash/thread/actions/runs/38142298112). These are backend/fixture checks, not full editor, clean-machine or model-inference certification. Windows editor activation remains gated pending broader document/edit integration validation. CI uploaded only six small probe/provenance metadata artifacts; no runtime, model or backend binary was redistributed.
