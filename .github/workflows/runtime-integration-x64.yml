@@ -66,6 +66,7 @@ jobs:
           python extensions/vscode/scripts/check_native.py
           npm ci --prefix extensions/vscode --ignore-scripts
           npm run compile --prefix extensions/vscode
+          node --test extensions/vscode/scripts/ci-process-ownership.test.cjs
       - name: Acquire and extract the exact runtime through the actual native installer
         if: ${{ !inputs.metadata_only }}
         env:

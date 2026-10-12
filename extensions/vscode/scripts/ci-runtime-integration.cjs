@@ -56,10 +56,12 @@ function request(endpoint, route, value, timeout=120000) {
 function ownedProcesses() {
   const prefix = fs.realpathSync.native(work)+path.sep;
   if (process.platform === 'win32') {
-    const script = "$ErrorActionPreference='Stop'; $live=@(Get-CimInstance Win32_Process | Where-Object { $_.ExecutablePath -and $_.ExecutablePath.StartsWith($env.THREAD_OWNED_TEST_ROOT,[StringComparison]::OrdinalIgnoreCase) } | ForEach-Object { $item=$_; try { $owned=[System.Diagnostics.Process]::GetProcessById($item.ProcessId); try { if (-not $owned.HasExited) { $item | Select-Object ProcessId,ExecutablePath } } finally { $owned.Dispose() } } catch [System.ArgumentException] { } }); ConvertTo-Json -InputObject $live -Compress";
+    // Query metadata only. Independently classify paths in Node before any kill.
+    const script = "$ErrorActionPreference='Stop'; $items=@(Get-CimInstance Win32_Process | Select-Object ProcessId,ExecutablePath); ConvertTo-Json -InputObject $items -Compress";
     const text = cp.execFileSync('powershell.exe',['-NoProfile','-NonInteractive','-Command',script],
-      {encoding:'utf8',timeout:30000,env:{...process.env,THREAD_OWNED_TEST_ROOT:prefix}}).trim();
-    return text ? [].concat(JSON.parse(text)).map(item=>({pid:item.ProcessId,executable:item.ExecutablePath})) : [];
+      {encoding:'utf8',timeout:30000}).trim();
+    const {ownedWindowsProcesses}=require('./ci-process-ownership.cjs');
+    return ownedWindowsProcesses(fs.realpathSync.native(work),JSON.parse(text));
   }
   return fs.readdirSync('/proc').filter(name=>/^\d+$/.test(name)).flatMap(name=>{
     try {const executable=fs.readlinkSync('/proc/'+name+'/exe');return executable.startsWith(prefix)?[{pid:Number(name),executable}]:[];}catch{return [];}
@@ -74,6 +76,7 @@ async function cleanup(endpoint, proxy) {
   const remaining=ownedProcesses();
   record('cleanup-before-termination.json',{owned_processes:remaining});
   for(const process of remaining) {
+    if(!ownedProcesses().some(item=>item.pid===process.pid && item.executable===process.executable)) continue;
     if(target==='win32-x64') {
       try {cp.execFileSync('taskkill.exe',['/PID',String(process.pid),'/F'],{timeout:30000,encoding:'utf8',stdio:'pipe'});}
       catch(error) {
