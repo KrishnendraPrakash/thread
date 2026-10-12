@@ -7,3 +7,9 @@ The Python wrapper's own BSD notice is separately included in its distribution m
 The approved Ollama Mac archive already supplies GO_LICENSE, LLAMA_CPP_LICENSE, LLAMA_CPP_VENDORS_LICENSE, MLX_LICENSE, MLX_C_LICENSE, CPP_HTTPLIB_LICENSE, DLPACK_LICENSE, FMT_LICENSE, PICOJSON_LICENSE, XGRAMMAR_LICENSE and XGRAMMAR_NOTICE. The private companion retains all of these plus the previously acquired Ollama MIT text and exact Qwen Apache-2.0 license layer.
 
 The portable install-only Python archive supplies CPython LICENSE.txt but lacks the full build archive's dependency license inventory. Static native dependency notice completeness (including OpenSSL 3.5.9) remains unverified. Do not substitute notices from a different installed OpenSSL build or claim complete redistribution review. No new download was made for this notice review.
+
+## Exact portable-Python static notice snapshot
+
+`portable-darwin-arm64-20261009/profile.json` binds CPython 3.12.15 and seven identified static dependencies to the source-library SHA-256 extracted from the already verified portable archive. It retains CPython, OpenSSL 3.5.9 LICENSE/AUTHORS, bzip2, expat, libffi, liblzma, mpdecimal and SQLite texts from official pinned sources. Build-recipe versions are recorded separately from runtime observations; the original texts/copyrights are unchanged. The source snapshot is excluded from VSIX roots; matched builds copy verified notices into their native notice directory. Unknown target/version/library hashes receive no misleading attribution and remain flagged.
+
+This addresses missing notice texts and CPython mapping for that exact private Mac build. Full component-specific attribution/modification review and other distribution profiles remain open; complete_distribution_review is false and the global production gate remains pending. Thread's MIT grant does not override any dependency's terms. No OpenSSL/other binary or model was downloaded.

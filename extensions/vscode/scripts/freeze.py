@@ -18,6 +18,8 @@ from importlib.metadata import PackageNotFoundError, distribution, version
 from pathlib import Path
 from sysconfig import get_path
 
+from native_notices import collect_static_notices
+
 ROOT = Path(__file__).resolve().parents[3]
 TARGETS = ("darwin-arm64", "darwin-x64", "linux-x64", "linux-arm64", "win32-x64", "win32-arm64")
 
@@ -64,6 +66,10 @@ def collect_notices(directory, work):
     or certify all target distributions. Missing notices stay explicit in the record.
     """
     output = directory / "notices"
+    if output.is_symlink() or (output.exists() and not output.is_dir()):
+        raise ValueError("Generated notice output must be a regular directory.")
+    if output.exists():
+        shutil.rmtree(output)
     output.mkdir()
     record = {
         "python": sys.version.split()[0],
@@ -90,6 +96,7 @@ def collect_notices(directory, work):
     else:
         record["missing"].append(f"Zstandard native library {zstd_version}")
     sources = [("CPython", Path(get_path("stdlib")))]
+    python_library = None
     analysis = ast.literal_eval((work / "work/thread-backend/Analysis-00.toc").read_text())
     for group in analysis:
         if isinstance(group, list):
@@ -101,6 +108,9 @@ def collect_notices(directory, work):
                     and Path(item[1]).is_file()
                 ):
                     sources.append((Path(item[0]).name, Path(item[1]).resolve().parent))
+                    name = Path(item[0]).name
+                    if name.startswith("libpython") or re.match(r"python\d+\.dll$", name):
+                        python_library = Path(item[1]).resolve()
     seen = set()
     for component, source in sources:
         found = []
@@ -139,6 +149,25 @@ def collect_notices(directory, work):
                     "sha256": hashlib.sha256(content).hexdigest(),
                 }
             )
+    if python_library:
+        profile = collect_static_notices(
+            python_library,
+            output,
+            ROOT / "extensions/vscode/notices",
+            host_target(),
+            sys.version.split()[0],
+        )
+        if profile:
+            record["static_profile"] = {
+                key: value for key, value in profile.items() if key != "notices"
+            }
+            record["notices"].extend(profile["notices"])
+            if any(item["component"] == "CPython" for item in profile["notices"]):
+                record["missing"] = [
+                    item for item in record["missing"] if item != python_library.name
+                ]
+        else:
+            record["missing"].append("Distribution-specific static dependency notice profile")
     (output / "provenance.json").write_text(json.dumps(record, indent=2) + "\n")
     if sys.platform == "darwin":
         minima = []
