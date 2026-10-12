@@ -163,8 +163,8 @@ class NativeInventoryTests(unittest.TestCase):
         )
         self.assertNotIn("Java", result["PATH"])
         self.assertNotIn("Git", result["PATH"])
-        self.assertIn("/fixture/Windows/System32", result["PATH"])
-        self.assertIn("/fixture/Python/DLLs", result["PATH"])
+        self.assertIn(str(Path("/fixture/Windows") / "System32"), result["PATH"].split(";"))
+        self.assertIn(str(Path("/fixture/Python") / "DLLs"), result["PATH"].split(";"))
         self.assertEqual(result["KEEP"], "value")
         self.assertIn("Java", original["PATH"])
         self.assertEqual(
