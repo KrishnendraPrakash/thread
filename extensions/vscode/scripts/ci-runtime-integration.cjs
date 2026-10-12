@@ -71,9 +71,11 @@ async function cleanup(endpoint, proxy) {
   if(proxy) {proxy.closeAllConnections();await new Promise(resolve=>proxy.close(resolve));}
   runtime.stop();
   await new Promise(resolve=>setTimeout(resolve,500));
-  for(const process of ownedProcesses()) {
+  const remaining=ownedProcesses();
+  record('cleanup-before-termination.json',{owned_processes:remaining});
+  for(const process of remaining) {
     if(target==='win32-x64') {
-      try {cp.execFileSync('taskkill.exe',['/PID',String(process.pid),'/T','/F'],{timeout:30000,encoding:'utf8',stdio:'pipe'});}
+      try {cp.execFileSync('taskkill.exe',['/PID',String(process.pid),'/F'],{timeout:30000,encoding:'utf8',stdio:'pipe'});}
       catch(error) {
         // The server can finish exiting between CIM enumeration and taskkill.
         // Accept only verified absence; a still-owned process remains failure.
@@ -117,6 +119,7 @@ async function main() {
       options:{temperature:0,seed:0,num_ctx:1024,num_predict:32,num_gpu:0},keep_alive:'5m'});
     assert.equal(smoke.done,true);assert.ok(smoke.message.content.trim());
     const residency=await request(endpoint,'/api/ps');
+    record('cpu-residency.json',{target,residency,required_size_vram:0});
     assert.ok(residency.models.length);assert.ok(residency.models.every(model=>model.size_vram===0));
     record('smoke.json',{target,runtime:'0.34.4',model:scope.model,completion:true,cpu_residency:true,
       output:smoke.message.content,done_reason:smoke.done_reason,eval_count:smoke.eval_count,
@@ -157,7 +160,7 @@ async function main() {
       done:response.done,done_reason:response.done_reason,eval_count:response.eval_count,
       semantic_verification:'not_performed',release_gate_passed:false});
     assert.equal(wire.length,1,'One unchanged production chat request must reach the real runtime; backend error: '+error);
-    const after=await request(endpoint,'/api/ps');assert.ok(after.models.every(model=>model.size_vram===0));
+    const after=await request(endpoint,'/api/ps');record('production-residency.json',{target,residency:after,required_size_vram:0});assert.ok(after.models.every(model=>model.size_vram===0));
     console.log('THREAD_REAL_RUNTIME_INTEGRATION_COMPLETED: '+target+'; structured acceptance recorded separately from smoke and model quality');
   } finally {await cleanup(endpoint,proxy);}
 }
