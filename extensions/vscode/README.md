@@ -1,56 +1,31 @@
 # Thread — Local Developer Agent
 
-Ask questions about your repository, diagnose errors, review proposed code changes, and summarize documents using a local Ollama model. Thread can manage the runtime and initial model setup on supported Macs. No paid API key is required.
+Thread 0.2.1 uses a **local model you supply** for repository questions, diagnosis, reviewed changes and document summaries. No model weights, including Llama, are distributed or downloaded by Thread. No paid API account is required.
 
-Bundled backend packages and online/offline distribution for Windows, macOS and Linux are under development. Current published/built packages still require Python unless they include a native backend asset. Windows repository access remains blocked pending secure platform implementation. See [distribution progress](https://github.com/KrishnendraPrakash/thread/blob/main/docs/distribution-modes.md).
-
-**Thread: Import Offline Local AI** imports an unpacked, trusted companion bundle after review of its manifest SHA-256, platform, model, native runtime and size. Copying is cancellable and checksum-verified; Thread checks the local model before activating it. Official companion bundles and real offline inference validation are still pending. Windows remains gated pending native validation of its new handle-based source reader.
-
-Use one Thread window during offline setup. Copying is serialized with an import lock; cancelled or failed copies remove their staging data. Completed repeat imports preserve separate copies. See the distribution guide for crash recovery and retained manifests.
+The release scope retains six native VSIX targets: macOS ARM64/x64, Linux ARM64/x64 and Windows ARM64/x64. Native packages contain the Python/backend dependencies, not Ollama or models. Release checks remain incomplete; Windows activation is still gated. Source changes do not update the existing Marketplace listing.
 
 ## Dependencies — what you need
 
-| Dependency | Requirement | Installed by Thread? |
-| --- | --- | --- |
-| VS Code | Version 1.95 or newer, with a trusted local folder open | No |
-| Operating system | macOS or Linux; macOS arm64 has local VS Code host testing | No; Windows and remote extension hosts are not supported in this preview |
-| Python 3 | **3.9 or newer**, automatically detected from the extension host’s PATH and common installation locations | No; install Python once if it is missing |
-| Ollama | Managed setup on Apple Silicon macOS 14+; existing local server on other supported systems | **Optional managed download** after confirmation |
-| Text-generation model | Choose a starter download or an already installed local completion model | **Optional managed download** after confirmation; embedding-only models cannot answer questions |
-| `pathspec` 0.12.1 | Repository ignore-rule handling | **Bundled**, no pip installation needed |
-| `pypdf` 6.19.0 | PDF text extraction | **Bundled**, no pip installation needed |
-
-You do **not** need a project virtual environment, LangChain, `uv sync`, a separate Node.js installation, or the Microsoft Python extension to use Thread. Python libraries needed by Thread are isolated from your project and included in the extension. Python itself remains a separate installation. Managed setup handles the Ollama runtime and model download on supported Macs; no Homebrew, Docker, admin commands or project changes are needed.
-
-The extension runtime supports Python 3.9+; it does not require a specific version such as 3.12. Use a maintained Python release when possible. [pypdf’s Python requirement](https://pypi.org/project/pypdf/6.19.0/) sets the current compatibility floor; older Python 3 releases are not supported. The separate field CLI and extension build tools still require Python 3.11+.
+| Component | Requirement |
+| --- | --- |
+| VS Code | 1.95+ |
+| Backend | Included in matching native VSIX; legacy/development package needs Python 3.9+ |
+| Ollama | Your existing local server; optional explicitly confirmed runtime-only installation on supported profiles |
+| Model | Your installed local completion model; supply it separately under its own terms |
 
 ## Start using Thread
 
-1. Install Python 3.9+ if your machine does not already have it. [Python downloads](https://www.python.org/downloads/).
-2. On Apple Silicon macOS 14+, let Thread handle local AI setup in the next steps. On Linux or Intel Mac, install/start [Ollama](https://ollama.com/download) and a text model separately.
-3. Open your project in VS Code and save the files you want analyzed.
-4. Run **Thread: Setup Local Model** from the Command Palette. Thread detects and checks Python automatically; there is no Python path prompt in the normal setup flow.
-5. If local AI is unavailable, choose **Set up local AI for me (Recommended)**, select a starter model, and confirm the displayed download. If Ollama is already ready, choose an installed model. No model is certified for accuracy.
-6. Open the **Thread** sidebar or run **Thread: Ask About Repository**.
+1. Install the matching VSIX and open a trusted local project.
+2. Run **Thread: Setup Local Model** and select an installed model.
+3. If setup needs attention, **Use existing Ollama (Recommended)** connects to port 11434 without downloads. **More options** provides setup details and explicit installed-model name entry; **Cancel** makes no setup change.
+4. **Install local runtime only** offers a pinned Ollama download after size/location/terms confirmation. It never obtains model weights. Supply your own Ollama model store in the shown Thread storage location, or import your own offline bundle, then rerun setup.
+5. Open the Thread sidebar and choose a workflow. Answers remain unverified; review sources and approve changes explicitly.
 
-Try: “Explain how this project handles an incoming request. Cite the relevant source excerpts.” Open the relevant source file to help retrieval focus on it.
+## User-provided offline setup
 
-## Managed local setup — no terminal commands
+**Thread: Import Offline Local AI** continues to accept your own complete, trusted schema-1 bundle containing a matching backend/runtime, your model and notices. Inspect its manifest fingerprint and explicitly approve native execution. Existing integrity, traversal/link restrictions, cancellation and rollback remain. This is user import functionality; 0.2.1 distributes no official ready-to-use companions. Models in your bundle retain their original terms.
 
-The runtime download is **160 MB** (Ollama 0.34.4, verified SHA-256). Starter choices are **qwen2.5-coder:1.5b**, about **986 MB**, or **qwen2.5-coder:7b**, about **4.7 GB**. Both list Apache 2.0 terms; the confirmation links to model details. The small starter minimizes the download and has limited reasoning quality. No model accuracy benchmark has certified either choice.
-
-Setup checks for at least 4 GB free disk space for the small starter or 10 GB for the larger one. These are setup allowances, not RAM guarantees; inference also needs sufficient memory. Progress and Cancel are available. Runtime and models stay in Thread’s VS Code global storage; Ollama may create its normal user configuration. The server uses a private loopback port with cloud disabled and stops when this extension instance is disposed. Setup does not replace an existing Ollama installation. Repeated use starts the saved runtime without downloading it again.
-
-**Scope:** managed installation currently supports Apple Silicon macOS 14+ only. Python 3.9+ is still needed. Existing Ollama remains supported on macOS/Linux. Full starter-model download/inference has not yet been verified on a clean machine; runtime download/startup and synthetic transfer/error tests have passed. [Setup details and recovery](https://github.com/KrishnendraPrakash/thread/blob/main/docs/local-setup.md).
-
-## If setup needs attention
-
-- **Python missing or incompatible:** install Python 3.9+ and restart VS Code so its PATH can refresh, then rerun setup. Detection tries a bounded list of local installations, including common Homebrew and system locations.
-- **Stale path from another machine:** detection tries the saved user override, then discovers another compatible local installation and reports the chosen path. Clear the optional **Thread: Python Path** setting to return to automatic detection.
-- **Unusual Python location:** use **Thread: Configure Python (Advanced)** to supply an absolute executable path. This is optional, not part of normal setup. Repository-local virtual environments are not automatically executed; selecting one requires this explicit override. **Python: Select Interpreter** is a separate extension setting.
-- **Python ready, Ollama unavailable:** rerun setup and choose managed setup on a supported Mac. Use **Retry existing Ollama** after starting an existing server. **More options** includes documentation and an explicit installed-model name field.
-- **No models found:** use the managed starter download on supported Macs, or install a text model in your existing Ollama. An embedding model alone is insufficient.
-- **Unsaved files:** choose **File → Save All** before repository analysis. No Git commit is required.
+Keep one Thread window active during setup/import. Existing local servers are not terminated by Thread. See [distribution scope and limits](https://github.com/KrishnendraPrakash/thread/blob/main/docs/distribution-modes.md) and [runtime setup](https://github.com/KrishnendraPrakash/thread/blob/main/docs/local-setup.md).
 
 ## What Thread can do
 
@@ -148,3 +123,15 @@ Final Windows x64/Linux x64 real runtime integration passed at d003dbfd403e079c6
 
 
 Cleanup incident clarification: in cancelled run 38217103078 (head d5885b0), the pre-termination record listed unowned lsass.exe PID 1008 first, followed by svchost.exe PID 716. The exact sequential cleanup code reached PID 716 and logged its failed taskkill, with no failure logged for PID 1008. This establishes by control flow that the unowned PID 1008 termination command returned success; it was not merely a query. Successful stdout and an independent post-kill probe were not retained, so the actual process exit and full OS impact cannot be independently reconstructed. It would be incorrect to claim no unowned processes were terminated. The impact was confined to disposable Windows CI runners, whose teardown stalled; affected runs reached terminal cancelled state. Final corrected runs independently enforce ownership and report zero remaining owned processes. No user Mac process was involved.
+
+
+Local packaging preparation now records exact PyInstaller BINARY and EXTENSION source/payload hashes while keeping redistribution review false. A private existing Mac backend copy has refreshed plaintext notices with unchanged non-notice bytes; its compiled installer still needs a final rebuild. Five target payload/source inventories and the release model decision remain unavailable/pending. No acquisitions, packaged-backend/Ollama/model execution, signing or remote changes were performed. [Concrete local inventory evidence](../../docs/local-packaging-inventory.md).
+
+
+Current owner-approved 0.2.1 scope: six model-free native VSIXs; users supply models. No starter-model downloads or official companion ZIPs are shipped. User-owned offline import is preserved. The exact-scope companion-distribution gate is not applicable; five notice/editor-inference/Windows/clean-machine/signing gates remain pending. No signing, hosting, workflow activation or publication occurred.
+
+
+The approved build-only CI now creates a temporary model-free VSIX on each of the six standard hosted targets, probes its actual native backend, verifies BYO package identity/content and prints exact native-file/source/notice inventory metadata. Packages are deleted on the runner; no artifacts, model/Ollama acquisitions, OIDC or publishing are involved. This does not advance ordinary-user, real-inference, complete licensing or signing gates.
+
+
+Six-target temporary BYO VSIX proof passed at 50eec6cd8ad18ca69853f14ba48666801480f57e: https://github.com/KrishnendraPrakash/thread/actions/runs/38243563529. Actual packaged native protocol, model-free contents, per-file/source/notice inventories and synthetic offline import passed on Windows/macOS/Linux ARM64/x64; temporary packages were removed, with zero artifact exports. A Windows UTF-8 decoding fix resolved the first run. These results do not establish ordinary-user trust, real editor/inference, complete redistribution rights or signing. All five production gates and Windows activation remain pending. [Evidence](../../docs/byo-package-checks.md).

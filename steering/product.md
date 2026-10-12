@@ -4,7 +4,7 @@ Updated: 2026-09-24. Basis: the user's planning instructions, subsequent scaffol
 
 ## Established direction
 
-The owner now requires dependency reduction across Windows, macOS and Linux from the start, with both consented first-use downloads and an offline distribution option. Bundle the backend so a separate user Python installation is unnecessary; preserve local inference and existing approval/security boundaries. Target support remains subject to native implementation and validation.
+The owner requires dependency reduction across Windows, macOS and Linux from the start. For 0.2.1, confirmed first-use acquisition covers runtime only; models are user-supplied and complete user-provided offline import remains available. Official ready-to-use companions are outside this release scope. Bundle the backend so a separate user Python installation is unnecessary; preserve local inference and existing approval/security boundaries. Target support remains subject to native implementation and validation.
 
 Build a public, reusable personal AI agent that completes useful tasks, makes important conclusions checkable, and gives the human meaningful choices. The main access path runs locally without a paid LLM API account. Optional hosted free tiers, paid APIs using the user's keys, and private on-premises endpoints use the same runtime.
 
@@ -25,10 +25,15 @@ Human-in-the-loop is part of the first version. Present a recommendation with a 
 
 ## Delivery boundaries
 
-M1 uses one local provider and a complete human-decision cycle. Hosted/private adapters arrive at M4B. Dashboard, scheduling, messaging, and delegation follow demonstrated need. Do not introduce a paid verifier, remote embeddings, or paid search as a hidden requirement of the local core. The user requested less developer-side setup: optional confirmed managed local runtime/model installation now reduces manual Ollama configuration on supported Macs; an initial download and adequate local resources are still required.
+M1 uses one local provider and a complete human-decision cycle. Hosted/private adapters arrive at M4B. Dashboard, scheduling, messaging, and delegation follow demonstrated need. Do not introduce a paid verifier, remote embeddings, or paid search as a hidden requirement of the local core. The user requested less developer-side setup: optional confirmed runtime-only installation with user-supplied models reduces manual Ollama configuration on supported profiles; an initial download and adequate local resources are still required.
 
 Local inference and offline operation are distinct: offline rules must cover every model role, tool, and data destination. Product runtime permissions are enforced in code and cannot be granted by retrieved text, skills, or an LLM's own assessment.
 
 The user has explicitly requested public installation through a published VS Code extension. Deliver a clearly labeled preview while full release gates remain incomplete; public packaging must use the owner-selected license and a confirmed Marketplace identity. A public code repository or CI artifact alone is not a Marketplace release.
 
 The owner approved MIT for Thread-authored code/documentation and version 0.2.1 for the next preview on 2026-10-11. Preserve independent third-party terms and keep publication/platform validation gates separate from this license decision.
+
+
+## Owner-approved BYO scope for 0.2.1 (2026-10-12)
+
+The owner selected user-supplied models, avoiding bundled Llama redistribution and explicitly replacing the ready-to-use offline companion plan. Official artifacts are six native VSIXs for Windows/macOS/Linux ARM64/x64, with no model weights or companion ZIPs. Existing installed-model selection, runtime-only confirmed acquisition and user-provided complete offline import remain. The exact-scope companion gate is not applicable; five gates remain pending: native notices, all-target editor/inference, Windows activation, clean-machine setup and signing. No model license approval or full release certification is inferred from BYO. Conditional Marketplace deployment remains blocked until material gates and exact artifacts pass; the production workflows remain inactive.

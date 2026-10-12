@@ -1,5 +1,11 @@
 # Changelog
 
+## Unpublished 0.2.1 BYO scope
+
+- User-supplied local models; no model weights, starter downloads or official companion ZIPs.
+- Explicit runtime-only setup and preserved user-provided offline import.
+- Six-target model-free packaging scope; five release gates and Windows activation remain pending.
+
 ## 0.2.1 — MIT preview preparation (not published)
 
 - Apply the owner-selected MIT license to Thread-authored code and documentation; retain separate third-party license terms and notices.

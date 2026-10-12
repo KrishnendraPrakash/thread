@@ -143,5 +143,6 @@
     "repository",
     "code review",
     "document summary"
-  ]
+  ],
+  "threadModelProvisioning": "user-supplied"
 }

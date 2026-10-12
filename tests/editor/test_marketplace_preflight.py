@@ -39,6 +39,7 @@ class MarketplacePreflightTests(unittest.TestCase):
         (extension / "src").mkdir(parents=True)
         policy = json.loads((ROOT / "release/marketplace-policy.json").read_text())
         policy["gates"] = dict.fromkeys(MODULE.GATES, "passed")
+        policy["gates"]["offline_companion_distribution_review"] = "not_applicable"
         (root / "release/marketplace-policy.json").write_text(json.dumps(policy))
         (root / "LICENSE").write_text("Synthetic test license")
         manifest = {
@@ -47,6 +48,7 @@ class MarketplacePreflightTests(unittest.TestCase):
             "version": "0.2.1",
             "license": "TEST",
             "preview": True,
+            "threadModelProvisioning": "user-supplied",
         }
         (extension / "package.json").write_text(json.dumps(manifest))
         (extension / "src/extension.ts").write_text("// synthetic enabled fixture")
@@ -57,6 +59,7 @@ class MarketplacePreflightTests(unittest.TestCase):
             "publisher": "Krishnendra",
             "channel": "pre-release",
             "targets": [],
+            "distribution_scope": MODULE.BYO_SCOPE,
         }
 
         def fingerprint(path):
@@ -84,18 +87,11 @@ class MarketplacePreflightTests(unittest.TestCase):
                     <Property Id="Microsoft.VisualStudio.Code.PreRelease" Value="true"/>
                     </Properties></Metadata></PackageManifest>''',
                 )
-            companion = root / f"{target}.zip"
-            bundle = json.dumps({"schema": 1, "target": target}).encode()
-            with zipfile.ZipFile(companion, "w") as archive:
-                archive.writestr("bundle.json", bundle)
             record["targets"].append(
                 {
                     "target": target,
                     "vsix": fingerprint(package),
-                    "companion": {
-                        **fingerprint(companion),
-                        "manifest_sha256": hashlib.sha256(bundle).hexdigest(),
-                    },
+                    "distribution_scope": MODULE.BYO_SCOPE,
                     "checks": {
                         name: {
                             "result": "passed",
@@ -122,10 +118,7 @@ class MarketplacePreflightTests(unittest.TestCase):
             self.assertEqual(MODULE.inventory(root, root, "a" * 40, "0.2.1"), record)
 
     def test_duplicate_archive_entries_cannot_override_reviewed_metadata(self):
-        for kind, entry, message in (
-            ("vsix", "extension/package.json", "Duplicate VSIX"),
-            ("companion", "bundle.json", "Duplicate companion"),
-        ):
+        for kind, entry, message in (("vsix", "extension/package.json", "Duplicate VSIX"),):
             with self.subTest(kind=kind), tempfile.TemporaryDirectory() as folder:
                 root = Path(folder)
                 record = self.release_fixture(root)
@@ -141,7 +134,7 @@ class MarketplacePreflightTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, message):
                     MODULE.inventory(root, root, "a" * 40, "0.2.1")
 
-    def test_stale_evidence_and_companion_digest_are_rejected(self):
+    def test_stale_evidence_and_unexpected_companions_are_rejected(self):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
             record = self.release_fixture(root)
@@ -150,9 +143,9 @@ class MarketplacePreflightTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "same-commit editor"):
                 MODULE.inventory(root, root, "a" * 40, "0.2.1")
             record["targets"][0]["checks"]["editor"]["commit"] = "a" * 40
-            record["targets"][0]["companion"]["manifest_sha256"] = "0" * 64
+            record["targets"][0]["companion"] = {"file": "unapproved.zip"}
             (root / "release.json").write_text(json.dumps(record))
-            with self.assertRaisesRegex(ValueError, "manifest digest mismatch"):
+            with self.assertRaisesRegex(ValueError, "BYO distribution scope"):
                 MODULE.inventory(root, root, "a" * 40, "0.2.1")
 
     def test_xml_identity_cannot_disagree_with_package_json(self):
@@ -183,6 +176,7 @@ class MarketplacePreflightTests(unittest.TestCase):
             (extension / "src").mkdir(parents=True)
             policy = json.loads((ROOT / "release/marketplace-policy.json").read_text())
             policy["gates"] = dict.fromkeys(MODULE.GATES, "passed")
+            policy["gates"]["offline_companion_distribution_review"] = "not_applicable"
             (root / "release/marketplace-policy.json").write_text(json.dumps(policy))
             (root / "LICENSE").write_text("Synthetic test license")
             manifest = {
@@ -191,6 +185,7 @@ class MarketplacePreflightTests(unittest.TestCase):
                 "version": "0.2.1",
                 "license": "TEST",
                 "preview": True,
+                "threadModelProvisioning": "user-supplied",
             }
             (extension / "package.json").write_text(json.dumps(manifest))
             (extension / "src/extension.ts").write_text("// synthetic enabled fixture")
@@ -200,6 +195,7 @@ class MarketplacePreflightTests(unittest.TestCase):
                 "version": "0.2.1",
                 "publisher": "Krishnendra",
                 "channel": "pre-release",
+                "distribution_scope": MODULE.BYO_SCOPE,
                 "targets": [],
             }
             for targets in ([], [{"target": "linux-x64"}] * 6):
@@ -217,6 +213,7 @@ class MarketplacePreflightTests(unittest.TestCase):
             (extension / "src").mkdir(parents=True)
             policy = json.loads((ROOT / "release/marketplace-policy.json").read_text())
             policy["gates"] = dict.fromkeys(MODULE.GATES, "passed")
+            policy["gates"]["offline_companion_distribution_review"] = "not_applicable"
             (root / "release/marketplace-policy.json").write_text(json.dumps(policy))
             (root / "LICENSE").write_text("Synthetic test license")
             manifest = {
@@ -225,6 +222,7 @@ class MarketplacePreflightTests(unittest.TestCase):
                 "version": "0.2.1",
                 "license": "TEST",
                 "preview": True,
+                "threadModelProvisioning": "user-supplied",
             }
             (extension / "package.json").write_text(json.dumps(manifest))
             (extension / "src/extension.ts").write_text("// synthetic enabled fixture")
@@ -254,13 +252,70 @@ class MarketplacePreflightTests(unittest.TestCase):
                 "version": "0.2.1",
                 "publisher": "Krishnendra",
                 "channel": "pre-release",
+                "distribution_scope": MODULE.BYO_SCOPE,
                 "targets": [
-                    {"target": target, "vsix": entry, "checks": checks}
+                    {
+                        "target": target,
+                        "vsix": entry,
+                        "checks": checks,
+                        "distribution_scope": MODULE.BYO_SCOPE,
+                    }
                     for target in sorted(MODULE.TARGETS)
                 ],
             }
             (root / "release.json").write_text(json.dumps(record))
             with self.assertRaisesRegex(ValueError, "Packaged publisher mismatch"):
+                MODULE.inventory(root, root, "a" * 40, "0.2.1")
+
+    def test_utf8_source_is_valid_on_all_native_hosts(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            self.release_fixture(root)
+            (root / "extensions/vscode/src/extension.ts").write_text(
+                "// enabled synthetic fixture — “Unicode” λ\n", encoding="utf-8"
+            )
+            self.assertEqual(MODULE.readiness(root)["version"], "0.2.1")
+
+    def test_companion_waiver_is_bound_to_exact_scope_and_other_gates_stay_required(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            self.release_fixture(root)
+            path = root / "release/marketplace-policy.json"
+            policy = json.loads(path.read_text())
+            policy["distribution_scope"]["official_companions"] = True
+            path.write_text(json.dumps(policy))
+            with self.assertRaisesRegex(ValueError, "BYO 0.2.1"):
+                MODULE.readiness(root)
+            policy["distribution_scope"]["official_companions"] = False
+            policy["gates"]["complete_third_party_notices"] = "not_applicable"
+            path.write_text(json.dumps(policy))
+            with self.assertRaisesRegex(ValueError, "complete_third_party_notices"):
+                MODULE.readiness(root)
+
+    def test_byo_weights_and_unreferenced_companion_transport_are_rejected(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            record = self.release_fixture(root)
+            artifact = record["targets"][0]["vsix"]
+            path = root / artifact["file"]
+            with zipfile.ZipFile(path, "a") as archive:
+                archive.writestr("extension/native/hidden.gguf", b"fake weight")
+            artifact["bytes"] = path.stat().st_size
+            artifact["sha256"] = hashlib.sha256(path.read_bytes()).hexdigest()
+            (root / "release.json").write_text(json.dumps(record))
+            with self.assertRaisesRegex(ValueError, "Model weights"):
+                MODULE.inventory(root, root, "a" * 40, "0.2.1")
+            (root / "unexpected.zip").write_bytes(b"not accepted")
+            with self.assertRaisesRegex(ValueError, "outside this release scope"):
+                MODULE.inventory(root, root, "a" * 40, "0.2.1")
+
+    def test_byo_keeps_same_commit_offline_user_inference_evidence(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            record = self.release_fixture(root)
+            record["targets"][0]["checks"].pop("offline_inference")
+            (root / "release.json").write_text(json.dumps(record))
+            with self.assertRaisesRegex(ValueError, "offline_inference"):
                 MODULE.inventory(root, root, "a" * 40, "0.2.1")
 
     def test_current_release_is_blocked_before_artifact_access(self):

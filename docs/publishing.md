@@ -84,3 +84,8 @@ flowchart TD
     Review --> Listing["Verify live listing and public installation"]
     Verify --> Artifact["Optional GitHub build artifact; not a Marketplace listing"]
 ```
+
+
+## Owner-approved BYO scope for 0.2.1 (2026-10-12)
+
+The owner selected user-supplied models, avoiding bundled Llama redistribution and explicitly replacing the ready-to-use offline companion plan. Official artifacts are six native VSIXs for Windows/macOS/Linux ARM64/x64, with no model weights or companion ZIPs. Existing installed-model selection, runtime-only confirmed acquisition and user-provided complete offline import remain. The exact-scope companion gate is not applicable; five gates remain pending: native notices, all-target editor/inference, Windows activation, clean-machine setup and signing. No model license approval or full release certification is inferred from BYO. Conditional Marketplace deployment remains blocked until material gates and exact artifacts pass; the production workflows remain inactive.

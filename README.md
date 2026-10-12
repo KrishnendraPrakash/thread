@@ -2,7 +2,7 @@
 
 ### Understand your project. Review AI suggestions. Stay in control.
 
-Thread is a local AI assistant inside **Visual Studio Code (VS Code)**, the app you use to open and edit code. Ask where something happens, get help investigating a bug, review a suggested change, or summarize a document. Thread uses a model running on your computer through **Ollama**; the main workflow needs no paid AI account or API key.
+Thread is a local AI assistant inside **Visual Studio Code (VS Code)**, the app you use to open and edit code. Ask where something happens, get help investigating a bug, review a suggested change, or summarize a document. Thread 0.2.1 uses a **model you supply**, running on your computer through **Ollama**; the main workflow needs no paid AI account or API key.
 
 > [!IMPORTANT]
 > **Experimental developer preview.** Answers and generated code can be wrong. Thread shows source excerpts and asks you to review changes. The new bundled-backend and offline paths are development candidates, not a finished release for every operating system.
@@ -30,9 +30,9 @@ Thread reads a bounded selection of **saved files**, rather than understanding e
 
 | Route | What you need | Where to start |
 | --- | --- | --- |
-| **Existing editor preview** | VS Code 1.95+, Python 3.9+ and a local text-generation model. On Apple Silicon macOS 14+, confirmed managed setup can install Ollama/model assets. | [Build/install and first setup](docs/vscode.md#build-and-install-from-this-public-repository) |
-| **Lightweight native candidate** | A matching platform VSIX containing the backend; local runtime/model assets acquired after confirmation, or an existing local server. A correctly built native package removes the separate Python requirement. | [Distribution paths and prerequisites](docs/distribution-modes.md) |
-| **Offline native candidate** | Matching VSIX **and** a trusted companion folder containing runtime/model assets and notices, transferred from a connected computer. | [Offline import steps](#offline-setup-in-plain-english) |
+| **Existing editor preview** | VS Code 1.95+, Python 3.9+ and a local text-generation model. Optional confirmed setup installs only the runtime; you supply models. | [Build/install and first setup](docs/vscode.md#build-and-install-from-this-public-repository) |
+| **Lightweight native candidate** | A matching platform VSIX containing the backend; your existing local model/server or a confirmed runtime-only install. No model weights are bundled or downloaded. A correctly built native package removes the separate Python requirement. | [Distribution paths and prerequisites](docs/distribution-modes.md) |
+| **Offline native candidate** | Matching VSIX and your own trusted runtime/model bundle, or an existing local Ollama installation. No official companion ZIPs are shipped in 0.2.1. | [Offline import steps](#offline-setup-in-plain-english) |
 | **Simple field lookup** | Git and Python 3.11+. No AI model or GPU required. This is a separate command-line tool. | [Try a field lookup](#try-a-field-lookup-without-ai) |
 
 A **VSIX** is a VS Code extension installer. A **model** is the downloaded AI data used to generate answers. A **companion bundle** contains the additional files needed for offline setup; it can be much larger than the extension.
@@ -45,14 +45,14 @@ A **VSIX** is a VS Code extension installer. A **model** is the downloaded AI da
 1. Follow the [build/install guide](docs/vscode.md#build-and-install-from-this-public-repository) to obtain the local VSIX. Building from source needs developer tools and internet access for dependencies.
 2. In VS Code, open **Extensions → … → Install from VSIX…** and select your installer.
 3. Open a project you trust. From the Command Palette, run **Thread: Setup Local Model**. The Python-based preview automatically detects Python 3.9+.
-4. Select an installed local text model. On a supported Apple Silicon Mac, you can choose **Set up local AI for me (Recommended)** and review/confirm the downloads instead.
+4. Select an installed local text model. Use **Use existing Ollama (Recommended)**; optional **Install local runtime only** never supplies models.
 5. Open the **Thread** sidebar and choose a workflow.
 
 Downloads need internet and sufficient storage/memory. They do not happen because an AI answer tells Thread to install something. [Setup sizes, terms and recovery →](docs/local-setup.md)
 
 ### Offline setup in plain English
 
-1. On a connected computer, obtain the matching VSIX and companion folder from a **trusted distributor**. Official ready-to-download companion releases are not available yet.
+1. Obtain the matching VSIX and supply your own complete, trusted runtime/model bundle. Ready-to-use official companions are outside the 0.2.1 release scope.
 2. Transfer both to the offline computer and install the VSIX.
 3. Run **Thread: Import Offline Local AI**, select the unpacked companion folder, and compare the shown manifest SHA-256 with the distributor's trusted record. SHA-256 is a fingerprint used to detect changed bytes; it does not prove who made the bundle.
 4. Review and explicitly approve the native programs being imported. Thread copies/checks the files, starts its local model server and checks the selected model before activating it.
@@ -196,7 +196,7 @@ Tests and synthetic traces demonstrate specific behavior; they are not accuracy 
 
 An [inactive Marketplace automation draft](docs/marketplace-automation.md) now proposes protected GitHub environment approval and Entra OIDC publishing of exact six-target packages. It does not run or publish. Release gates remain pending, the native release builder is unfinished, and protected Azure/GitHub access and identity lookup are verified. Marketplace Contributor membership is owner-reported and awaits independent verification. The existing public extension is updated through the same `Krishnendra.thread-agent` identity.
 
-Local release automation now includes host-native candidate packaging and offline companion assembly, six-target inventory aggregation, and a resumable upload/listing controller with a durable exact-release ledger. Both production workflows remain inactive under `release/*.yml.disabled`. Production execution and validation and six remaining evidence gates remain pending; no new public package is provided by this preparation.
+Local release automation now includes model-free host-native candidate packaging, separate user-bundle assembly and six-target inventory aggregation, and a resumable upload/listing controller with a durable exact-release ledger. Both production workflows remain inactive under `release/*.yml.disabled`. Production execution and validation and five remaining evidence gates remain pending for BYO 0.2.1; no new public package is provided by this preparation.
 
 Both inactive release workflows now pin every Action to a verified official upstream commit and disable persisted checkout credentials. Recovery restores only a validated same-commit publishing attempt. A CI-only review can exercise native probes and synthetic recovery tests without enabling publishing or resolving production release gates.
 
@@ -255,3 +255,15 @@ Final Windows x64/Linux x64 real runtime integration passed at d003dbfd403e079c6
 
 
 Cleanup incident clarification: in cancelled run 38217103078 (head d5885b0), the pre-termination record listed unowned lsass.exe PID 1008 first, followed by svchost.exe PID 716. The exact sequential cleanup code reached PID 716 and logged its failed taskkill, with no failure logged for PID 1008. This establishes by control flow that the unowned PID 1008 termination command returned success; it was not merely a query. Successful stdout and an independent post-kill probe were not retained, so the actual process exit and full OS impact cannot be independently reconstructed. It would be incorrect to claim no unowned processes were terminated. The impact was confined to disposable Windows CI runners, whose teardown stalled; affected runs reached terminal cancelled state. Final corrected runs independently enforce ownership and report zero remaining owned processes. No user Mac process was involved.
+
+
+Local packaging preparation now records exact PyInstaller BINARY and EXTENSION source/payload hashes while keeping redistribution review false. A private existing Mac backend copy has refreshed plaintext notices with unchanged non-notice bytes; its compiled installer still needs a final rebuild. Five target payload/source inventories and the release model decision remain unavailable/pending. No acquisitions, packaged-backend/Ollama/model execution, signing or remote changes were performed. [Concrete local inventory evidence](docs/local-packaging-inventory.md).
+
+
+Current owner-approved 0.2.1 scope: six model-free native VSIXs; users supply models. No starter-model downloads or official companion ZIPs are shipped. User-owned offline import is preserved. The exact-scope companion-distribution gate is not applicable; five notice/editor-inference/Windows/clean-machine/signing gates remain pending. No signing, hosting, workflow activation or publication occurred.
+
+
+The approved build-only CI now creates a temporary model-free VSIX on each of the six standard hosted targets, probes its actual native backend, verifies BYO package identity/content and prints exact native-file/source/notice inventory metadata. Packages are deleted on the runner; no artifacts, model/Ollama acquisitions, OIDC or publishing are involved. This does not advance ordinary-user, real-inference, complete licensing or signing gates.
+
+
+Six-target temporary BYO VSIX proof passed at 50eec6cd8ad18ca69853f14ba48666801480f57e: https://github.com/KrishnendraPrakash/thread/actions/runs/38243563529. Actual packaged native protocol, model-free contents, per-file/source/notice inventories and synthetic offline import passed on Windows/macOS/Linux ARM64/x64; temporary packages were removed, with zero artifact exports. A Windows UTF-8 decoding fix resolved the first run. These results do not establish ordinary-user trust, real editor/inference, complete redistribution rights or signing. All five production gates and Windows activation remain pending. [Evidence](docs/byo-package-checks.md).
