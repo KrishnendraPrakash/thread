@@ -3,7 +3,7 @@
 import * as vscode from 'vscode';
 import * as assert from 'node:assert/strict';
 import * as path from 'node:path';
-import { readFileSync, realpathSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, realpathSync, writeFileSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { createHash } from 'node:crypto';
 
@@ -33,7 +33,7 @@ export async function run(): Promise<void> {
   let approvals = 0, diffConfirmations = 0;
   installedAPI.window.showQuickPick = async (items: any[]) => {
     const key = picks.shift(); assert.ok(key, 'Unexpected picker');
-    if (key === 'file') return items[0];
+    if (key.startsWith('file')) { const selected = items[Number(key.split(':')[1] || 0)]; assert.ok(selected); return selected; }
     const selected = items.find(item => (typeof item === 'string' ? item : item.key || item.label) === key);
     assert.ok(selected, 'Missing choice '+key); return selected;
   };
@@ -73,6 +73,17 @@ export async function run(): Promise<void> {
   const review = async (...choices: string[]) => { picks.push(...choices); await command('review'); };
   const feature = async (next: any[]) => { changes = next; prompts.push('Change value in app.py'); await command('feature'); assert.ok(agent.result.proposal); };
   const unchanged = (text: string) => assert.equal(readFileSync(app, 'utf8'), text);
+  const fixtureWrite = async (text: string) => {
+    // Windows saves/watchers can briefly retain sharing locks. Retry only this
+    // controlled fixture's open failures, never product edits or uncertain actions.
+    for (let attempt = 0; ; attempt++) {
+      try { writeFileSync(app, text); return; }
+      catch (error) {
+        if (attempt >= 19 || !['EBUSY', 'EPERM'].includes((error as NodeJS.ErrnoException).code || '')) throw error;
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+    }
+  };
   try {
     if (process.env.THREAD_TEST_PHASE === 'resume') {
       // A second real extension host uses the same isolated profile/workspace storage.
@@ -106,22 +117,15 @@ export async function run(): Promise<void> {
     await vscode.workspace.applyEdit(restore); await document.save();
     assert.equal(document.isDirty, false);
     // Disk changes invalidate the native proposal without dispatching an editor edit.
-    writeFileSync(app, 'value = 3\n');
+    await fixtureWrite('value = 3\n');
     await review('diff', 'file', 'apply'); assert.ok(errors.pop()!.includes('changed'));
     unchanged('value = 3\n');
-    await command('clear'); writeFileSync(app, 'value = 1\n');
+    await command('clear'); await fixtureWrite('value = 1\n');
     await feature([{ path: 'app.py', old_text: 'value = 1', new_text: 'value = 2' },
       { path: 'new.py', old_text: '', new_text: 'created = True\n' },
       { path: 'crlf.py', old_text: '', new_text: 'windows = True\r\n' }]);
     // Review both exact native diffs; scripted explicit modal approval.
-    const savedPicker = installedAPI.window.showQuickPick;
-    let fileIndex = 0;
-    installedAPI.window.showQuickPick = async (items: any[]) => {
-      if (picks[0] === 'file') { picks.shift(); return items[fileIndex++]; }
-      return savedPicker(items);
-    };
-    await review('diff', 'file', 'diff', 'file', 'diff', 'file', 'apply');
-    installedAPI.window.showQuickPick = savedPicker;
+    await review('diff', 'file:0', 'diff', 'file:1', 'diff', 'file:2', 'apply');
     if (agent.result.decision !== 'applied') {
       console.log('THREAD_POST_EDIT_DIAGNOSIS: '+JSON.stringify({ expected: agent.result.proposal.files.map((file: any) => ({path: file.path, text: file.after})),
         actual: vscode.workspace.textDocuments.filter(document => document.uri.scheme === 'file').map(document => ({path: path.basename(document.uri.fsPath), text: document.getText()})) }));
@@ -137,6 +141,14 @@ export async function run(): Promise<void> {
     assert.equal(created.eol, vscode.EndOfLine.LF);
     await edited.save(); await created.save(); await crlf.save();
     assert.ok(requests >= 3); assert.ok(diffConfirmations >= 4); assert.equal(errors.length, 0);
+    await command('clear');
+    await feature([{ path: 'blocked.py', old_text: '', new_text: 'safe = True\n' },
+      { path: 'app.py', old_text: 'value = 2', new_text: 'value = 5\r\nmixed = True' }]);
+    await review('diff', 'file:0', 'diff', 'file:1', 'apply');
+    assert.ok(errors.pop()!.includes('mixed or bare-CR'));
+    assert.equal(agent.result.decision, 'pending'); unchanged('value = 2\n');
+    assert.equal(existsSync(path.join(root, 'blocked.py')), false, 'No earlier staged creation may be dispatched');
+    assert.equal(edited.isDirty, false); await review('cancel');
     await command('clear');
     await feature([{ path: 'app.py', old_text: 'value = 2', new_text: 'value = 4' }]);
     await review('diff', 'file', 'pause'); unchanged('value = 2\n');
