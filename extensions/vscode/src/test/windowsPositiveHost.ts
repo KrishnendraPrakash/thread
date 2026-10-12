@@ -91,12 +91,13 @@ export async function run(): Promise<void> {
     await review('apply', 'pause'); assert.equal(approvals, 0); unchanged('value = 1\n');
     await review('cancel'); assert.equal(agent.result.decision, 'cancelled'); unchanged('value = 1\n');
     await feature([{ path: 'app.py', old_text: 'value = 1', new_text: 'value = 2' }]);
-    // Actual editor dirty buffer must reject a request before invoking the provider.
+    // Actual editor dirty buffer must reject application before dispatching an edit.
     const document = await vscode.workspace.openTextDocument(app);
     const dirty = new vscode.WorkspaceEdit(); dirty.insert(document.uri, new vscode.Position(0, 0), '# dirty\n');
     await vscode.workspace.applyEdit(dirty);
     await review('diff', 'file', 'apply'); assert.ok(errors.pop()!.includes('Save or revert'));
     unchanged('value = 1\n');
+    await vscode.window.showTextDocument(document);
     await vscode.commands.executeCommand('workbench.action.files.revert');
     assert.equal(document.isDirty, false);
     // Disk changes invalidate the native proposal without dispatching an editor edit.
