@@ -1,0 +1,13 @@
+Thread BYO 0.2.1 CPython packaging changes
+
+Thread packages the CPython interpreter, selected standard-library modules and
+native extensions with PyInstaller 6.22.3. Thread does not patch CPython source.
+PyInstaller freezes Python modules and may rewrite native library load paths,
+select the host architecture slice, and apply its existing build signatures.
+The source and packaged native image hashes record these packaging differences.
+Windows 10+ packages use OS-supplied API-set/UCRT components and retain the
+other required vendor libraries. Installed distribution patches/build choices
+are outside Thread-authored source changes and require separate provenance.
+
+The retained CPython and independent third-party terms continue to apply.
+This summary does not approve redistribution of Microsoft vendor runtimes.

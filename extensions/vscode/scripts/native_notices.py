@@ -56,3 +56,82 @@ def collect_static_notices(source, output, profiles, target, python_version):
     }
     (output / "static-profile.json").write_text(json.dumps(result, indent=2) + "\n")
     return result
+
+
+def notice_text_candidate(path):
+    """Accept bounded UTF-8 notice text, never DLL/EXE images named License*."""
+    if path.suffix.lower() in {".dll", ".exe", ".so", ".dylib", ".pyd"}:
+        return False
+    if not path.is_file() or path.is_symlink() or path.stat().st_size > 1024 * 1024:
+        return False
+    if not path.name.upper().startswith(("LICENSE", "COPYING", "COPYRIGHT")):
+        return False
+    content = path.read_bytes()
+    if not content or b"\0" in content or content.startswith((b"MZ", b"\x7fELF")):
+        return False
+    try:
+        content.decode("utf-8")
+    except UnicodeDecodeError:
+        return False
+    return True
+
+
+def collect_bound_notices(inventory, output, folder, target, python_version):
+    """Bind retained terms to recorded exact source hashes; no dependency closure claim."""
+    profile = json.loads((folder / "bindings.json").read_text(encoding="utf-8"))
+    if profile.get("schema") != 1:
+        raise ValueError("Unsupported exact-image notice bindings.")
+    notices = []
+    for entry in inventory["entries"]:
+        matches = [
+            binding
+            for binding in profile["bindings"]
+            if binding["target"] == target
+            and binding["python"] == python_version
+            and binding["source_name"] == entry["source_name"]
+            and binding["source_sha256"] == entry["source_sha256"]
+        ]
+        if len(matches) > 1:
+            raise ValueError("Ambiguous exact-image notice binding.")
+        if not matches:
+            continue
+        binding = matches[0]
+        documents = binding.get(
+            "notices",
+            [
+                {
+                    "file": binding.get("notice_file"),
+                    "sha256": binding.get("notice_sha256"),
+                    "source": binding.get("source"),
+                }
+            ],
+        )
+        for document in documents:
+            name = document["file"]
+            if not isinstance(name, str) or Path(name).name != name or "\\" in name:
+                raise ValueError("Bound notice filenames must be basenames.")
+            notice = folder / name
+            if notice.is_symlink() or not notice.is_file() or digest(notice) != document["sha256"]:
+                raise ValueError("Bound notice missing or changed.")
+            destination = profile.get("prefix", "CPython-core-") + name
+            shutil.copy2(notice, output / destination)
+            notices.append(
+                {
+                    **binding,
+                    "component": binding.get("component", "CPython core"),
+                    "file": destination,
+                    "sha256": document["sha256"],
+                    "source": document["source"],
+                    "payload_sha256": entry["payload_sha256"],
+                    "payload_destination": entry["destination"],
+                    "scope": profile["scope"],
+                    "complete_distribution_review": False,
+                }
+            )
+    if notices and (folder / "PACKAGING-CHANGES.txt").is_file():
+        changes = folder / "PACKAGING-CHANGES.txt"
+        shutil.copy2(changes, output / "CPython-PACKAGING-CHANGES.txt")
+    return notices
+
+
+collect_cpython_core_notices = collect_bound_notices

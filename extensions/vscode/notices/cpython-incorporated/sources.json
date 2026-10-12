@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "scope": "Official incorporated-software license documentation; actual module/build attribution remains required",
+  "sources": [
+    {
+      "python": "3.12.10",
+      "file": "CPython-3.12.10-incorporated.rst",
+      "sha256": "341832873fd316a37927e79385093fbbfd40a467428480835fe435a80cadf4e5",
+      "source": "https://raw.githubusercontent.com/python/cpython/0cc81280367df838c4b199f8f0378837165071c2/Doc/license.rst"
+    },
+    {
+      "python": "3.12.15",
+      "file": "CPython-3.12.15-incorporated.rst",
+      "sha256": "341832873fd316a37927e79385093fbbfd40a467428480835fe435a80cadf4e5",
+      "source": "https://raw.githubusercontent.com/python/cpython/e848e4b09ca4bc67c0041c9ce7526dae471d4c36/Doc/license.rst"
+    }
+  ]
+}

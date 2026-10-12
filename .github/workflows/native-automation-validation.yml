@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - byo-model-release-prep
+      - byo-native-notice-provenance
   workflow_dispatch:
 
 permissions:
@@ -46,7 +47,7 @@ jobs:
       - name: Install native build dependencies in the CI environment
         run: python -m pip install -e ".[editor]" -r extensions/vscode/scripts/requirements-native.txt
       - name: Test distribution and native Windows source protections
-        run: python -m unittest tests.editor.test_distribution tests.editor.test_runtime_install tests.editor.test_windows_filesystem tests.editor.test_marketplace_preflight tests.editor.test_marketplace_automation tests.editor.test_native_inventory -v
+        run: python -m unittest tests.editor.test_distribution tests.editor.test_runtime_install tests.editor.test_windows_filesystem tests.editor.test_marketplace_preflight tests.editor.test_marketplace_automation tests.editor.test_native_inventory tests.editor.test_native_notices tests.editor.test_distribution_provenance -v
       - name: Build and probe the native candidate
         run: |
           python extensions/vscode/scripts/freeze.py --target ${{ matrix.target }}
