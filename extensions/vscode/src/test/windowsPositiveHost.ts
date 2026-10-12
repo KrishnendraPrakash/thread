@@ -46,7 +46,7 @@ export async function run(): Promise<void> {
     if (message.startsWith('Apply this exact proposal')) { approvals++; return 'Apply reviewed changes'; }
     return undefined;
   };
-  installedAPI.window.showErrorMessage = async (message: string) => { errors.push(message); return undefined; };
+  installedAPI.window.showErrorMessage = async (message: string) => { errors.push(message); console.log('THREAD_FIXTURE_ERROR: '+message); return undefined; };
   Agent.prototype.setup = async function () { agent = this; return original.setup.call(this); };
   Agent.prototype.review = async function () { agent = this; return original.review.call(this); };
   let changes: any[] = [];
@@ -68,7 +68,7 @@ export async function run(): Promise<void> {
       response.setHeader('Content-Type', 'application/json'); response.end(JSON.stringify(value));
     });
   });
-  const command = async (suffix: string) => { await vscode.commands.executeCommand('thread.'+suffix); assert.equal(picks.length, 0); assert.equal(prompts.length, 0); };
+  const command = async (suffix: string) => { await vscode.commands.executeCommand('thread.'+suffix); assert.equal(picks.length, 0, JSON.stringify({ errors, picks, proposalRoot: agent?.result?.proposal?.root, workspaceRoot: realpathSync(root) })); assert.equal(prompts.length, 0); };
   const review = async (...choices: string[]) => { picks.push(...choices); await command('review'); };
   const feature = async (next: any[]) => { changes = next; prompts.push('Change value in app.py'); await command('feature'); assert.ok(agent.result.proposal); };
   const unchanged = (text: string) => assert.equal(readFileSync(app, 'utf8'), text);
