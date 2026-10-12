@@ -18,8 +18,14 @@ from importlib.metadata import PackageNotFoundError, distribution, version
 from pathlib import Path
 from sysconfig import get_path
 
+from distribution_provenance import collect_distribution_provenance
 from native_inventory import collected_binaries
-from native_notices import collect_static_notices
+from native_notices import (
+    collect_bound_notices,
+    collect_cpython_core_notices,
+    collect_static_notices,
+    notice_text_candidate,
+)
 
 ROOT = Path(__file__).resolve().parents[3]
 TARGETS = ("darwin-arm64", "darwin-x64", "linux-x64", "linux-arm64", "win32-x64", "win32-arm64")
@@ -133,13 +139,7 @@ def collect_notices(directory, work):
     for component, source in sources:
         found = []
         for parent in [source, *list(source.parents)[:6]]:
-            found = [
-                item
-                for item in parent.iterdir()
-                if item.is_file()
-                and item.name.upper().startswith(("LICENSE", "COPYING", "COPYRIGHT"))
-                and item.stat().st_size <= 1024 * 1024
-            ]
+            found = [item for item in parent.iterdir() if notice_text_candidate(item)]
             if found:
                 break
         if not found:
@@ -153,6 +153,45 @@ def collect_notices(directory, work):
             name = f"{len(seen):02d}-{item.name}"
             (output / name).write_bytes(content)
             record["notices"].append({"component": component, "file": name, "sha256": sha})
+    core_notices = collect_cpython_core_notices(
+        record["binary_inventory"],
+        output,
+        ROOT / "extensions/vscode/notices/cpython-core-ci",
+        host_target(),
+        sys.version.split()[0],
+    )
+    record["notices"].extend(core_notices)
+    covered_core = {item["source_name"] for item in core_notices}
+    record["missing"] = [item for item in record["missing"] if item not in covered_core]
+    import ssl
+
+    record["openssl_runtime_version"] = ssl.OPENSSL_VERSION
+    openssl_notices = (
+        collect_bound_notices(
+            record["binary_inventory"],
+            output,
+            ROOT / "extensions/vscode/notices/openssl-macos-ci",
+            host_target(),
+            sys.version.split()[0],
+        )
+        if ssl.OPENSSL_VERSION.startswith("OpenSSL 3.0.16 ")
+        else []
+    )
+    record["notices"].extend(openssl_notices)
+    covered_openssl = {item["source_name"] for item in openssl_notices}
+    record["missing"] = [item for item in record["missing"] if item not in covered_openssl]
+    distribution_report = collect_distribution_provenance(
+        analysis,
+        record["binary_inventory"],
+        output,
+        host_target(),
+    )
+    record["distribution_provenance"] = {
+        "file": "distribution-provenance.json",
+        "images": len(distribution_report["images"]),
+        "texts": len(distribution_report["texts"]),
+        "complete_distribution_review": False,
+    }
     package = distribution("PyInstaller")
     for item in package.files or []:
         if "licenses/" in str(item) and str(item).endswith(".txt"):

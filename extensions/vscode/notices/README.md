@@ -15,3 +15,5 @@ The portable install-only Python archive supplies CPython LICENSE.txt but lacks 
 This addresses missing notice texts and CPython mapping for that exact private Mac build. Full component-specific attribution/modification review and other distribution profiles remain open; complete_distribution_review is false and the global production gate remains pending. Thread's MIT grant does not override any dependency's terms. No OpenSSL/other binary or model was downloaded.
 
 `pathspec-0.12.1-SOURCE.txt` records exact upstream MPL-2.0 Source Code Form access and the official PyPI archive digest. Native notice collection includes it only for the matching installed version.
+
+`cpython-core-ci/bindings.json` binds the unchanged official CPython core LICENSE to four exact Mac/Linux CI source-library hashes. It does not provide third-party/static dependency or distribution-wide approval. See [notice progress](../../../docs/byo-notice-progress.md). Unknown profiles, including Windows, are not covered.

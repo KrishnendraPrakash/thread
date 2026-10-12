@@ -1,0 +1,100 @@
+{
+  "schema": 1,
+  "scope": "OpenSSL 3.0.16 LICENSE and AUTHORS for exact Mac Python distribution shared libraries; excludes other static components",
+  "prefix": "OpenSSL-3.0.16-",
+  "complete_distribution_review": false,
+  "bindings": [
+    {
+      "component": "OpenSSL 3.0.16",
+      "target": "darwin-arm64",
+      "python": "3.12.10",
+      "source_name": "libcrypto.3.dylib",
+      "source_sha256": "2b2d14fc8f354e21ff8e613ef1fd74d9a93473ade5dd270eb7e3550720539d92",
+      "notices": [
+        {
+          "file": "LICENSE.txt",
+          "sha256": "7d5450cb2d142651b8afa315b5f238efc805dad827d91ba367d8516bc9d49e7a",
+          "source": "https://raw.githubusercontent.com/openssl/openssl/fa1e5dfb142bb1c26c3c38a10aafa7a095df52e5/LICENSE.txt"
+        },
+        {
+          "file": "AUTHORS.md",
+          "sha256": "5076ca441daef7fb35e904c2ac070880c7b3d58300a5a6aecac41e8f525f4412",
+          "source": "https://raw.githubusercontent.com/openssl/openssl/fa1e5dfb142bb1c26c3c38a10aafa7a095df52e5/AUTHORS.md"
+        }
+      ],
+      "evidence_run": 38243563529,
+      "evidence_commit": "50eec6cd8ad18ca69853f14ba48666801480f57e",
+      "build_recipe": "https://github.com/python/cpython/blob/0cc81280367df838c4b199f8f0378837165071c2/Mac/BuildScript/build-installer.py",
+      "dependency_source_sha256": "57e03c50feab5d31b152af2b764f10379aecd8ee92f16c985983ce4a99f7ef86"
+    },
+    {
+      "component": "OpenSSL 3.0.16",
+      "target": "darwin-arm64",
+      "python": "3.12.10",
+      "source_name": "libssl.3.dylib",
+      "source_sha256": "4278742a962e0b5d6610ca8a6b7082f35d9594c7bb25466e04e7f1f226540f2a",
+      "notices": [
+        {
+          "file": "LICENSE.txt",
+          "sha256": "7d5450cb2d142651b8afa315b5f238efc805dad827d91ba367d8516bc9d49e7a",
+          "source": "https://raw.githubusercontent.com/openssl/openssl/fa1e5dfb142bb1c26c3c38a10aafa7a095df52e5/LICENSE.txt"
+        },
+        {
+          "file": "AUTHORS.md",
+          "sha256": "5076ca441daef7fb35e904c2ac070880c7b3d58300a5a6aecac41e8f525f4412",
+          "source": "https://raw.githubusercontent.com/openssl/openssl/fa1e5dfb142bb1c26c3c38a10aafa7a095df52e5/AUTHORS.md"
+        }
+      ],
+      "evidence_run": 38243563529,
+      "evidence_commit": "50eec6cd8ad18ca69853f14ba48666801480f57e",
+      "build_recipe": "https://github.com/python/cpython/blob/0cc81280367df838c4b199f8f0378837165071c2/Mac/BuildScript/build-installer.py",
+      "dependency_source_sha256": "57e03c50feab5d31b152af2b764f10379aecd8ee92f16c985983ce4a99f7ef86"
+    },
+    {
+      "component": "OpenSSL 3.0.16",
+      "target": "darwin-x64",
+      "python": "3.12.10",
+      "source_name": "libcrypto.3.dylib",
+      "source_sha256": "2b2d14fc8f354e21ff8e613ef1fd74d9a93473ade5dd270eb7e3550720539d92",
+      "notices": [
+        {
+          "file": "LICENSE.txt",
+          "sha256": "7d5450cb2d142651b8afa315b5f238efc805dad827d91ba367d8516bc9d49e7a",
+          "source": "https://raw.githubusercontent.com/openssl/openssl/fa1e5dfb142bb1c26c3c38a10aafa7a095df52e5/LICENSE.txt"
+        },
+        {
+          "file": "AUTHORS.md",
+          "sha256": "5076ca441daef7fb35e904c2ac070880c7b3d58300a5a6aecac41e8f525f4412",
+          "source": "https://raw.githubusercontent.com/openssl/openssl/fa1e5dfb142bb1c26c3c38a10aafa7a095df52e5/AUTHORS.md"
+        }
+      ],
+      "evidence_run": 38243563529,
+      "evidence_commit": "50eec6cd8ad18ca69853f14ba48666801480f57e",
+      "build_recipe": "https://github.com/python/cpython/blob/0cc81280367df838c4b199f8f0378837165071c2/Mac/BuildScript/build-installer.py",
+      "dependency_source_sha256": "57e03c50feab5d31b152af2b764f10379aecd8ee92f16c985983ce4a99f7ef86"
+    },
+    {
+      "component": "OpenSSL 3.0.16",
+      "target": "darwin-x64",
+      "python": "3.12.10",
+      "source_name": "libssl.3.dylib",
+      "source_sha256": "4278742a962e0b5d6610ca8a6b7082f35d9594c7bb25466e04e7f1f226540f2a",
+      "notices": [
+        {
+          "file": "LICENSE.txt",
+          "sha256": "7d5450cb2d142651b8afa315b5f238efc805dad827d91ba367d8516bc9d49e7a",
+          "source": "https://raw.githubusercontent.com/openssl/openssl/fa1e5dfb142bb1c26c3c38a10aafa7a095df52e5/LICENSE.txt"
+        },
+        {
+          "file": "AUTHORS.md",
+          "sha256": "5076ca441daef7fb35e904c2ac070880c7b3d58300a5a6aecac41e8f525f4412",
+          "source": "https://raw.githubusercontent.com/openssl/openssl/fa1e5dfb142bb1c26c3c38a10aafa7a095df52e5/AUTHORS.md"
+        }
+      ],
+      "evidence_run": 38243563529,
+      "evidence_commit": "50eec6cd8ad18ca69853f14ba48666801480f57e",
+      "build_recipe": "https://github.com/python/cpython/blob/0cc81280367df838c4b199f8f0378837165071c2/Mac/BuildScript/build-installer.py",
+      "dependency_source_sha256": "57e03c50feab5d31b152af2b764f10379aecd8ee92f16c985983ce4a99f7ef86"
+    }
+  ]
+}

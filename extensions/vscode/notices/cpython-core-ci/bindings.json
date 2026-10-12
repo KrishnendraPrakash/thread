@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "scope": "CPython core license only; excludes incorporated third-party code and distribution terms",
+  "complete_distribution_review": false,
+  "bindings": [
+    {
+      "target": "darwin-arm64",
+      "python": "3.12.10",
+      "source_name": "Python",
+      "source_sha256": "14e61fb22a897d238248dfd8fe3b472b4541338c293368b4747803055b8bb3aa",
+      "notice_sha256": "3b2f81fe21d181c499c59a256c8e1968455d6689d269aa85373bfb6af41da3bf",
+      "notice_file": "LICENSE.txt",
+      "source": "https://raw.githubusercontent.com/python/cpython/v3.12.10/LICENSE",
+      "evidence_run": 38243563529,
+      "evidence_commit": "50eec6cd8ad18ca69853f14ba48666801480f57e",
+      "evidence_job": 114791815561
+    },
+    {
+      "target": "darwin-x64",
+      "python": "3.12.10",
+      "source_name": "Python",
+      "source_sha256": "14e61fb22a897d238248dfd8fe3b472b4541338c293368b4747803055b8bb3aa",
+      "notice_sha256": "3b2f81fe21d181c499c59a256c8e1968455d6689d269aa85373bfb6af41da3bf",
+      "notice_file": "LICENSE.txt",
+      "source": "https://raw.githubusercontent.com/python/cpython/v3.12.10/LICENSE",
+      "evidence_run": 38243563529,
+      "evidence_commit": "50eec6cd8ad18ca69853f14ba48666801480f57e",
+      "evidence_job": 114791815463
+    },
+    {
+      "target": "linux-arm64",
+      "python": "3.12.15",
+      "source_name": "libpython3.12.so.1.0",
+      "source_sha256": "3b7bb403d2d32495309dfb412559ea3a3b20daaa4522ae64b4fa2c639aa8179d",
+      "notice_sha256": "3b2f81fe21d181c499c59a256c8e1968455d6689d269aa85373bfb6af41da3bf",
+      "notice_file": "LICENSE.txt",
+      "source": "https://raw.githubusercontent.com/python/cpython/v3.12.15/LICENSE",
+      "evidence_run": 38243563529,
+      "evidence_commit": "50eec6cd8ad18ca69853f14ba48666801480f57e",
+      "evidence_job": 114791815547
+    },
+    {
+      "target": "linux-x64",
+      "python": "3.12.15",
+      "source_name": "libpython3.12.so.1.0",
+      "source_sha256": "210b4c2f6be72f3fc739a0479cda75f93d268a0ca6f6a5e40f7c6d64579aef6d",
+      "notice_sha256": "3b2f81fe21d181c499c59a256c8e1968455d6689d269aa85373bfb6af41da3bf",
+      "notice_file": "LICENSE.txt",
+      "source": "https://raw.githubusercontent.com/python/cpython/v3.12.15/LICENSE",
+      "evidence_run": 38243563529,
+      "evidence_commit": "50eec6cd8ad18ca69853f14ba48666801480f57e",
+      "evidence_job": 114791815185
+    }
+  ]
+}

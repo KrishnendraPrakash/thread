@@ -208,3 +208,7 @@ The approved build-only CI now creates a temporary model-free VSIX on each of th
 
 
 Six-target temporary BYO VSIX proof passed at 50eec6cd8ad18ca69853f14ba48666801480f57e: https://github.com/KrishnendraPrakash/thread/actions/runs/38243563529. Actual packaged native protocol, model-free contents, per-file/source/notice inventories and synthetic offline import passed on Windows/macOS/Linux ARM64/x64; temporary packages were removed, with zero artifact exports. A Windows UTF-8 decoding fix resolved the first run. These results do not establish ordinary-user trust, real editor/inference, complete redistribution rights or signing. All five production gates and Windows activation remain pending. [Evidence](../docs/byo-package-checks.md).
+
+Local notice preparation (2026-10-12): [exact CPython core mappings and remaining distribution inputs](../docs/byo-notice-progress.md) cover the recorded Mac/Linux source hashes and reject executable images mistaken for notice text. This is locally tested preparation; native notice completeness and publication remain pending.
+
+Owner-approved follow-up: six free hosted targets collect exact installed distribution origins, versions and bounded original notice text; existing SDK redist hashes are compared without acquiring an SDK or accepting terms. Pinned Mac OpenSSL 3.0.16 and incorporated CPython license text supplement the exact core mappings. This work is under review; it does not promote the notice gate or activate publication.

@@ -42,6 +42,14 @@ def main():
     for row in metadata["files"]:
         print(json.dumps({"native_file": row}), flush=True)
     print(json.dumps({"native_notice_provenance": provenance}), flush=True)
+    distribution_report = json.loads(
+        (native / "notices/distribution-provenance.json").read_text(encoding="utf-8")
+    )
+    for row in distribution_report.pop("images"):
+        print(json.dumps({"native_distribution_image": row}), flush=True)
+    for row in distribution_report.pop("texts"):
+        print(json.dumps({"native_distribution_text": row}), flush=True)
+    print(json.dumps({"native_distribution_summary": distribution_report}), flush=True)
     with tempfile.TemporaryDirectory(prefix="thread-byo-ci-package-") as directory:
         package = package_native(ROOT, args.target, manifest, Path(directory))
         verify_byo_vsix(ROOT, manifest, package, args.target)

@@ -98,3 +98,59 @@ class NativeNoticeTests(unittest.TestCase):
         openssl = next(x for x in profile["components"] if x["component"] == "OpenSSL")
         self.assertEqual(openssl["version"], "3.5.9")
         self.assertIn(b"Apache License", (folder / openssl["file"]).read_bytes())
+
+    def test_executable_named_license_is_not_notice_text(self):
+        with tempfile.TemporaryDirectory() as directory:
+            folder = Path(directory)
+            for name, content in [
+                ("LicenseManager.dll", b"MZimage"),
+                ("LicenseManager.exe", b"MZimage"),
+                ("LICENSE", b"MZimage"),
+                ("COPYING.txt", b"bad\0text"),
+            ]:
+                path = folder / name
+                path.write_bytes(content)
+                self.assertFalse(MODULE.notice_text_candidate(path))
+            text = folder / "LICENSE.txt"
+            text.write_text("retained copyright and terms", encoding="utf-8")
+            self.assertTrue(MODULE.notice_text_candidate(text))
+
+    def test_core_binding_requires_exact_source_target_version_and_notice(self):
+        folder = ROOT / "extensions/vscode/notices/cpython-core-ci"
+        bindings = json.loads((folder / "bindings.json").read_text())["bindings"]
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory)
+            for binding in bindings:
+                entry = {
+                    "source_name": binding["source_name"],
+                    "source_sha256": binding["source_sha256"],
+                    "payload_sha256": "a" * 64,
+                }
+                result = MODULE.collect_cpython_core_notices(
+                    {"entries": [entry]}, output, folder, binding["target"], binding["python"]
+                )
+                self.assertEqual(len(result), 1)
+                self.assertFalse(result[0]["complete_distribution_review"])
+                self.assertEqual(result[0]["payload_sha256"], "a" * 64)
+                for target, version, source_hash in [
+                    ("unknown", binding["python"], binding["source_sha256"]),
+                    (binding["target"], "unknown", binding["source_sha256"]),
+                    (binding["target"], binding["python"], "f" * 64),
+                ]:
+                    changed = {**entry, "source_sha256": source_hash}
+                    self.assertEqual(
+                        MODULE.collect_cpython_core_notices(
+                            {"entries": [changed]}, output, folder, target, version
+                        ),
+                        [],
+                    )
+            copied = output / "CPython-core-LICENSE.txt"
+            self.assertEqual(copied.read_bytes(), (folder / "LICENSE.txt").read_bytes())
+            altered = output / "altered"
+            altered.mkdir()
+            (altered / "bindings.json").write_text((folder / "bindings.json").read_text())
+            (altered / "LICENSE.txt").write_bytes(b"changed")
+            with self.assertRaisesRegex(ValueError, "missing or changed"):
+                MODULE.collect_cpython_core_notices(
+                    {"entries": [entry]}, output, altered, binding["target"], binding["python"]
+                )
