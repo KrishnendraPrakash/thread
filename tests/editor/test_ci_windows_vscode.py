@@ -18,6 +18,36 @@ SPEC.loader.exec_module(MODULE)
 
 
 class WindowsVSCodeAcquisitionTests(unittest.TestCase):
+    def test_pinned_commit_wrapper_is_normalized_without_guessing(self):
+        import io
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            archive = root / "wrapped.zip"
+            prefix = "a" * 10
+            with zipfile.ZipFile(archive, "w") as source:
+                source.writestr(prefix + "/Code.exe", b"fixture never executed")
+                source.writestr(
+                    prefix + "/resources/app/package.json", json.dumps({"version": "fixture"})
+                )
+                source.writestr(
+                    prefix + "/resources/app/product.json", json.dumps({"commit": "a" * 40})
+                )
+            pin = {
+                "platform": "win32-x64-archive",
+                "commit": "a" * 40,
+                "version": "fixture",
+                "archive_root": prefix,
+                "url": "https://vscode.download.prss.microsoft.com/" + "a" * 40 + "/code.zip",
+                "sha256": hashlib.sha256(archive.read_bytes()).hexdigest(),
+            }
+            with patch.object(
+                MODULE.urllib.request, "urlopen", return_value=io.BytesIO(archive.read_bytes())
+            ):
+                result = MODULE.download(root / "code", pin)
+            self.assertEqual(result, root / "code/Code.exe")
+            self.assertFalse((root / "code" / prefix).exists())
+
     def test_traversal_duplicate_and_existing_output_are_rejected(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

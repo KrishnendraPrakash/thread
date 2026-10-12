@@ -215,3 +215,5 @@ A follow-up draft adds Windows x64 document/proposal/frozen-protocol fixtures an
 Git now preserves project-license and dependency-notice bytes across platform checkouts, so Windows newline conversion cannot invalidate the reviewed SHA-256 records.
 
 An approved follow-up adds a real Windows x64 VS Code extension-host test using pinned Microsoft VS Code 1.141.0 and @vscode/test-electron 3.1.0. It installs a private CI-only native VSIX into empty profiles and checks installed metadata/license, activation/commands, native no-Python probing and expected guard rejection. It does not enable positive Windows workflows or publishing. A clean CI profile is not a bare consumer Windows machine.
+
+The pinned Windows Code archive uses a commit-prefix wrapper directory. Test acquisition validates and normalizes that verified layout before invoking Code; its version, commit and byte digest remain checked.
