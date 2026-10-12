@@ -420,19 +420,19 @@ export class Agent implements vscode.WebviewViewProvider, vscode.Disposable {
     for (const file of proposal.files) {
       const uri = this.fileUri(proposal.root, file.path);
       const eol = proposalLineEnding(file.after);
-      if (file.before === null) { edit.createFile(uri, { overwrite: false, ignoreIfExists: false }); edit.insert(uri, new vscode.Position(0, 0), file.after); }
-      else {
+      let textEdit: vscode.TextEdit;
+      if (file.before === null) {
+        edit.createFile(uri, { overwrite: false, ignoreIfExists: false });
+        textEdit = vscode.TextEdit.insert(new vscode.Position(0, 0), file.after);
+      } else {
         const document = await vscode.workspace.openTextDocument(uri);
         if (document.isDirty || document.getText() !== file.before) { throw new Error('An edit target changed. Regenerate the proposal.'); }
         opened.push({ file, document, version: document.version });
-        edit.replace(uri, new vscode.Range(document.positionAt(0), document.positionAt(document.getText().length)), file.after);
+        textEdit = vscode.TextEdit.replace(new vscode.Range(document.positionAt(0), document.positionAt(document.getText().length)), file.after);
       }
-      if (eol !== undefined) {
-        const edits = edit.get(uri);
-        // Carry EOL on the replacement itself: a separate zero-range EOL edit
-        // overlaps a full-document replacement in the WorkspaceEdit protocol.
-        edits[0].newEol = eol; edit.set(uri, edits);
-      }
+      if (eol !== undefined) { textEdit.newEol = eol; }
+      // WorkspaceEdit.set appends: enqueue the sole text edit once per file.
+      edit.set(uri, [textEdit]);
     }
     result.decision = 'applying'; await this.save();
     // Validate again after editor loading and persistence, then check buffers synchronously.
