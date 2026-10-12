@@ -3,7 +3,7 @@ name: Windows installed VS Code profile checks
 on:
   push:
     branches:
-      - windows-vscode-installed-validation
+      - windows-positive-candidate
   workflow_dispatch:
 
 permissions:
@@ -59,4 +59,12 @@ jobs:
         env:
           THREAD_TEST_CODE_EXE: ${{ github.workspace }}/build/windows-installed/vscode/Code.exe
           THREAD_TEST_VSIX: ${{ github.workspace }}/build/windows-installed/thread-agent-ci.vsix
+        run: npm run test:windows-installed --prefix extensions/vscode
+      - name: Package an unpublished positive candidate with only the platform rejection omitted
+        run: python extensions/vscode/scripts/ci_windows_vscode.py package --positive-candidate --output build/windows-installed/thread-agent-positive-ci.vsix
+      - name: Exercise actual installed commands and human-reviewed edits with a synthetic local provider
+        env:
+          THREAD_TEST_CODE_EXE: ${{ github.workspace }}/build/windows-installed/vscode/Code.exe
+          THREAD_TEST_VSIX: ${{ github.workspace }}/build/windows-installed/thread-agent-positive-ci.vsix
+          THREAD_TEST_POSITIVE: '1'
         run: npm run test:windows-installed --prefix extensions/vscode

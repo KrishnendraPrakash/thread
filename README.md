@@ -219,3 +219,7 @@ An approved follow-up adds a real Windows x64 VS Code extension-host test using 
 The pinned Windows Code archive uses a commit-prefix wrapper directory. Test acquisition preserves the verified side-by-side executable/runtime layout before invoking Code; its version, commit and byte digest remain checked.
 
 Installed-host guard observation uses the actual activated module's error handler, preserving its original behavior and the shipped guard. It avoids relying on a separate test extension's notification API facade.
+
+### Isolated positive Windows integration
+
+The next private Windows check retains the production guard control and builds a separate CI-only candidate omitting only its platform rejection in temporary staging bytes. It tests installed commands, native validation and actual editor edits with scripted approval and a synthetic loopback provider; a second host launch checks renewed review after reload. Production source remains guarded. No real-runtime/model or ordinary-user readiness is implied. See [extension limits](extensions/vscode/README.md) and [remaining notice review](docs/licensing.md). The old Mac companion must be rebuilt with the final notices. Full release gates and protected publication stay inactive.

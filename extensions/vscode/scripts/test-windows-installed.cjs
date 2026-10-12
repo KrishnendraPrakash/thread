@@ -36,13 +36,18 @@ async function main() {
   const hostEnvironment = { ...process.env }; delete hostEnvironment.ELECTRON_RUN_AS_NODE;
   const expectedLicense = crypto.createHash('sha256').update(fs.readFileSync(path.join(root, 'LICENSE'))).digest('hex');
   // runTests receives the exact installed payload, not source/out as a substitute.
-  await runTests({ vscodeExecutablePath: code, platform: pin.platform,
+  const options = { vscodeExecutablePath: code, platform: pin.platform,
     extensionDevelopmentPath: installed,
-    extensionTestsPath: path.join(extension, 'out/test/windowsInstalledHost.js'),
+    extensionTestsPath: path.join(extension, process.env.THREAD_TEST_POSITIVE === '1' ? 'out/test/windowsPositiveHost.js' : 'out/test/windowsInstalledHost.js'),
     extensionTestsEnv: { ...hostEnvironment, ELECTRON_RUN_AS_NODE: undefined, THREAD_INSTALLED_VERSION: manifest.version,
       THREAD_INSTALLED_LICENSE_SHA: expectedLicense, THREAD_INSTALLED_PATH: installed },
     launchArgs: [workspace, '--user-data-dir='+profile, '--extensions-dir='+extensions,
-      '--disable-extensions', '--disable-telemetry', '--disable-gpu'] });
+      '--disable-extensions', '--disable-telemetry', '--disable-gpu'] };
+  await runTests(options);
+  if (process.env.THREAD_TEST_POSITIVE === '1') {
+    options.extensionTestsEnv.THREAD_TEST_PHASE = 'resume';
+    await runTests(options);
+  }
   console.log('THREAD_WINDOWS_INSTALLED_PROFILE_PASSED: '+temporary);
 }
 main().catch(error => { console.error(error); process.exitCode = 1; });

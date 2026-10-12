@@ -88,7 +88,21 @@ def download(output, pin):
     return output / "Code.exe"
 
 
-def package(root, output):
+WINDOWS_REJECTION = """        if (process.platform === 'win32') {
+            throw new Error('This experimental backend currently supports macOS and Linux.');
+        }
+"""
+
+
+def positive_candidate(source):
+    """Omit exactly the known platform block in disposable compiled bytes only."""
+    trust = "throw new Error('Trust this workspace before using Thread.');"
+    if source.count(WINDOWS_REJECTION) != 1 or source.count(trust) != 1:
+        raise ValueError("Expected exactly one platform rejection and workspace trust check.")
+    return source.replace(WINDOWS_REJECTION, "", 1)
+
+
+def package(root, output, positive=False):
     if output.exists() or output.is_symlink():
         raise ValueError("CI-only package output already exists.")
     extension = root / "extensions/vscode"
@@ -114,6 +128,11 @@ def package(root, output):
                 "tsconfig.json",
             ),
         )
+        compiled = stage / "out/extension.js"
+        original = compiled.read_bytes()
+        candidate = positive_candidate(original.decode("utf-8")).encode("utf-8")
+        if positive:
+            compiled.write_bytes(candidate)
         shutil.copytree(native, stage / "native/win32-x64")
         shutil.copy2(root / "LICENSE", stage / "LICENSE")
         staged = {
@@ -144,6 +163,8 @@ def package(root, output):
         for key in ("name", "publisher", "version", "license", "preview"):
             if packaged[key] != manifest[key]:
                 raise ValueError("CI package metadata mismatch.")
+        if archive.read("extension/out/extension.js") != (candidate if positive else original):
+            raise ValueError("CI compiled payload differs from the exact expected transformation.")
         ns = {"v": "http://schemas.microsoft.com/developer/vsx-schema/2011"}
         xml = ElementTree.fromstring(archive.read("extension.vsixmanifest"))
         if xml.find("v:Metadata/v:Identity", ns).get("TargetPlatform") != "win32-x64":
@@ -160,6 +181,11 @@ def package(root, output):
                 "version": manifest["version"],
                 "target": "win32-x64",
                 "ci_only": True,
+                "windows_platform_rejection_omitted": positive,
+                "original_extension_sha256": hashlib.sha256(original).hexdigest(),
+                "packaged_extension_sha256": hashlib.sha256(
+                    candidate if positive else original
+                ).hexdigest(),
                 "public_release_ready": False,
             },
             indent=2,
@@ -172,11 +198,18 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("operation", choices=("download", "package"))
     parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument(
+        "--positive-candidate",
+        action="store_true",
+        help="Omit only the Windows rejection in private staging bytes; never publish.",
+    )
     args = parser.parse_args()
+    if args.positive_candidate and args.operation != "package":
+        parser.error("The positive candidate flag applies only to private packaging.")
     if args.operation == "download":
         print(download(args.output, json.loads(PIN.read_text())))
     else:
-        package(ROOT, args.output)
+        package(ROOT, args.output, args.positive_candidate)
 
 
 if __name__ == "__main__":

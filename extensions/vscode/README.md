@@ -110,3 +110,9 @@ The next hosted Windows check installs the actual CI-only native VSIX in empty V
 The pinned Windows Code archive uses a commit-prefix wrapper directory. Test acquisition preserves the verified side-by-side executable/runtime layout before invoking Code; its version, commit and byte digest remain checked.
 
 Installed-host guard observation uses the actual activated module's error handler, preserving its original behavior and the shipped guard. It avoids relying on a separate test extension's notification API facade.
+
+### Private positive Windows integration candidate
+
+The Windows CI fixture packages two unpublished VSIXs: an unchanged guard control and a candidate whose staging bytes omit exactly the known Windows platform rejection. Workspace trust, source boundaries, human review and stale/buffer validation remain in place. No runtime setting enables Windows in the shipped source. The candidate exercises actual installed commands and the native backend against synthetic loopback responses, including reviewed replacement/creation, pause/cancel, dirty/stale rejection, duplicate rejection and a second host launch requiring renewed review. These are scripted integration fixtures, not real-model, managed-runtime, manual UX or ordinary-user certification. CI results must be checked before claiming this candidate passed. Release and publishing gates remain pending.
+
+Pathspec 0.12.1 source access is recorded in native notices; other target-specific binary inventories and the final offline companion rebuild/review remain open.
