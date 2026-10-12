@@ -26,7 +26,10 @@ const realSpawn = cp.spawn;
 cp.spawn = function(executable, args, options) {
   if (path.resolve(executable) === path.resolve(runtimeBinary)) {
     options = {...options, env: {...options.env, HOME:ownedHome, USERPROFILE:ownedHome,
-      TMPDIR:path.join(ownedHome,'tmp'), TMP:path.join(ownedHome,'tmp'), TEMP:path.join(ownedHome,'tmp')}};
+      TMPDIR:path.join(ownedHome,'tmp'), TMP:path.join(ownedHome,'tmp'), TEMP:path.join(ownedHome,'tmp'),
+      OLLAMA_LLM_LIBRARY:'cpu', OLLAMA_VULKAN:'0', OLLAMA_IGPU_ENABLE:'0',
+      CUDA_VISIBLE_DEVICES:'-1', HIP_VISIBLE_DEVICES:'-1', ROCR_VISIBLE_DEVICES:'-1',
+      GGML_VK_VISIBLE_DEVICES:'-1', GPU_DEVICE_ORDINAL:'-1'}};
   }
   return realSpawn.call(this, executable, args, options);
 };
@@ -124,7 +127,7 @@ async function main() {
     const residency=await request(endpoint,'/api/ps');
     record('cpu-residency.json',{target,residency,required_size_vram:0});
     assert.ok(residency.models.length);assert.ok(residency.models.every(model=>model.size_vram===0));
-    record('smoke.json',{target,runtime:'0.34.4',model:scope.model,completion:true,cpu_residency:true,
+    record('smoke.json',{target,runtime:'0.34.4',model:scope.model,completion:true,cpu_residency:true,cpu_library_override:'cpu',vulkan_disabled:true,
       output:smoke.message.content,done_reason:smoke.done_reason,eval_count:smoke.eval_count,
       model_quality_certified:false,external_network_denial_certified:false});
     const base=localEndpoint(endpoint);
