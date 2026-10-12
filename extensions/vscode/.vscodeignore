@@ -9,3 +9,5 @@ out/test/**
 tsconfig.json
 package-lock.json
 notices/portable-darwin-arm64-20261009/**
+
+test-config/**

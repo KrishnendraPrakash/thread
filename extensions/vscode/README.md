@@ -104,3 +104,5 @@ Private Mac 0.2.1 installation checks passed for an offline-installed Python whe
 A follow-up draft adds Windows x64 document/proposal/frozen-protocol fixtures and verifies that the Windows product guard still blocks setup. It also retains source-bound static dependency notices for the verified portable Mac Python build, including OpenSSL 3.5.9. These are core/transport fixtures and notice provenance checks, not Windows UI, real-model or clean-machine certification. Publishing stays inactive and the production gates remain pending.
 
 Git now preserves project-license and dependency-notice bytes across platform checkouts, so Windows newline conversion cannot invalidate the reviewed SHA-256 records.
+
+The next hosted Windows check installs the actual CI-only native VSIX in empty VS Code profiles and exercises its activation, commands, license and backend. Windows setup still rejects through the shipped guard; positive setup/edit/inference and normal-consumer installation remain unvalidated. No VS Code/test utility, model or CI-only installer is bundled into the public extension by this preparation.
