@@ -298,7 +298,7 @@ export class Agent implements vscode.WebviewViewProvider, vscode.Disposable {
   }
   private dirty(root: string): boolean {
     return vscode.workspace.textDocuments.some(document => document.isDirty && document.uri.scheme === 'file'
-      && contained(realpathSync(root), realpathSync(document.uri.fsPath)));
+      && contained(workspacePath(root), workspacePath(document.uri.fsPath)));
   }
   async request(mode: Mode, supplied?: string): Promise<void> {
     this.trusted();
@@ -352,7 +352,7 @@ export class Agent implements vscode.WebviewViewProvider, vscode.Disposable {
     if (this.reviewing || this.backend.busy) { throw new Error('A request or review is already active.'); }
     const result = this.result, proposal = result?.proposal;
     if (!result || !proposal || result.decision !== 'pending') { throw new Error('There is no pending proposal. Applied, cancelled or uncertain proposals cannot be reused.'); }
-    if (!vscode.workspace.workspaceFolders?.some(folder => realpathSync(folder.uri.fsPath) === proposal.root)) { throw new Error('Open the proposal’s original workspace.'); }
+    if (!vscode.workspace.workspaceFolders?.some(folder => workspacePath(folder.uri.fsPath) === workspacePath(proposal.root))) { throw new Error('Open the proposal’s original workspace.'); }
     this.reviewing = true;
     try {
       const reviewed = new Set<string>();
@@ -403,7 +403,7 @@ export class Agent implements vscode.WebviewViewProvider, vscode.Disposable {
     } finally { this.reviewing = false; }
   }
   private fileUri(root: string, name: string): vscode.Uri {
-    const folder = vscode.workspace.workspaceFolders?.find(item => item.uri.scheme === 'file' && realpathSync(item.uri.fsPath) === root);
+    const folder = vscode.workspace.workspaceFolders?.find(item => item.uri.scheme === 'file' && workspacePath(item.uri.fsPath) === workspacePath(root));
     if (!folder) { throw new Error('The original workspace is no longer open.'); }
     const uri = vscode.Uri.joinPath(folder.uri, name);
     if (!contained(folder.uri.fsPath, uri.fsPath)) { throw new Error('Edit path escaped the workspace.'); }
@@ -419,13 +419,20 @@ export class Agent implements vscode.WebviewViewProvider, vscode.Disposable {
     const opened: { file: FileChange; document: vscode.TextDocument; version: number }[] = [];
     for (const file of proposal.files) {
       const uri = this.fileUri(proposal.root, file.path);
-      if (file.before === null) { edit.createFile(uri, { overwrite: false, ignoreIfExists: false }); edit.insert(uri, new vscode.Position(0, 0), file.after); }
-      else {
+      const eol = proposalLineEnding(file.after);
+      let textEdit: vscode.TextEdit;
+      if (file.before === null) {
+        edit.createFile(uri, { overwrite: false, ignoreIfExists: false });
+        textEdit = vscode.TextEdit.insert(new vscode.Position(0, 0), file.after);
+      } else {
         const document = await vscode.workspace.openTextDocument(uri);
         if (document.isDirty || document.getText() !== file.before) { throw new Error('An edit target changed. Regenerate the proposal.'); }
         opened.push({ file, document, version: document.version });
-        edit.replace(uri, new vscode.Range(document.positionAt(0), document.positionAt(document.getText().length)), file.after);
+        textEdit = vscode.TextEdit.replace(new vscode.Range(document.positionAt(0), document.positionAt(document.getText().length)), file.after);
       }
+      if (eol !== undefined) { textEdit.newEol = eol; }
+      // WorkspaceEdit.set appends: enqueue the sole text edit once per file.
+      edit.set(uri, [textEdit]);
     }
     result.decision = 'applying'; await this.save();
     // Validate again after editor loading and persistence, then check buffers synchronously.
@@ -481,4 +488,21 @@ export class Agent implements vscode.WebviewViewProvider, vscode.Disposable {
 export function contained(root: string, filename: string): boolean {
   const relative = path.relative(root, filename);
   return relative !== '' && !relative.startsWith('..' + path.sep) && relative !== '..' && !path.isAbsolute(relative);
+}
+
+// Windows JS realpath preserves drive casing and 8.3 aliases, while Python
+// resolves them to the final filesystem name. Resolve both sides natively;
+// never lowercase arbitrary components (Windows directories can be case-sensitive).
+export function workspacePath(filename: string): string {
+  return process.platform === 'win32' ? realpathSync.native(filename) : realpathSync(filename);
+}
+
+// Monaco normalizes inserted newlines to the document EOL. Preserve the exact
+// reviewed content explicitly; reject forms the editor cannot represent exactly.
+export function proposalLineEnding(text: string): vscode.EndOfLine | undefined {
+  const remainder = text.replace(/\r\n/g, '');
+  if (remainder.includes('\r') || (text.includes('\r\n') && remainder.includes('\n'))) {
+    throw new Error('Proposal has mixed or bare-CR line endings. Request consistent LF or CRLF content; no edit was dispatched.');
+  }
+  return text.includes('\r\n') ? vscode.EndOfLine.CRLF : text.includes('\n') ? vscode.EndOfLine.LF : undefined;
 }

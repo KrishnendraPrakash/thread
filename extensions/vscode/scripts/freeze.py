@@ -95,6 +95,19 @@ def collect_notices(directory, work):
         )
     else:
         record["missing"].append(f"Zstandard native library {zstd_version}")
+    source_notice = ROOT / "extensions/vscode/notices/pathspec-0.12.1-SOURCE.txt"
+    if version("pathspec") == "0.12.1":
+        content = source_notice.read_bytes()
+        (output / source_notice.name).write_bytes(content)
+        record["notices"].append(
+            {
+                "component": "pathspec 0.12.1 source access",
+                "file": source_notice.name,
+                "sha256": hashlib.sha256(content).hexdigest(),
+            }
+        )
+    else:
+        record["missing"].append("Version-specific pathspec source access notice")
     sources = [("CPython", Path(get_path("stdlib")))]
     python_library = None
     analysis = ast.literal_eval((work / "work/thread-backend/Analysis-00.toc").read_text())

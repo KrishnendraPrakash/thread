@@ -117,6 +117,18 @@ class WindowsVSCodeAcquisitionTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, "version/commit mismatch"):
                     MODULE.download(root / "wrong", pin)
 
+    def test_positive_candidate_omits_only_platform_rejection_and_rejects_drift(self):
+        trust = "throw new Error('Trust this workspace before using Thread.');"
+        original = "prefix\n" + trust + "\n" + MODULE.WINDOWS_REJECTION + "suffix\n"
+        self.assertEqual(MODULE.positive_candidate(original), "prefix\n" + trust + "\nsuffix\n")
+        for changed in (
+            original.replace(trust, ""),
+            original + MODULE.WINDOWS_REJECTION,
+            original.replace("win32", "other"),
+        ):
+            with self.assertRaisesRegex(ValueError, "exactly one"):
+                MODULE.positive_candidate(changed)
+
     def test_ci_package_requires_native_payload_without_running_tools(self):
         with (
             tempfile.TemporaryDirectory() as directory,

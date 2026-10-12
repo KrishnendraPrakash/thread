@@ -1,0 +1,15 @@
+Pathspec 0.12.1 source access
+
+Pathspec is Copyright (C) Caleb P. Burns and contributors and is distributed
+under Mozilla Public License 2.0. Its license text is retained separately in
+pathspec distribution metadata. Thread does not modify pathspec source files.
+
+The exact upstream Source Code Form is available without charge:
+https://files.pythonhosted.org/packages/ca/bc/f35b8446f4531a7cb215605d100cd88b7ac6f44ab3fc94870c120ab3adbf/pathspec-0.12.1.tar.gz
+SHA-256: a482d51503a1ab33b1c67a6c3813a26953dbdc71c31dacaef9a838c4e29f5712
+Release metadata: https://pypi.org/pypi/pathspec/0.12.1/json
+Project: https://github.com/cpburnz/python-pathspec
+
+The Source Code Form remains available under MPL-2.0. Thread's MIT license does
+not change those terms. This notice identifies source access for this version;
+it does not certify redistribution of unrelated components or modified builds.
