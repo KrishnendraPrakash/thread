@@ -121,6 +121,10 @@ export async function run(): Promise<void> {
     };
     await review('diff', 'file', 'diff', 'file', 'apply');
     installedAPI.window.showQuickPick = savedPicker;
+    if (agent.result.decision !== 'applied') {
+      console.log('THREAD_POST_EDIT_DIAGNOSIS: '+JSON.stringify({ expected: agent.result.proposal.files.map((file: any) => ({path: file.path, text: file.after})),
+        actual: vscode.workspace.textDocuments.filter(document => document.uri.scheme === 'file').map(document => ({path: path.basename(document.uri.fsPath), text: document.getText()})) }));
+    }
     assert.equal(agent.result.decision, 'applied');
     const edited = await vscode.workspace.openTextDocument(app);
     assert.equal(edited.getText(), 'value = 2\n'); assert.equal(edited.isDirty, true); unchanged('value = 1\n');
