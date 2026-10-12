@@ -62,3 +62,14 @@ class DistributionProvenanceTests(unittest.TestCase):
             self.assertEqual(result["packages"], [])
             self.assertEqual(result["origin"], "unresolved installed origin")
             self.assertFalse(result["terms_reviewed"])
+
+    def test_notice_link_cannot_escape_declared_source_root(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            allowed = root / "allowed"
+            allowed.mkdir()
+            outside = root / "outside"
+            outside.write_bytes(b"unrelated text")
+            candidate = allowed / "LICENSE.txt"
+            candidate.symlink_to(outside)
+            self.assertIsNone(MODULE.retain_text(candidate, allowed, {}, "fixture", allowed))

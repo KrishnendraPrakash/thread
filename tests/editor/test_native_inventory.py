@@ -106,3 +106,48 @@ class NativeInventoryTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Unsafe"):
             MODULE.omit_windows_os_images(toc, self.payload, system.parent)
         self.assertTrue(destination.is_file())
+
+    def test_copied_os_family_requires_exact_installed_os_bytes(self):
+        system = self.root / "Windows/System32/downlevel"
+        system.mkdir(parents=True)
+        source = self.root / "api-ms-win-crt-copy.dll"
+        source.write_bytes(b"copy")
+        installed = system / source.name
+        installed.write_bytes(b"other")
+        destination = self.payload / "_internal" / source.name
+        destination.write_bytes(source.read_bytes())
+        toc = [[(source.name, str(source), "BINARY")]]
+        _, omitted = MODULE.omit_windows_os_images(toc, self.payload, system.parents[1])
+        self.assertEqual(omitted, [])
+        self.assertTrue(destination.is_file())
+        installed.write_bytes(source.read_bytes())
+        filtered, omitted = MODULE.omit_windows_os_images(toc, self.payload, system.parents[1])
+        self.assertEqual(len(omitted), 1)
+        self.assertEqual(filtered, [[]])
+        self.assertFalse(destination.exists())
+
+    def test_windows_component_store_requires_microsoft_component_path(self):
+        windows = self.root / "Windows"
+        component = (
+            windows / "WinSxS/amd64_microsoft-windows-ucrt_31bf3856ad364e35_10.0.1.0_none_fixture"
+        )
+        component.mkdir(parents=True)
+        source = component / "ucrtbase.dll"
+        source.write_bytes(b"fixture component image")
+        destination = self.payload / "_internal/ucrtbase.dll"
+        destination.write_bytes(source.read_bytes())
+        filtered, omitted = MODULE.omit_windows_os_images(
+            [[("ucrtbase.dll", str(source), "BINARY")]], self.payload, windows
+        )
+        self.assertEqual(len(omitted), 1)
+        self.assertEqual(filtered, [[]])
+        other = windows / "WinSxS/unrelated"
+        other.mkdir()
+        source = other / "ucrtbase.dll"
+        source.write_bytes(b"unrelated bytes")
+        destination.write_bytes(source.read_bytes())
+        _, omitted = MODULE.omit_windows_os_images(
+            [[("ucrtbase.dll", str(source), "BINARY")]], self.payload, windows
+        )
+        self.assertEqual(omitted, [])
+        self.assertTrue(destination.exists())

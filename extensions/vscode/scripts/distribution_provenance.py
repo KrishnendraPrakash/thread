@@ -33,9 +33,13 @@ def sha(path):
     return value.hexdigest()
 
 
-def retain_text(path, output, texts, origin):
+def retain_text(path, output, texts, origin, allowed_root=None):
     """Retain original bounded text, not executable names or rewritten terms."""
     if not path.is_file() or path.stat().st_size > MAX_TEXT:
+        return None
+    root = (allowed_root or path.parent).resolve(strict=True)
+    resolved = path.resolve(strict=True)
+    if root not in resolved.parents:
         return None
     content = path.read_bytes()
     if not content or b"\0" in content or content.startswith((b"MZ", b"\x7fELF")):
@@ -89,7 +93,9 @@ def linux_evidence(source, output, texts):
             continue
         package, version, source_package, source_version = metadata.split("\t")
         document = Path("/usr/share/doc") / owner.split(":")[0] / "copyright"
-        notice = retain_text(document, output, texts, "Ubuntu installed package " + package)
+        notice = retain_text(
+            document, output, texts, "Ubuntu installed package " + package, Path("/usr/share/doc")
+        )
         references = []
         if notice:
             for name in sorted(
@@ -233,6 +239,24 @@ def collect_distribution_provenance(analysis, inventory, output, target):
         if base in source.parents:
             evidence["python_relative_path"] = source.relative_to(base).as_posix()
         if sys.platform == "win32":
+            windows = Path(os.environ["SystemRoot"]).resolve(strict=True)
+            if windows in source.parents:
+                evidence["windows_relative_path"] = source.relative_to(windows).as_posix()
+            else:
+                evidence["outside_windows_root"] = True
+                for label, environment_name in [
+                    ("Program Files", "ProgramFiles"),
+                    ("Program Files x86", "ProgramFiles(x86)"),
+                    ("Runner toolcache", "RUNNER_TOOL_CACHE"),
+                ]:
+                    if os.environ.get(environment_name):
+                        installed_root = Path(os.environ[environment_name]).resolve()
+                        if installed_root in source.parents:
+                            evidence["installed_root"] = label
+                            evidence["installed_relative_path"] = source.relative_to(
+                                installed_root
+                            ).as_posix()
+                            break
             evidence["file_version"] = windows_file_version(source)
         images.append({**row, "distribution": evidence})
     # Python installation texts, including the Windows combined dependency license.

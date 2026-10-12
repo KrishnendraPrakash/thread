@@ -29,15 +29,42 @@ def omit_windows_os_images(analysis, payload, windows_root):
             eligible = False
             if isinstance(item, tuple) and len(item) == 3 and item[2] == "BINARY":
                 source = Path(item[1]).resolve(strict=True)
+                family = (
+                    re.fullmatch(r"(?:api-ms-win-[a-z0-9-]+|ucrtbase)\.dll", source.name.lower())
+                    is not None
+                )
                 if root in source.parents:
                     relative = source.relative_to(root)
-                    eligible = (
-                        relative.parts[0].lower() in {"system32", "syswow64"}
+                    system_directory = relative.parts[0].lower() in {"system32", "syswow64"}
+                    component_store = (
+                        len(relative.parts) == 3
+                        and relative.parts[0].lower() == "winsxs"
                         and re.fullmatch(
-                            r"(?:api-ms-win-[a-z0-9-]+|ucrtbase)\.dll", source.name.lower()
+                            r"(?:amd64|arm64|wow64)_microsoft-windows-[a-z0-9.-]+_31bf3856ad364e35_[a-z0-9._-]+",
+                            relative.parts[1].lower(),
                         )
                         is not None
                     )
+                    eligible = family and (system_directory or component_store)
+                if not eligible and family:
+                    # Build search paths can resolve a copied OS image outside
+                    # SystemRoot. Only an exact match to the installed OS image
+                    # supplies equivalent evidence; names/versions alone do not.
+                    for parent in [
+                        root / "System32",
+                        root / "System32/downlevel",
+                        root / "SysWOW64",
+                        root / "SysWOW64/downlevel",
+                    ]:
+                        candidate = parent / source.name
+                        if (
+                            candidate.is_file()
+                            and root in candidate.resolve().parents
+                            and digest(candidate) == digest(source)
+                        ):
+                            eligible = True
+                            relative = candidate.resolve().relative_to(root)
+                            break
             if eligible:
                 row = by_destination[item[0].replace("\\", "/")]
                 omitted.append(
