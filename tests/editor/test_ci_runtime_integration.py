@@ -53,6 +53,13 @@ class RuntimeCIPolicyTests(unittest.TestCase):
         self.assertEqual(blocks[0]["url"], MODULE.CUDNN_TERMS)
         self.assertEqual(MODULE.vendor_blocks([{"path": "lib/cuda_v12/cublas64.dll"}]), [])
 
+    def test_exact_permissive_notice_is_not_a_vendor_binary_acceptance(self):
+        path = "lib/ollama/CUDNN_LICENSE.txt"
+        digest = next(iter(MODULE.PERMISSIVE_NOTICE_HASHES[path]))
+        self.assertEqual(MODULE.vendor_blocks([{"path": path, "sha256": digest}]), [])
+        self.assertTrue(MODULE.vendor_blocks([{"path": path, "sha256": "changed"}]))
+        self.assertTrue(MODULE.vendor_blocks([{"path": "lib/cudnn64_9.dll", "sha256": digest}]))
+
     def test_model_tag_drift_stops_before_blob_acquisition(self):
         with self.assertRaisesRegex(ValueError, "tag drift"):
             MODULE.verify_manifest(b'{"changed":"tag"}')

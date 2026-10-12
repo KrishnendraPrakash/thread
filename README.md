@@ -240,3 +240,6 @@ Runtime integration attempt (2026-10-12): draft PR #7, tested head 8669617dc07b9
 
 
 A separately selected manual `runtime-metadata` diagnostic reads only the exact approved Windows/Linux archive manifests and license text on temporary GitHub runners. It neither extracts nor executes payloads or acquires models; archives are deleted after inspection. This diagnoses the unresolved cuDNN notice and Linux archive-link rejection without continuing the blocked integration suite.
+
+
+Metadata-only diagnosis passed on both runners: the cuDNN-named and MLX notices in the approved main Windows archive are permissive texts, with no cuDNN/MLX runtime binaries present. No extra SDK acceptance is needed for those exact notices. The audit now distinguishes exact inspected notice hashes from unapproved binaries. Linux extraction now supports bounded internal file-link chains by regular copying, retaining containment and size limits; synthetic security regressions pass. Real inference has not been rerun. [Evidence, exact component revisions and conditional SDK approval →](docs/runtime-integration.md)

@@ -30,6 +30,22 @@ BLOBS = {
 }
 CUDNN_TERMS = "https://docs.nvidia.com/deeplearning/cudnn/backend/v9.18.1/reference/eula.html"
 
+# Exact permissive notice bytes inspected in pinned-archive metadata run 38215230670.
+# This permits only these notices, never a cuDNN/MLX binary or a changed license.
+PERMISSIVE_NOTICE_HASHES = {
+    "lib/ollama/CUDNN_LICENSE.txt": {
+        "b6fe452605fe29245f0cbafa724b42df94a5e170bedb9d45bc9cfaa4883ad907",
+    },
+    "lib/ollama/MLX_LICENSE": {
+        "e93675e97d080c4fcfef6dd530448b9a6fd7c1ad43c736d593537079cd669d3d",
+        "ccfab7ccb2ea306f71531c8ca77bb55507606cd90768b1e32b8b52ab5b48cf01",
+    },
+    "lib/ollama/MLX_C_LICENSE": {
+        "d8d63c7fa57071d80d30116d014e4189c52ef4cb2d1671f6d848e78d9f6cfad0",
+        "44326a4ea062241ae6fc26ee2ec90bdc81af7eb7b9d3966181b733fa69d42057",
+    },
+}
+
 
 def require_runner(target):
     actual = f"{sys.platform}-" + {"amd64": "x64", "x86_64": "x64"}.get(
@@ -85,6 +101,8 @@ def vendor_blocks(entries):
     """Fail closed for unapproved optional/vendor payloads; no license auto-acceptance."""
     blocks = []
     for entry in entries:
+        if entry.get("sha256") in PERMISSIVE_NOTICE_HASHES.get(entry["path"], set()):
+            continue
         name = entry["path"].lower()
         if "cudnn" in name:
             blocks.append({"path": entry["path"], "agreement": "cuDNN", "url": CUDNN_TERMS})
