@@ -103,7 +103,7 @@ jobs:
     if: github.repository == 'KrishnendraPrakash/thread' && github.event_name == 'workflow_dispatch' && (inputs.publish || inputs.check_access) && github.ref == 'refs/heads/main'
     environment: marketplace-publish
     runs-on: ubuntu-22.04
-    timeout-minutes: 10
+    timeout-minutes: 25
     permissions:
       contents: read
       id-token: write

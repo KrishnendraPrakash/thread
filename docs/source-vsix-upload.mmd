@@ -13,5 +13,10 @@ flowchart TD
     L --> M{Publish requested?}
     M -->|No| N[Read-only access check completed]
     M -->|Yes| O[Upload same packagePath with durable receipt]
-    O --> P[Verify exact stable universal Marketplace listing and digest]
+    O --> P[Wait at most 15 minutes for exact stable universal listing and digest]
+    P --> R[Verified receipt]
+    P --> S[Pending listing preserves uploaded ledger]
+    S --> T[Local verification-only recovery; no upload or authentication]
+    T --> R
+    P --> U[Explicit rejection or mismatch stops; no upload retry]
     O --> Q[Uncertain outcome pauses for owner reconciliation]

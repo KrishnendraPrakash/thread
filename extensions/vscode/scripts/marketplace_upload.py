@@ -61,19 +61,19 @@ def save(path, ledger):
     os.replace(temporary, path)
 
 
-def process(record, folder, ledger_path, publish, visible, execute=False):
+def process(record, folder, ledger_path, publish, visible, execute=False, *, wait_for_listing=None):
     if not execute:
         return _process(record, folder, ledger_path, publish, visible, False)
     lock = ledger_path.with_name(ledger_path.name + ".lock")
     handle = lock.open("x")
     try:
         with handle:
-            return _process(record, folder, ledger_path, publish, visible, True)
+            return _process(record, folder, ledger_path, publish, visible, True, wait_for_listing)
     finally:
         lock.unlink()
 
 
-def _process(record, folder, ledger_path, publish, visible, execute=False):
+def _process(record, folder, ledger_path, publish, visible, execute=False, wait_for_listing=None):
     identity = {k: record[k] for k in ("commit", "version", "publisher", "channel")}
     expected = {item["target"]: item["vsix"]["sha256"] for item in record["targets"]}
     ledger = (
@@ -127,6 +127,11 @@ def _process(record, folder, ledger_path, publish, visible, execute=False):
             raise
         ledger["targets"][target] = "uploaded"
         save(ledger_path, ledger)
+        if wait_for_listing is not None:
+            wait_for_listing(target)
+            ledger["targets"][target] = "verified"
+            save(ledger_path, ledger)
+            continue
         for attempt in range(6):
             if visible(target):
                 ledger["targets"][target] = "verified"
