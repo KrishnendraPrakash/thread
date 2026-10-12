@@ -222,6 +222,7 @@ class SourceReleaseTests(unittest.TestCase):
         )
         self.assertIn("if: inputs.publish", publish)
         self.assertIn("environment: marketplace-publish", publish)
+        self.assertIn("github.repository == 'KrishnendraPrakash/thread'", publish)
         self.assertIn("verify-pat --azure-credential Krishnendra", publish)
         self.assertNotIn("native-release-candidates", source)
 

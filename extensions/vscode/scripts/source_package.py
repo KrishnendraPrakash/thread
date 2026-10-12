@@ -291,6 +291,16 @@ def stage(root, output, commit):
     for name in ("bridge.py", "install_runtime.py", "runtime_assets.py"):
         shutil.copy2(extension / "scripts" / name, output / "python" / name)
     manifest.update(threadDistribution=PROFILE, threadPythonRequirement=">=3.9", scripts={})
+    manifest["files"] = [
+        "out/**",
+        "media/**",
+        "python/**",
+        "README.md",
+        "CHANGELOG.md",
+        "PRIVACY.md",
+        "LICENSE",
+        "source-build.json",
+    ]
     manifest.pop("devDependencies", None)
     (output / "package.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
     (output / "source-build.json").write_text(
