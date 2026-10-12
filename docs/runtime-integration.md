@@ -26,3 +26,25 @@ Real integration retries exposed a Windows CI cleanup defect: the PowerShell own
 
 
 The real CPU integration harness now explicitly selects Ollama’s documented `OLLAMA_LLM_LIBRARY=cpu`, disables Vulkan/integrated GPU discovery and masks accelerator visibility only for the owned test runtime child. This addresses a runner residency discrepancy without changing production settings or the captured structured request. Zero-VRAM assertions remain mandatory before/after the production call. Windows owned-process classification regressions remain enabled before acquisition.
+
+
+## Final real integration result
+
+[Run 38218047751](https://github.com/KrishnendraPrakash/thread/actions/runs/38218047751) completed successfully on standard windows-2025 and ubuntu-22.04 at exact tested head d003dbfd403e079c6f9ea196f74d9ebd406c1836. Each job retained the 45-minute bound, disk preflight, exact approved main-archive/runtime/model identities, no optional MLX/cuDNN payloads, and vendor audit before execution.
+
+| Evidence | Windows x64 | Linux x64 |
+| --- | --- | --- |
+| Actual native installer / runtime version | Passed / Ollama 0.34.4 | Passed / Ollama 0.34.4 |
+| Real model / quantization | Qwen2.5-Coder 0.5B / Q4_K_M | Qwen2.5-Coder 0.5B / Q4_K_M |
+| Bounded CPU completion | READY; 10 generated tokens; stop | READY; 10 generated tokens; stop |
+| Reported VRAM before/after production call | 0 / 0 bytes | 0 / 0 bytes |
+| Unchanged production structured request | Captured; 119 tokens; stop | Captured; 103 tokens; stop |
+| Backend acceptance | Rejected: invalid source reference or text | Rejected: edits prohibited in ask mode |
+| Synthetic source preservation | Passed | Passed |
+| Independently verified owned-process cleanup | Zero remaining | Zero remaining |
+
+The real runtime path passed its integration checks; the production task did not produce an accepted answer on either platform. Both responses included proposed edits and contradictory statements about the add function, and Windows also invented source IDs. This is retained model-failure evidence, not a model-quality pass. The production schema, prompt and options (context 16384, output cap 3072) were forwarded unchanged; test-only CPU-library environment controls do not change shipped settings.
+
+Earlier Windows cleanup attempts returned system paths from an overbroad query and are invalid owned-only evidence. The affected four runs (38216011621, 38216413084, 38216778581, 38217103078) reached terminal cancelled state. The independent Node path classifier, pre-termination identity recheck and negative ownership regressions correct that defect; the final run required no post-stop termination because its owned-process inventory was empty. One earlier Linux attempt reported nonzero VRAM and correctly stopped; explicit documented CPU-library selection plus disabled accelerator discovery resolved the final integration check without weakening assertions.
+
+Zero artifacts were exported. Large assets ran only on temporary GitHub runners. No Mac runtime/model acquisition, driver installation, paid capacity, access change, Windows guard removal, starter-model change, merge, publication or release activation occurred. This is synthetic-input real runtime/backend evidence on development runners, not ordinary-user/clean-machine editor certification, Windows ARM validation, external-network-denial certification, complete redistribution review or a benchmark. Full release/model-quality gates remain open.
