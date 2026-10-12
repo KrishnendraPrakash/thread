@@ -2,7 +2,7 @@
 
 Thread 0.2.1 uses a **local model you supply** for repository questions, diagnosis, reviewed changes and document summaries. No model weights, including Llama, are distributed or downloaded by Thread. No paid API account is required.
 
-The immediate 0.2.1 package is a universal **Python-source VSIX**, using the existing Marketplace stable channel with an experimental preview label. Install Python 3.9+ separately; no Python/native runtime, Ollama or models are bundled. Windows activation remains gated. The six-target native work is preserved as a separate future release effort. Source changes do not update the Marketplace listing.
+The published 0.2.1 package is a universal **Python-source VSIX**, using the existing Marketplace stable channel with an experimental preview label. Install Python 3.9+ separately; no Python/native runtime, Ollama or models are bundled. Windows activation remains gated. The six-target native work is preserved as a separate future release effort. Maintainer listing verification can recover a preserved upload receipt without uploading again; local maintenance changes do not update the published package or Marketplace Details page.
 
 ## Dependencies — what you need
 

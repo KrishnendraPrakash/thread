@@ -211,6 +211,151 @@ class SourceReleaseTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "digest"):
                 UPLOAD.visible(record)
 
+    def test_listing_wait_survives_eight_minute_validation_and_is_capped(self):
+        now = [0.0]
+        delays = []
+
+        def sleep(seconds):
+            delays.append(seconds)
+            now[0] += seconds
+
+        with patch.object(UPLOAD, "visible", side_effect=lambda _: now[0] >= 480):
+            UPLOAD.wait_visible({}, clock=lambda: now[0], sleep=sleep)
+        self.assertGreaterEqual(now[0], 480)
+        self.assertLess(now[0], UPLOAD.LISTING_WAIT_SECONDS)
+        self.assertLessEqual(max(delays), 45)
+        now[0] = 0
+        with patch.object(UPLOAD, "visible", return_value=False):
+            with self.assertRaisesRegex(UPLOAD.ListingPending, "Do not rerun"):
+                UPLOAD.wait_visible({}, clock=lambda: now[0], sleep=sleep)
+        self.assertEqual(now[0], UPLOAD.LISTING_WAIT_SECONDS)
+
+    def test_listing_pending_rejection_and_mismatch_are_distinct(self):
+        record = {
+            "publisher": "Krishnendra",
+            "version": "0.2.1",
+            "targets": [{"vsix": {"sha256": "a" * 64}}],
+        }
+        listing = {"version": "0.2.1", "flags": "none"}
+        with patch.object(UPLOAD, "versions", return_value=[listing]):
+            self.assertFalse(UPLOAD.visible(record))
+            listing["validationResultMessage"] = "Validation failed: scanner rejection"
+            with self.assertRaises(UPLOAD.ListingRejected):
+                UPLOAD.visible(record)
+            listing.clear()
+            listing.update(
+                version="0.2.1",
+                flags="validated",
+                properties=[
+                    {"key": "Microsoft.VisualStudio.Services.VsixSha256", "value": "b" * 64}
+                ],
+            )
+            with self.assertRaisesRegex(ValueError, "digest"):
+                UPLOAD.visible(record)
+            listing["properties"] = [
+                {"key": "Microsoft.VisualStudio.Code.PreRelease", "value": "true"}
+            ]
+            with self.assertRaisesRegex(ValueError, "channel"):
+                UPLOAD.visible(record)
+            listing["targetPlatform"] = "linux-x64"
+            with self.assertRaisesRegex(UPLOAD.ListingMismatch, "universal target"):
+                UPLOAD.visible(record)
+
+    def recovery_fixture(self, root):
+        package, _ = self.fixture(root)
+        digest = PACKAGE.fingerprint(package)["sha256"]
+        ledger = root / "uploaded.json"
+        value = {
+            "schema": 1,
+            "commit": self.commit,
+            "version": "0.2.1",
+            "publisher": "Krishnendra",
+            "channel": "stable",
+            "hashes": {"universal": digest},
+            "targets": {"universal": "uploaded"},
+        }
+        ledger.write_text(json.dumps(value))
+        return package, digest, ledger, value
+
+    def test_recovery_never_uploads_authenticates_or_changes_original_ledger(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            package, digest, ledger, _ = self.recovery_fixture(root)
+            original = ledger.read_bytes()
+            receipt = root / "verified.json"
+            with (
+                patch.object(UPLOAD, "visible", return_value=True),
+                patch.object(UPLOAD.subprocess, "run") as execute,
+                patch.object(UPLOAD, "process") as publishing_process,
+            ):
+                result = UPLOAD.recover(root, package, self.commit, digest, ledger, receipt)
+                execute.assert_not_called()
+                publishing_process.assert_not_called()
+            self.assertFalse(result["upload_invoked"])
+            self.assertEqual(result["targets"], {"universal": "verified"})
+            self.assertEqual(json.loads(receipt.read_text()), result)
+            self.assertEqual(ledger.read_bytes(), original)
+
+    def test_recovery_fails_closed_on_unknown_state_wrong_identity_and_receipt_overwrite(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            package, digest, ledger, value = self.recovery_fixture(root)
+            with patch.object(UPLOAD, "versions") as query:
+                for state in ("not_started", "uploading", "uncertain"):
+                    value["targets"]["universal"] = state
+                    ledger.write_text(json.dumps(value))
+                    with self.assertRaisesRegex(ValueError, "exact uploaded"):
+                        UPLOAD.recover(root, package, self.commit, digest, ledger)
+                value["targets"]["universal"] = "uploaded"
+                value["commit"] = "b" * 40
+                ledger.write_text(json.dumps(value))
+                with self.assertRaisesRegex(ValueError, "exact uploaded"):
+                    UPLOAD.recover(root, package, self.commit, digest, ledger)
+                value["commit"] = self.commit
+                ledger.write_text(json.dumps(value))
+                for receipt in (ledger, package):
+                    with self.assertRaisesRegex(ValueError, "new file"):
+                        UPLOAD.recover(root, package, self.commit, digest, ledger, receipt)
+                query.assert_not_called()
+
+    def test_recovery_pending_preserves_evidence_and_creates_no_success_receipt(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            package, digest, ledger, _ = self.recovery_fixture(root)
+            original = ledger.read_bytes()
+            receipt = root / "verified.json"
+            with patch.object(UPLOAD, "wait_visible", side_effect=UPLOAD.ListingPending("pending")):
+                with self.assertRaises(UPLOAD.ListingPending):
+                    UPLOAD.recover(root, package, self.commit, digest, ledger, receipt)
+            self.assertEqual(ledger.read_bytes(), original)
+            self.assertFalse(receipt.exists())
+
+    def test_long_wait_failure_keeps_uploaded_state_without_second_upload(self):
+        from marketplace_upload import process
+
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            package, digest, ledger, value = self.recovery_fixture(root)
+            ledger.unlink()
+            record = {
+                **value,
+                "targets": [
+                    {"target": "universal", "vsix": {"file": package.name, "sha256": digest}}
+                ],
+            }
+            publisher = unittest.mock.Mock()
+            wait = unittest.mock.Mock(side_effect=UPLOAD.ListingPending("pending"))
+            with self.assertRaises(UPLOAD.ListingPending):
+                process(
+                    record, root, ledger, publisher, lambda _: False, True, wait_for_listing=wait
+                )
+            self.assertEqual(json.loads(ledger.read_text())["targets"], {"universal": "uploaded"})
+            with self.assertRaisesRegex(ValueError, "without re-uploading"):
+                process(
+                    record, root, ledger, publisher, lambda _: False, True, wait_for_listing=wait
+                )
+            publisher.assert_called_once_with(package)
+
     def test_source_workflow_oidc_is_only_in_explicit_protected_publish_job(self):
         source = (ROOT / ".github/workflows/source-vsix-release.yml").read_text()
         build, publish = source.split("\njobs:\n", 1)[1].split("\n  publish:\n", 1)
@@ -224,6 +369,7 @@ class SourceReleaseTests(unittest.TestCase):
         self.assertIn("environment: marketplace-publish", publish)
         self.assertIn("github.repository == 'KrishnendraPrakash/thread'", publish)
         self.assertIn("verify-pat --azure-credential Krishnendra", publish)
+        self.assertIn("timeout-minutes: 25", publish)
         self.assertNotIn("native-release-candidates", source)
 
     def test_staging_allowlist_ignores_existing_generated_native_and_model_folders(self):

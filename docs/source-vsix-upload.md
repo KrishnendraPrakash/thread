@@ -1,6 +1,8 @@
 # Source-only VSIX upload automation
 
-The owner-approved immediate release is universal Thread 0.2.1, in the existing stable Marketplace channel with its experimental preview label. Users still install Python 3.9+. This automates the manual package/upload path, without acquiring or distributing a Python runtime, Ollama or models. Windows activation remains guarded. The six-native packaging effort is preserved separately and is not promoted by this workflow.
+The owner-approved release is universal Thread 0.2.1, in the existing stable Marketplace channel with its experimental preview label. Users still install Python 3.9+. This automates the manual package/upload path, without acquiring or distributing a Python runtime, Ollama or models. Windows activation remains guarded. The six-native packaging effort is preserved separately and is not promoted by this workflow.
+
+Release [38280324789](https://github.com/KrishnendraPrakash/thread/actions/runs/38280324789) uploaded the 508,353-byte source package from commit `8983cdde9759c4ff6cb83b232ee090dcda8582a2` at 17:15:24 UTC on 2026-10-12. Marketplace reported the public version validated at 17:23:19; independent public verification confirmed universal/stable identity and SHA-256 `f4624973d7e60a64f9dfa8d9ca65911daaa5cdccca36e0e29a6cbd63ac44b9a7`. The original workflow remains failed because its 25-second listing check expired. No upload was repeated. The local maintenance change below has not been merged or run as a GitHub workflow.
 
 The public 0.2.0 VSIX matches the existing local file SHA-256 `b061ece70d40327d469e324487b2a8d8fdedb99da90757f9a889825ce53f2032` (501,273 bytes). It has zero native images/models, readable pathspec/pypdf sources and their licenses, but declares UNLICENSED and omits the project LICENSE. The new package uses the already approved MIT declaration/text. The old package has a preview label but no Marketplace pre-release property; those are different concepts.
 
@@ -33,6 +35,25 @@ Only a subsequent explicit main dispatch with `publish=true` enables the upload 
 
 The per-release ledger records uploading/uploaded/verified/uncertain states. Upload receipts are retained in this repository for 30 days. If upload or network outcome is uncertain, do not blindly rerun: inspect the preserved receipt and reconcile the exact public listing first. A rerun that finds an existing version without its ledger fails closed rather than overwrite/re-upload. Automated ledger-restoration across attempts is not implemented in this narrow workflow.
 
-No merge or publication is performed by implementing this workflow. The actual release requires reviewed main code, successful package checks, a fresh version slot, successful OIDC publisher-rights check and owner protected-environment approval. Native legal/signing/editor certification is not silently waived; it applies to its separate future native distribution.
+## Bounded verification and recovery
+
+The maintenance implementation waits up to 15 minutes after a successful source upload, polling after 5, 10, 20, 40 and then at most 45 seconds per delay. A final in-flight metadata request can consume its existing 30-second network timeout. The protected job budget is 25 minutes. These are chosen operational caps, not a documented Marketplace SLA. Native publication keeps its existing behavior.
+
+A missing or unvalidated listing stays pending; explicit rejection evidence stops as rejected, while a different target, channel or digest stops as a mismatch. Public APIs may omit pending/rejected versions entirely, so absence cannot establish rejection. The existing local Azure user's private validation-status request returned 403; no access was expanded. If the public listing stays absent, inspect the [publisher management page](https://marketplace.visualstudio.com/manage/publishers/Krishnendra/extensions/thread-agent/hub) for private validation details.
+
+Download the original candidate and its `thread-source-upload-RUN-ATTEMPT` ledger from the completed run into owned local directories. Use the original source commit and reviewed digest. The recovery command validates the package and requires an exact `uploaded` or `verified` ledger; it has no publishing callback, OIDC login, protected-dispatch override or upload retry:
+
+```sh
+python extensions/vscode/scripts/source_upload.py --verify-only \
+  --package candidate/thread-agent-0.2.1-source.vsix \
+  --commit 8983cdde9759c4ff6cb83b232ee090dcda8582a2 \
+  --sha256 f4624973d7e60a64f9dfa8d9ca65911daaa5cdccca36e0e29a6cbd63ac44b9a7 \
+  --ledger evidence/source-upload-ledger.json \
+  --receipt evidence/public-verification-receipt.json
+```
+
+The original ledger remains unchanged on every outcome. A separate receipt is created only after exact public verification; existing receipt paths and paths aliasing the package/ledger are refused. Without `--receipt`, the verified result is printed only. Pending, rejected, mismatch and network errors produce no success receipt. Uncertain/uploading/missing ledgers cannot recover through this path. This command does not change the failed original Actions result, release refs or published package. Do not rerun the publication workflow to repair a red check.
+
+The local maintenance change performs no new merge or publication. Future releases still require reviewed main code, successful package checks, a fresh version slot, successful OIDC publisher-rights check and owner protected-environment approval. Native legal/signing/editor certification is not silently waived; it applies to its separate future native distribution.
 
 See [workflow diagram](source-vsix-upload.mmd).
