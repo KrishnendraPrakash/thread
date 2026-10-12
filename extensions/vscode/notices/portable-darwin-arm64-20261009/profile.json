@@ -1,0 +1,120 @@
+{
+  "schema": 1,
+  "target": "darwin-arm64",
+  "python": "3.12.15",
+  "distribution_release": "20261009",
+  "distribution_source_commit": "ccc07c40c2731bfb459c119f2388f65a5a470de6",
+  "source_archive_sha256": "233f8e15255b3e1d1fd47ea5dd5230dfed803f371138e896e54d98c60ae19f6f",
+  "source_library_sha256": "f684eb35620b1af1202566e43f2bc94db61f315858fff02b711faa0ea7d2b974",
+  "components": [
+    {
+      "component": "bzip2",
+      "version": "1.0.8",
+      "license": [
+        "bzip2-1.0.6"
+      ],
+      "file": "LICENSE.bzip2.txt",
+      "sha256": "1f38bbc7caacafd65169276d759c0d88c991b753b643ce35d0e45ea1971dd441",
+      "source": "https://github.com/astral-sh/python-build-standalone/blob/ccc07c40c2731bfb459c119f2388f65a5a470de6/LICENSE.bzip2.txt",
+      "dependency_source": "https://sourceware.org/pub/bzip2/bzip2-1.0.8.tar.gz",
+      "dependency_source_sha256": "ab5a03176ee106d3f0fa90e381da478ddae405918153cca248e682cd0c4a2269"
+    },
+    {
+      "component": "expat",
+      "version": "2.9.0",
+      "license": [
+        "MIT"
+      ],
+      "file": "LICENSE.expat.txt",
+      "sha256": "122f2c27000472a201d337b9b31f7eb2b52d091b02857061a8880371612d9534",
+      "source": "https://github.com/astral-sh/python-build-standalone/blob/ccc07c40c2731bfb459c119f2388f65a5a470de6/LICENSE.expat.txt",
+      "dependency_source": "https://github.com/libexpat/libexpat/releases/download/R_2_9_0/expat-2.9.0.tar.xz",
+      "dependency_source_sha256": "1e6371862cc31999b368c3b89b49994f0677e1bab5f1b2b85ae3741f5d803051"
+    },
+    {
+      "component": "libffi",
+      "version": "3.8.0",
+      "license": [
+        "MIT"
+      ],
+      "file": "LICENSE.libffi.txt",
+      "sha256": "deaf3a42effb551a5b140fa9afefed183a27f1341c6d1bf430d106a5e6931fc0",
+      "source": "https://github.com/astral-sh/python-build-standalone/blob/ccc07c40c2731bfb459c119f2388f65a5a470de6/LICENSE.libffi.txt",
+      "dependency_source": "https://github.com/libffi/libffi/releases/download/v3.8.0/libffi-3.8.0.tar.gz",
+      "dependency_source_sha256": "7da3e2d9a171eb0a038f592ecad3ff2bb2550f3496d87b3b29ad0cf4430c0db4"
+    },
+    {
+      "component": "mpdecimal",
+      "version": "4.0.0",
+      "license": [
+        "BSD-2-Clause"
+      ],
+      "file": "LICENSE.mpdecimal.txt",
+      "sha256": "669512af7219f58be03a398766d7c9da11a3b3df9d3f05cb74c5ceca25c8da3b",
+      "source": "https://github.com/astral-sh/python-build-standalone/blob/ccc07c40c2731bfb459c119f2388f65a5a470de6/LICENSE.mpdecimal.txt",
+      "dependency_source": "https://www.bytereef.org/software/mpdecimal/releases/mpdecimal-4.0.0.tar.gz",
+      "dependency_source_sha256": "942445c3245b22730fd41a67a7c5c231d11cb1b9936b9c0f76334fb7d0b4468c"
+    },
+    {
+      "component": "sqlite",
+      "version": "3.53.1.0",
+      "license": [
+        "public-domain dedication"
+      ],
+      "file": "LICENSE.sqlite.txt",
+      "sha256": "38bef3d28b24f145ea293bd3b6eb4b20396982abc8303128fb493986ea5bc719",
+      "source": "https://github.com/astral-sh/python-build-standalone/blob/ccc07c40c2731bfb459c119f2388f65a5a470de6/LICENSE.sqlite.txt",
+      "dependency_source": "https://www.sqlite.org/2026/sqlite-autoconf-3530100.tar.gz",
+      "dependency_source_sha256": "83e6b2020a034e9a7ad4a72feea59e1ad52f162e09cbd26735a3ffb98359fc4f"
+    },
+    {
+      "component": "xz",
+      "version": "5.8.4",
+      "license": [
+        "0BSD"
+      ],
+      "file": "LICENSE.liblzma.txt",
+      "sha256": "9a4062de0a2c388a98cf35a35d348b62fa97c838a71c3c28ee1a2d7d0a565b02",
+      "source": "https://github.com/astral-sh/python-build-standalone/blob/ccc07c40c2731bfb459c119f2388f65a5a470de6/LICENSE.liblzma.txt",
+      "dependency_source": "https://github.com/tukaani-project/xz/releases/download/v5.8.4/xz-5.8.4.tar.gz",
+      "dependency_source_sha256": "0014c7886930454fe8bd4228665b51af55eeae560ea135c9c4cd33f55b2591d9"
+    },
+    {
+      "component": "OpenSSL",
+      "version": "3.5.9",
+      "license": [
+        "Apache-2.0"
+      ],
+      "file": "OpenSSL-3.5.9-LICENSE.txt",
+      "sha256": "7d5450cb2d142651b8afa315b5f238efc805dad827d91ba367d8516bc9d49e7a",
+      "source": "https://github.com/openssl/openssl/blob/45e844fa2a14ec92d146bd8f5778ac130b6625fb/LICENSE.txt",
+      "dependency_source": "https://github.com/openssl/openssl/releases/download/openssl-3.5.9/openssl-3.5.9.tar.gz",
+      "dependency_source_sha256": "603f5602e2eef00d77fbd429d34dcd5822bb301757a1bc9cdb24c670f1eb859a"
+    },
+    {
+      "component": "OpenSSL authors attribution",
+      "version": "3.5.9",
+      "license": [
+        "Apache-2.0"
+      ],
+      "file": "OpenSSL-3.5.9-AUTHORS.md",
+      "sha256": "b9f638dfc06b59c2d3b808186c3b30f713805a5db390f5b77b1703ac58acb83e",
+      "source": "https://github.com/openssl/openssl/blob/45e844fa2a14ec92d146bd8f5778ac130b6625fb/AUTHORS.md"
+    },
+    {
+      "component": "CPython",
+      "version": "3.12.15",
+      "license": [
+        "PSF-2.0 and retained historical terms"
+      ],
+      "file": "CPython-3.12.15-LICENSE.txt",
+      "sha256": "3b2f81fe21d181c499c59a256c8e1968455d6689d269aa85373bfb6af41da3bf",
+      "source": "https://github.com/python/cpython/blob/e848e4b09ca4bc67c0041c9ce7526dae471d4c36/LICENSE"
+    }
+  ],
+  "complete_distribution_review": false,
+  "limits": [
+    "Snapshot covers identified static libraries; not all component-specific attribution/modification terms or other platform distributions.",
+    "Do not apply this profile to a different source library hash."
+  ]
+}
