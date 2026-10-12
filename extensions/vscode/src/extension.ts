@@ -298,7 +298,7 @@ export class Agent implements vscode.WebviewViewProvider, vscode.Disposable {
   }
   private dirty(root: string): boolean {
     return vscode.workspace.textDocuments.some(document => document.isDirty && document.uri.scheme === 'file'
-      && contained(realpathSync(root), realpathSync(document.uri.fsPath)));
+      && contained(workspacePath(root), workspacePath(document.uri.fsPath)));
   }
   async request(mode: Mode, supplied?: string): Promise<void> {
     this.trusted();
@@ -352,7 +352,7 @@ export class Agent implements vscode.WebviewViewProvider, vscode.Disposable {
     if (this.reviewing || this.backend.busy) { throw new Error('A request or review is already active.'); }
     const result = this.result, proposal = result?.proposal;
     if (!result || !proposal || result.decision !== 'pending') { throw new Error('There is no pending proposal. Applied, cancelled or uncertain proposals cannot be reused.'); }
-    if (!vscode.workspace.workspaceFolders?.some(folder => realpathSync(folder.uri.fsPath) === proposal.root)) { throw new Error('Open the proposal’s original workspace.'); }
+    if (!vscode.workspace.workspaceFolders?.some(folder => workspacePath(folder.uri.fsPath) === workspacePath(proposal.root))) { throw new Error('Open the proposal’s original workspace.'); }
     this.reviewing = true;
     try {
       const reviewed = new Set<string>();
@@ -403,7 +403,7 @@ export class Agent implements vscode.WebviewViewProvider, vscode.Disposable {
     } finally { this.reviewing = false; }
   }
   private fileUri(root: string, name: string): vscode.Uri {
-    const folder = vscode.workspace.workspaceFolders?.find(item => item.uri.scheme === 'file' && realpathSync(item.uri.fsPath) === root);
+    const folder = vscode.workspace.workspaceFolders?.find(item => item.uri.scheme === 'file' && workspacePath(item.uri.fsPath) === workspacePath(root));
     if (!folder) { throw new Error('The original workspace is no longer open.'); }
     const uri = vscode.Uri.joinPath(folder.uri, name);
     if (!contained(folder.uri.fsPath, uri.fsPath)) { throw new Error('Edit path escaped the workspace.'); }
@@ -481,4 +481,11 @@ export class Agent implements vscode.WebviewViewProvider, vscode.Disposable {
 export function contained(root: string, filename: string): boolean {
   const relative = path.relative(root, filename);
   return relative !== '' && !relative.startsWith('..' + path.sep) && relative !== '..' && !path.isAbsolute(relative);
+}
+
+// Windows JS realpath preserves drive casing and 8.3 aliases, while Python
+// resolves them to the final filesystem name. Resolve both sides natively;
+// never lowercase arbitrary components (Windows directories can be case-sensitive).
+export function workspacePath(filename: string): string {
+  return process.platform === 'win32' ? realpathSync.native(filename) : realpathSync(filename);
 }

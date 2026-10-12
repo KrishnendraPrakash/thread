@@ -21,6 +21,7 @@ export async function run(): Promise<void> {
   const installedAPI = loaded.require('vscode');
   const Agent = loaded.exports.Agent;
   const root = vscode.workspace.workspaceFolders![0].uri.fsPath;
+  assert.equal(loaded.exports.workspacePath(root), realpathSync.native(root));
   const app = path.join(root, 'app.py');
   const notice = readFileSync(path.join(extension.extensionPath, 'native/win32-x64/thread-backend/notices/pathspec-0.12.1-SOURCE.txt'));
   assert.equal(createHash('sha256').update(notice).digest('hex'), process.env.THREAD_SOURCE_NOTICE_SHA);
