@@ -428,7 +428,10 @@ export class Agent implements vscode.WebviewViewProvider, vscode.Disposable {
         edit.replace(uri, new vscode.Range(document.positionAt(0), document.positionAt(document.getText().length)), file.after);
       }
       if (eol !== undefined) {
-        edit.set(uri, [...edit.get(uri), vscode.TextEdit.setEndOfLine(eol)]);
+        const edits = edit.get(uri);
+        // Carry EOL on the replacement itself: a separate zero-range EOL edit
+        // overlaps a full-document replacement in the WorkspaceEdit protocol.
+        edits[0].newEol = eol; edit.set(uri, edits);
       }
     }
     result.decision = 'applying'; await this.save();
