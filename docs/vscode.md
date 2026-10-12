@@ -1,6 +1,6 @@
 # Use Thread in VS Code
 
-Thread's experimental VS Code extension can answer questions across eligible repository files, help diagnose errors, propose small features as reviewable edits, and summarize documents. Inference uses your installed local Ollama model. There is no paid API requirement or unconfirmed model download. On Apple Silicon macOS 14+, optional [managed setup](local-setup.md) installs local AI after a download confirmation.
+Thread's experimental VS Code extension can answer questions across eligible repository files, help diagnose errors, propose small features as reviewable edits, and summarize documents. Inference uses your installed local Ollama model. There is no paid API requirement. Version 0.2.1 uses your own installed models; optional [managed setup](local-setup.md) installs only the runtime after confirmation.
 
 It is a bounded assistant: retrieved sources make its answers inspectable, but explanations and generated code still need review. This is not full-repository semantic analysis or an autonomous debugger.
 
@@ -27,7 +27,7 @@ Without uv, create `.venv` and install `python -m pip install -e '.[dev,editor]'
 4. Open the repository you want help with and trust it if appropriate.
 5. Open the command palette and run **Thread: Setup Local Model**.
 6. Thread detects and probes Python 3.9+ automatically, then reports its version/path. No interpreter path or project virtual environment is needed for standard installations. Python itself and Ollama are not bundled. For an unusual installation, **Thread: Configure Python (Advanced)** accepts an explicit absolute path.
-7. Select an installed local text model, or on supported Macs choose **Set up local AI for me (Recommended)** and confirm a starter download. Embedding-only and detected cloud-backed models cannot run analysis; neither starter is accuracy-certified.
+7. Select your installed local completion model. **Use existing Ollama (Recommended)** needs no download; optional runtime-only setup never obtains model weights. Embedding-only and detected cloud-backed models cannot run analysis.
 8. Open the **Thread** activity-bar icon, choose a workflow, write your request and click **Send**.
 
 You can alternatively install with `code --install-extension artifacts/thread-agent-0.2.0.vsix` when the VS Code shell command is configured. This builds a local VSIX patch. The owner reported publishing version 0.1.0; a local build does not update the Marketplace listing. The repository license decision remains open. For Marketplace distribution, use the [public preview publishing guide](publishing.md); the checked public-package command requires the owner license and matching publisher identity.

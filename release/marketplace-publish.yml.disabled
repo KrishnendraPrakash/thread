@@ -76,7 +76,7 @@ jobs:
           path: candidates
           run-id: ${{ inputs.candidate_run_id }}
           github-token: ${{ github.token }}
-      - name: Verify exact native VSIXs, companion fingerprints and same-commit gates
+      - name: Verify six exact model-free VSIXs and same-commit gates
         env:
           RELEASE_VERSION: ${{ inputs.version }}
         run: python extensions/vscode/scripts/marketplace_preflight.py --artifacts candidates --commit "$GITHUB_SHA" --version "$RELEASE_VERSION"
@@ -186,4 +186,4 @@ jobs:
       # Before any retry, the operator must restore the latest ledger from the
       # previous attempt. A missing ledger plus an existing version fails closed;
       # an uploading/uncertain state requires owner reconciliation, never replay.
-      # Offline companions stay verified artifacts; no GitHub Release write granted.
+      # BYO 0.2.1 distributes native VSIXs only; no companion/hosting writes granted.

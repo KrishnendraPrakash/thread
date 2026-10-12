@@ -1,6 +1,5 @@
 """Native candidate aggregation and irreversible upload recovery boundaries."""
 
-import hashlib
 import importlib.util
 import io
 import json
@@ -68,7 +67,7 @@ class MarketplaceAutomationTests(unittest.TestCase):
         ):
             with self.assertRaisesRegex(ValueError, "native host"):
                 BUILDER.build(ROOT, "win32-x64", {}, {}, Path("unused"))
-            with self.assertRaisesRegex(ValueError, "recipe must match"):
+            with self.assertRaisesRegex(ValueError, "outside the BYO"):
                 BUILDER.build(ROOT, "linux-x64", {"target": "darwin-arm64"}, {}, Path("unused"))
             command.assert_not_called()
 
@@ -85,16 +84,6 @@ class MarketplaceAutomationTests(unittest.TestCase):
             backend.write_bytes(b"synthetic native backend")
             (extension / "python").mkdir()
             (extension / "python/legacy.py").write_text("legacy backend")
-            recipe = {
-                "target": "linux-x64",
-                "assets": [
-                    {
-                        "role": "backend",
-                        "path": "backend/thread-backend",
-                        "sha256": hashlib.sha256(backend.read_bytes()).hexdigest(),
-                    }
-                ],
-            }
 
             def command(args, **kwargs):
                 if "package" in args:
@@ -107,20 +96,15 @@ class MarketplaceAutomationTests(unittest.TestCase):
                     )
                     Path(args[args.index("--out") + 1]).write_bytes(b"synthetic test transport")
 
-            def companion(data, path):
-                path.mkdir()
-                (path / "bundle.json").write_text(json.dumps(data))
-
             with (
                 patch.object(BUILDER, "host_target", return_value="linux-x64"),
                 patch.object(BUILDER.subprocess, "check_output", side_effect=["a" * 40, ""]),
                 patch.object(BUILDER.subprocess, "run", side_effect=command),
-                patch.object(BUILDER, "assemble_bundle", side_effect=companion),
             ):
                 result = BUILDER.build(
                     root,
                     "linux-x64",
-                    recipe,
+                    None,
                     {
                         "target": "linux-x64",
                         "commit": "a" * 40,
@@ -129,6 +113,8 @@ class MarketplaceAutomationTests(unittest.TestCase):
                     root / "output",
                 )
             self.assertEqual(result["target"], "linux-x64")
+            self.assertNotIn("companion", result)
+            self.assertFalse(list((root / "output").glob("*.zip")))
             self.assertTrue((root / "output/linux-x64.candidate.json").is_file())
             self.assertEqual(json.loads((extension / "package.json").read_text()), source)
 

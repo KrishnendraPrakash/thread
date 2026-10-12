@@ -194,3 +194,14 @@ Final Windows x64/Linux x64 real runtime integration passed at d003dbfd403e079c6
 
 
 Cleanup incident clarification: in cancelled run 38217103078 (head d5885b0), the pre-termination record listed unowned lsass.exe PID 1008 first, followed by svchost.exe PID 716. The exact sequential cleanup code reached PID 716 and logged its failed taskkill, with no failure logged for PID 1008. This establishes by control flow that the unowned PID 1008 termination command returned success; it was not merely a query. Successful stdout and an independent post-kill probe were not retained, so the actual process exit and full OS impact cannot be independently reconstructed. It would be incorrect to claim no unowned processes were terminated. The impact was confined to disposable Windows CI runners, whose teardown stalled; affected runs reached terminal cancelled state. Final corrected runs independently enforce ownership and report zero remaining owned processes. No user Mac process was involved.
+
+
+Local packaging preparation now records exact PyInstaller BINARY and EXTENSION source/payload hashes while keeping redistribution review false. A private existing Mac backend copy has refreshed plaintext notices with unchanged non-notice bytes; its compiled installer still needs a final rebuild. Five target payload/source inventories and the release model decision remain unavailable/pending. No acquisitions, packaged-backend/Ollama/model execution, signing or remote changes were performed. [Concrete local inventory evidence](../docs/local-packaging-inventory.md).
+
+
+## Owner-approved BYO scope for 0.2.1 (2026-10-12)
+
+The owner selected user-supplied models, avoiding bundled Llama redistribution and explicitly replacing the ready-to-use offline companion plan. Official artifacts are six native VSIXs for Windows/macOS/Linux ARM64/x64, with no model weights or companion ZIPs. Existing installed-model selection, runtime-only confirmed acquisition and user-provided complete offline import remain. The exact-scope companion gate is not applicable; five gates remain pending: native notices, all-target editor/inference, Windows activation, clean-machine setup and signing. No model license approval or full release certification is inferred from BYO. Conditional Marketplace deployment remains blocked until material gates and exact artifacts pass; the production workflows remain inactive.
+
+
+The approved build-only CI now creates a temporary model-free VSIX on each of the six standard hosted targets, probes its actual native backend, verifies BYO package identity/content and prints exact native-file/source/notice inventory metadata. Packages are deleted on the runner; no artifacts, model/Ollama acquisitions, OIDC or publishing are involved. This does not advance ordinary-user, real-inference, complete licensing or signing gates.

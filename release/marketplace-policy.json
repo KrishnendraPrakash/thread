@@ -18,6 +18,12 @@
     "windows_editor_activation": "pending",
     "clean_machine_setup": "pending",
     "signing_decision_and_validation": "pending",
-    "offline_companion_distribution_review": "pending"
+    "offline_companion_distribution_review": "not_applicable"
+  },
+  "distribution_scope": {
+    "version": "0.2.1",
+    "models": "user-supplied",
+    "artifacts": "native-vsix",
+    "official_companions": false
   }
 }

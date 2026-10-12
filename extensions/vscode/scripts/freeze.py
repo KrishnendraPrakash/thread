@@ -18,6 +18,7 @@ from importlib.metadata import PackageNotFoundError, distribution, version
 from pathlib import Path
 from sysconfig import get_path
 
+from native_inventory import collected_binaries
 from native_notices import collect_static_notices
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -77,6 +78,7 @@ def collect_notices(directory, work):
         "zstandard": version("zstandard"),
         "notices": [],
         "missing": [],
+        "complete_distribution_review": False,
     }
     import zstandard
 
@@ -111,6 +113,7 @@ def collect_notices(directory, work):
     sources = [("CPython", Path(get_path("stdlib")))]
     python_library = None
     analysis = ast.literal_eval((work / "work/thread-backend/Analysis-00.toc").read_text())
+    record["binary_inventory"] = collected_binaries(analysis, directory)
     for group in analysis:
         if isinstance(group, list):
             for item in group:

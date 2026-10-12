@@ -5,7 +5,7 @@ import { realpathSync } from 'node:fs';
 import { rm } from 'node:fs/promises';
 import { Backend, bundledBackend } from './backend';
 import { discoverPython, pythonCandidates, PythonRuntime } from './python';
-import { LocalRuntime, ollamaJson, pullModel, STARTER_MODELS } from './localRuntime';
+import { LocalRuntime, ollamaJson } from './localRuntime';
 import { importOffline, inspectOffline, OfflineInstallation } from './offline';
 import { Result, Mode, FileChange } from './types';
 
@@ -165,8 +165,8 @@ export class Agent implements vscode.WebviewViewProvider, vscode.Disposable {
   }
   private async recoverModelSetup(python: string): Promise<void> {
     const choice = await vscode.window.showQuickPick([
-      ...(this.managed.supported ? [{ label: 'Set up local AI for me (Recommended)', detail: 'Thread manages Ollama and a model in its own storage. No terminal or admin commands.' }] : []),
-      { label: 'Retry existing Ollama', detail: 'Use an already running local server on port 11434.' },
+      { label: 'Use existing Ollama (Recommended)', detail: 'Use your installed local models on port 11434. No downloads.' },
+      ...(this.managed.supported ? [{ label: 'Install local runtime only', detail: 'Install pinned Ollama in Thread storage; supply your own models. No model download.' }] : []),
       { label: 'More options', detail: 'Installation guide, storage location and model requirements.' },
       { label: 'Cancel', detail: 'Do nothing; run setup later.' },
     ], { title: 'Python is ready — local AI setup is needed', ignoreFocusOut: true });
@@ -185,43 +185,49 @@ export class Agent implements vscode.WebviewViewProvider, vscode.Disposable {
       }
       return;
     }
-    if (choice.label === 'Retry existing Ollama') {
+    if (choice.label === 'Use existing Ollama (Recommended)') {
       const result = await this.backend.call(python, this.context.extensionPath, { operation: 'models' });
-      if (!result.models.length) { throw new Error('Existing Ollama has no local text model. Rerun setup and choose managed setup on supported Macs.'); }
-      this.managedMode = false; this.managed.stop(); await this.context.globalState.update('managedRuntime', false);
-      await this.chooseModel(result); return;
+      if (!result.models.length) { throw new Error('Existing Ollama has no local text model. Supply your own model, then retry setup or import your own offline bundle.'); }
+      if (await this.chooseModel(result)) {
+        this.managedMode = false; this.managed.stop(); await this.context.globalState.update('managedRuntime', false);
+      }
+      return;
     }
-    const selected = await vscode.window.showQuickPick(STARTER_MODELS.map((model, index) => ({
-      label: `${model.name}${index === 0 ? ' — small starter (Recommended)' : ''}`, detail: `${model.size}; ${model.description} Not accuracy-certified.`, model,
-    })), { title: 'Choose a local starter model', placeHolder: 'Escape cancels. Existing models remain available through normal setup.', ignoreFocusOut: true });
-    if (!selected) { return; }
     const confirm = await vscode.window.showInformationMessage(
-      `Download ${selected.model.name} (${selected.model.size})${this.managed.installed ? '' : ` and Ollama 0.34.4 (${(this.managed.downloadBytes / 1e6).toFixed(0)} MB)`}? Internet is required for downloads from official Ollama/GitHub services. Runtime and models are stored in ${this.managed.storageDirectory}; Ollama may create its normal user configuration. No project changes, API key or admin access. Model details and terms: https://ollama.com/library/${selected.model.name}`,
-      { modal: true }, 'Download and set up');
-    if (confirm !== 'Download and set up') { return; }
+      `Install only Ollama 0.34.4 (${(this.managed.downloadBytes / 1e6).toFixed(0)} MB) in ${this.managed.storageDirectory}? Thread 0.2.1 supplies no model weights. Provide your own Ollama model store or import your own offline bundle. Runtime terms: https://github.com/ollama/ollama/releases/tag/v0.34.4.`,
+      { modal: true }, 'Install runtime');
+    if (confirm !== 'Install runtime') { return; }
     if (this.setupController || this.callController || this.backend.busy) { throw new Error('Another request started during setup review; finish or cancel it first.'); }
     const controller = new AbortController(); this.setupController = controller;
+    let managedModels: any;
     try {
-      await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, title: 'Thread: preparing local AI', cancellable: true }, async (progress, token) => {
+      await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, title: 'Thread: preparing model-free local runtime', cancellable: true }, async (progress, token) => {
         const cancellation = token.onCancellationRequested(() => controller.abort());
         try {
-          await this.managed.checkDisk(selected.model.disk);
           if (!this.managed.installed) { await this.managed.install(python, this.context.extensionPath, controller.signal, message => progress.report({ message })); }
           const endpoint = await this.managed.start(controller.signal);
-          await pullModel(endpoint, selected.model.name, controller.signal, message => progress.report({ message }));
-          const metadata = await ollamaJson(endpoint, '/api/show', { model: selected.model.name }, controller.signal);
-          if (!metadata.capabilities?.includes('completion') || metadata.remote_host || metadata.remote_model) { throw new Error('Downloaded model is not a local completion model.'); }
-          this.managedMode = true;
-          await this.context.globalState.update('managedRuntime', true);
-          await vscode.workspace.getConfiguration('thread').update('model', selected.model.name, vscode.ConfigurationTarget.Global);
-          this.notify(`Local AI is ready with ${selected.model.name}. Run Thread: Ask About Repository. Answer accuracy is not independently verified.`);
+          controller.signal.throwIfAborted();
+          const inventory = await this.backend.call(python, this.context.extensionPath, { operation: 'models', endpoint });
+          controller.signal.throwIfAborted();
+          if (!inventory.models.length) {
+            this.managed.stop();
+            this.notify(`Runtime installed; no model weights were downloaded. Supply your own Ollama model store in ${path.join(this.managed.storageDirectory, 'models')} or use Thread: Import Offline Local AI with your own bundle, then rerun setup.`);
+            return;
+          }
+          managedModels = inventory;
         } finally { cancellation.dispose(); }
       });
     } catch (error) {
       this.managed.stop();
-      if (controller.signal.aborted) { this.notify('Setup cancelled. Rerun setup to reuse downloaded model layers.'); return; }
+      if (controller.signal.aborted) { this.notify('Runtime setup cancelled. No model download was requested.'); return; }
       throw error;
     } finally { this.setupController = undefined; }
+    if (managedModels) {
+      if (await this.chooseModel(managedModels)) {
+        this.managedMode = true;
+        await this.context.globalState.update('managedRuntime', true);
+      } else { this.managed.stop(); }
+    }
   }
   async importOfflineBundle(): Promise<void> {
     this.trusted();
@@ -279,7 +285,7 @@ export class Agent implements vscode.WebviewViewProvider, vscode.Disposable {
     const result = await this.configurePython(python);
     await this.chooseModel(result);
   }
-  private async chooseModel(result: any): Promise<void> {
+  private async chooseModel(result: any): Promise<boolean> {
     if (!result.models.length) { throw new Error('No local Ollama models found. Install a text model separately, then run Setup again.'); }
     const chosen = await vscode.window.showQuickPick(result.models as string[], {
       title: 'Thread · Choose an installed local Ollama model',
@@ -288,8 +294,10 @@ export class Agent implements vscode.WebviewViewProvider, vscode.Disposable {
     if (chosen) {
       if (this.setupController) { throw new Error('Local AI setup started during model selection; finish or cancel it first.'); }
       await vscode.workspace.getConfiguration('thread').update('model', chosen, vscode.ConfigurationTarget.Global);
-      this.notify(`Using ${chosen} with ${this.managedMode ? 'Thread-managed local AI' : 'local Ollama'}. No paid API key is required.`);
+      this.notify(`Selected installed local model ${chosen}. No paid API key is required.`);
+      return true;
     }
+    return false;
   }
   private async folder(): Promise<vscode.WorkspaceFolder | undefined> {
     const folders = vscode.workspace.workspaceFolders?.filter(folder => folder.uri.scheme === 'file') ?? [];

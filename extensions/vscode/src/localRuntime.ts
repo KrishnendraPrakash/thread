@@ -9,10 +9,7 @@ import { bundledBackend, BACKEND_TARGETS } from './backend';
 import { OfflineInstallation } from './offline';
 
 export const RUNTIME_VERSION = '0.34.4';
-export const STARTER_MODELS = [
-  { name: 'qwen2.5-coder:1.5b', size: 'about 986 MB', disk: 4e9, description: 'Small download; limited reasoning quality. Apache 2.0.' },
-  { name: 'qwen2.5-coder:7b', size: 'about 4.7 GB', disk: 10e9, description: 'Larger coding model; allow more memory. Apache 2.0.' },
-];
+export const MODEL_PROVISIONING = 'user-supplied';
 
 export function localEndpoint(value: string): URL {
   const url = new URL(value);
@@ -24,6 +21,7 @@ export function localEndpoint(value: string): URL {
 
 export function ollamaJson(endpoint: string, route: string, payload?: object, signal?: AbortSignal): Promise<any> {
   const base = localEndpoint(endpoint);
+  if (route.split('?')[0] === '/api/pull') { return Promise.reject(new Error('Thread 0.2.1 requires user-supplied models; model downloads are disabled.')); }
   return new Promise((resolve, reject) => {
     const body = payload ? JSON.stringify(payload) : undefined;
     const request = http.request({ hostname: base.hostname, port: base.port || 11434, path: route, agent: false,
@@ -41,47 +39,6 @@ export function ollamaJson(endpoint: string, route: string, payload?: object, si
     });
     request.setTimeout(5000, () => request.destroy(new Error('Ollama check timed out.')));
     request.on('error', reject); request.end(body);
-  });
-}
-
-export function pullModel(endpoint: string, model: string, signal: AbortSignal, progress: (text: string) => void): Promise<void> {
-  const base = localEndpoint(endpoint);
-  if (!STARTER_MODELS.some(item => item.name === model)) { return Promise.reject(new Error('Choose a listed starter model.')); }
-  return new Promise((resolve, reject) => {
-    let pending = '', success = false;
-    const request = http.request({ hostname: base.hostname, port: base.port || 11434, path: '/api/pull', method: 'POST', signal, agent: false,
-      headers: { 'Content-Type': 'application/json' } }, response => {
-      response.setEncoding('utf8');
-      const consume = (line: string) => {
-        if (!line.trim()) { return; }
-        const data = JSON.parse(line);
-        if (data.error) { throw new Error(String(data.error)); }
-        success = data.status === 'success';
-        const percent = typeof data.total === 'number' && data.total > 0 && typeof data.completed === 'number'
-          ? ` ${Math.min(100, Math.round(100 * data.completed / data.total))}%` : '';
-        progress(`${String(data.status ?? 'Downloading model').slice(0, 120)}${percent}`);
-      };
-      response.on('data', chunk => {
-        try {
-          pending += chunk;
-          if (pending.length > 1024 * 1024) { throw new Error('Invalid model download progress.'); }
-          let newline: number;
-          while ((newline = pending.indexOf('\n')) >= 0) { consume(pending.slice(0, newline)); pending = pending.slice(newline + 1); }
-        } catch (error) { reject(error); response.destroy(); request.destroy(); }
-      });
-      response.on('error', reject);
-      response.on('end', () => {
-        try {
-          consume(pending);
-          if (response.statusCode !== 200 || !success) { throw new Error('Model download did not complete. Retry setup.'); }
-          resolve();
-        } catch (error) { reject(error); }
-      });
-    });
-    const timer = setTimeout(() => request.destroy(new Error('Model download exceeded one hour. Retry setup to reuse partial downloads.')), 3600000);
-    request.setTimeout(60000, () => request.destroy(new Error('Model download stalled. Retry setup.')));
-    request.on('error', reject); request.on('close', () => clearTimeout(timer));
-    request.end(JSON.stringify({ model, stream: true }));
   });
 }
 

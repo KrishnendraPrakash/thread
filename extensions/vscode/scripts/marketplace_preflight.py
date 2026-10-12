@@ -22,6 +22,13 @@ GATES = {
     "offline_companion_distribution_review",
 }
 
+BYO_SCOPE = {
+    "version": "0.2.1",
+    "models": "user-supplied",
+    "artifacts": "native-vsix",
+    "official_companions": False,
+}
+
 
 def checked_file(root: Path, record: dict) -> Path:
     name = record.get("file", "")
@@ -65,7 +72,15 @@ def readiness(root: Path) -> dict:
         raise ValueError("Unexpected release policy identity/targets.")
     if set(policy.get("gates", {})) != GATES:
         raise ValueError("Required release gates must not be removed.")
-    pending = [name for name, value in policy["gates"].items() if value != "passed"]
+    if policy.get("distribution_scope") != BYO_SCOPE or manifest.get("version") != "0.2.1":
+        raise ValueError("Owner-approved BYO 0.2.1 distribution scope is required.")
+    if policy["gates"]["offline_companion_distribution_review"] != "not_applicable":
+        raise ValueError("Official-companion gate must match the exact BYO scope.")
+    pending = [
+        name
+        for name, value in policy["gates"].items()
+        if name != "offline_companion_distribution_review" and value != "passed"
+    ]
     if pending:
         raise ValueError("Release gates pending: " + ", ".join(sorted(pending)))
     if (
@@ -75,6 +90,8 @@ def readiness(root: Path) -> dict:
         raise ValueError("Manifest identity differs from approved publisher.")
     if manifest.get("license") in (None, "", "UNLICENSED") or not (root / "LICENSE").is_file():
         raise ValueError("Owner-selected project license is required.")
+    if manifest.get("threadModelProvisioning") != "user-supplied":
+        raise ValueError("Packaged model provisioning must be user-supplied.")
     if manifest.get("preview") is not True:
         raise ValueError("Prepared automation supports the preview channel only.")
     source = (root / "extensions/vscode/src/extension.ts").read_text()
@@ -94,14 +111,22 @@ def inventory(root: Path, folder: Path, commit: str, version: str) -> dict:
         or record.get("version") != version
         or record.get("channel") != "pre-release"
         or record.get("publisher") != manifest["publisher"]
+        or record.get("distribution_scope") != BYO_SCOPE
     ):
         raise ValueError("Release inventory identity/commit/channel mismatch.")
     targets = record.get("targets", [])
     if len(targets) != 6 or {item.get("target") for item in targets} != TARGETS:
         raise ValueError("Exactly one entry per required target is required.")
-    ns = {"v": "http://schemas.microsoft.com/developer/vsx-schema/2011"}
+    if any(
+        p.suffix.lower() in {".zip", ".gguf", ".safetensors"} or p.name.startswith("sha256-")
+        for p in folder.iterdir()
+        if p.is_file()
+    ):
+        raise ValueError("Official companions/model assets are outside this release scope.")
     for item in targets:
         target = item["target"]
+        if "companion" in item or item.get("distribution_scope") != BYO_SCOPE:
+            raise ValueError("Candidate must match model-free BYO distribution scope.")
         for check in ("native_package", "security", "editor", "clean_machine", "offline_inference"):
             evidence = item.get("checks", {}).get(check, {})
             if (
@@ -114,51 +139,57 @@ def inventory(root: Path, folder: Path, commit: str, version: str) -> dict:
         package = checked_file(folder, item["vsix"])
         if package.suffix != ".vsix":
             raise ValueError("Expected a VSIX file.")
-        with zipfile.ZipFile(package) as archive:
-            if len(archive.namelist()) != len(set(archive.namelist())):
-                raise ValueError("Duplicate VSIX archive entries are ambiguous.")
-            packaged = json.loads(archive.read("extension/package.json"))
-            for key in ("name", "publisher", "version", "license", "preview"):
-                if packaged.get(key) != manifest.get(key):
-                    raise ValueError(f"Packaged {key} mismatch for {target}")
-            xml = ElementTree.fromstring(archive.read("extension.vsixmanifest"))
-            identity = xml.find("v:Metadata/v:Identity", ns)
-            if identity is None or identity.get("TargetPlatform") != target:
-                raise ValueError("Native VSIX target mismatch.")
-            if any(
-                identity.get(attribute) != manifest[key]
-                for attribute, key in (
-                    ("Id", "name"),
-                    ("Publisher", "publisher"),
-                    ("Version", "version"),
-                )
-            ):
-                raise ValueError("VSIX XML identity differs from the approved manifest.")
-            properties = {
-                p.get("Id"): p.get("Value")
-                for p in xml.findall("v:Metadata/v:Properties/v:Property", ns)
-            }
-            if properties.get("Microsoft.VisualStudio.Code.PreRelease") != "true":
-                raise ValueError("Expected a pre-release VSIX.")
-            executable = "thread-backend.exe" if target.startswith("win32-") else "thread-backend"
-            if f"extension/native/{target}/thread-backend/{executable}" not in archive.namelist():
-                raise ValueError("Matching bundled native backend missing.")
-            verify_packaged_license(archive, (root / "LICENSE").read_bytes())
-        companion = checked_file(folder, item["companion"])
-        if companion.suffix != ".zip":
-            raise ValueError("Prepared companion transport must be ZIP.")
-        with zipfile.ZipFile(companion) as archive:
-            if len(archive.namelist()) != len(set(archive.namelist())):
-                raise ValueError("Duplicate companion archive entries are ambiguous.")
-            bundle = json.loads(archive.read("bundle.json"))
-            if bundle.get("schema") != 1 or bundle.get("target") != target:
-                raise ValueError("Offline companion target mismatch.")
-            expected = item["companion"].get("manifest_sha256")
-            if hashlib.sha256(archive.read("bundle.json")).hexdigest() != expected:
-                raise ValueError("Companion manifest digest mismatch.")
-            # Full inventory/native asset trust checks are required in the builder and
-            # same-commit offline test evidence; this transport gate never executes assets.
+        verify_byo_vsix(root, manifest, package, target)
     return record
+
+
+def verify_byo_vsix(root, manifest, package, target):
+    """Inspect model-free package contents; never advance product/release gates."""
+    ns = {"v": "http://schemas.microsoft.com/developer/vsx-schema/2011"}
+    with zipfile.ZipFile(package) as archive:
+        if len(archive.namelist()) != len(set(archive.namelist())):
+            raise ValueError("Duplicate VSIX archive entries are ambiguous.")
+        if any(
+            name.lower().startswith("extension/models/")
+            or name.lower().endswith((".gguf", ".safetensors"))
+            or "/models/blobs/sha256-" in name.lower()
+            for name in archive.namelist()
+        ):
+            raise ValueError("Model weights must not be bundled in a BYO VSIX.")
+        packaged = json.loads(archive.read("extension/package.json"))
+        for key in (
+            "name",
+            "publisher",
+            "version",
+            "license",
+            "preview",
+            "threadModelProvisioning",
+        ):
+            if packaged.get(key) != manifest.get(key):
+                raise ValueError(f"Packaged {key} mismatch for {target}")
+        xml = ElementTree.fromstring(archive.read("extension.vsixmanifest"))
+        identity = xml.find("v:Metadata/v:Identity", ns)
+        if identity is None or identity.get("TargetPlatform") != target:
+            raise ValueError("Native VSIX target mismatch.")
+        if any(
+            identity.get(attribute) != manifest[key]
+            for attribute, key in (
+                ("Id", "name"),
+                ("Publisher", "publisher"),
+                ("Version", "version"),
+            )
+        ):
+            raise ValueError("VSIX XML identity differs from the approved manifest.")
+        properties = {
+            p.get("Id"): p.get("Value")
+            for p in xml.findall("v:Metadata/v:Properties/v:Property", ns)
+        }
+        if properties.get("Microsoft.VisualStudio.Code.PreRelease") != "true":
+            raise ValueError("Expected a pre-release VSIX.")
+        executable = "thread-backend.exe" if target.startswith("win32-") else "thread-backend"
+        if f"extension/native/{target}/thread-backend/{executable}" not in archive.namelist():
+            raise ValueError("Matching bundled native backend missing.")
+        verify_packaged_license(archive, (root / "LICENSE").read_bytes())
 
 
 def main() -> int:
