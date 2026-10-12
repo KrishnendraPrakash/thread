@@ -82,7 +82,9 @@ export class Agent implements vscode.WebviewViewProvider, vscode.Disposable {
       if (packaged) {
         const runtime = await this.backend.call(packaged, this.context.extensionPath, { operation: 'python' }, 30000);
         if (this.discoveryCancelled) { throw new Error('Backend discovery cancelled.'); }
-        this.detectedPython = { ...runtime, setting };
+        // Keep the selected package path: sys.executable can canonicalize /tmp
+        // to /private/tmp, which must not turn a native launch into Python flags.
+        this.detectedPython = { ...runtime, executable: packaged, setting };
         return this.detectedPython!;
       }
       const candidates = pythonCandidates(process.env.PATH ?? '',

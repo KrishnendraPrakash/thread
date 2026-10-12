@@ -40,13 +40,20 @@ class ReleaseTests(unittest.TestCase):
         self.save_manifest()
         (self.root / "LICENSE").write_bytes(self.license)
 
-    def archive(self, *, target="darwin-arm64", pre_release="true", extra=None):
+    def archive(
+        self,
+        *,
+        target="darwin-arm64",
+        pre_release="true",
+        extra=None,
+        license_name="extension/LICENSE",
+    ):
         package = self.root / "fixture.vsix"
         xml = f'''<PackageManifest xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011"><Metadata><Identity TargetPlatform="{target}"/><Properties><Property Id="Microsoft.VisualStudio.Code.PreRelease" Value="{pre_release}"/></Properties></Metadata></PackageManifest>'''
         files = {
             "extension.vsixmanifest": xml,
             "extension/package.json": json.dumps(self.manifest),
-            "extension/LICENSE": self.license,
+            license_name: self.license,
         }
         for name in (
             "readme.md",
@@ -96,3 +103,19 @@ class ReleaseTests(unittest.TestCase):
                 release.inspect_package(
                     self.archive(extra=extra), self.manifest, "darwin-arm64", self.license
                 )
+
+    def test_vsce_normalized_license_is_accepted_but_ambiguous_files_stop(self):
+        self.configure_fixture()
+        release.inspect_package(
+            self.archive(license_name="extension/LICENSE.txt"),
+            self.manifest,
+            "darwin-arm64",
+            self.license,
+        )
+        with self.assertRaisesRegex(ValueError, "Packaged license differs"):
+            release.inspect_package(
+                self.archive(extra={"extension/LICENSE.txt": self.license}),
+                self.manifest,
+                "darwin-arm64",
+                self.license,
+            )

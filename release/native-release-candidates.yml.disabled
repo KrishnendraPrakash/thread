@@ -1,0 +1,117 @@
+# INACTIVE: owner must review and activate only after all policy gates are met.
+# Reviewed input artifacts contain recipe.json, evidence.json and already local
+# runtime/model/notice files per target; this job does not acquire model assets.
+name: Build reviewed native release candidates
+on:
+  workflow_dispatch:
+    inputs:
+      input_run_id:
+        description: Owner-reviewed same-commit input artifact run (no AI download)
+        required: true
+        type: string
+permissions:
+  contents: read
+jobs:
+  native:
+    if: github.ref == 'refs/heads/main'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {runner: macos-14, target: darwin-arm64}
+          - {runner: macos-15-intel, target: darwin-x64}
+          - {runner: ubuntu-22.04, target: linux-x64}
+          - {runner: ubuntu-24.04-arm, target: linux-arm64}
+          - {runner: windows-2025, target: win32-x64}
+          - {runner: windows-11-arm, target: win32-arm64}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: '3.12'
+      - name: Reject unresolved release gates before fetching assets
+        run: python extensions/vscode/scripts/marketplace_preflight.py
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: '22'
+          package-manager-cache: false
+      - name: Validate reviewed input run provenance
+        env:
+          GH_TOKEN: ${{ github.token }}
+          INPUT_RUN: ${{ inputs.input_run_id }}
+        shell: bash
+        run: |
+          python - <<'PYTHON'
+          import json, os, urllib.request
+          run = os.environ['INPUT_RUN']
+          if not run.isascii() or not run.isdecimal():
+              raise SystemExit('Input run ID must be an ASCII decimal number')
+          repo = os.environ['GITHUB_REPOSITORY']
+          request = urllib.request.Request(
+              f'https://api.github.com/repos/{repo}/actions/runs/{run}',
+              headers={'Authorization': 'Bearer ' + os.environ['GH_TOKEN']})
+          with urllib.request.urlopen(request, timeout=30) as response:
+              data = json.load(response)
+          if (data['repository']['full_name'] != repo
+                  or data['head_sha'] != os.environ['GITHUB_SHA']
+                  or data['head_branch'] != 'main'
+                  or data['event'] != 'workflow_dispatch'
+                  or data['status'] != 'completed' or data['conclusion'] != 'success'):
+              raise SystemExit('Expected successful owner-reviewed same-commit main input run')
+          PYTHON
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          name: reviewed-native-inputs-${{ matrix.target }}
+          path: inputs
+          run-id: ${{ inputs.input_run_id }}
+          github-token: ${{ github.token }}
+      - name: Install build tools and run native security fixtures
+        run: |
+          python -m pip install -e ".[editor]" -r extensions/vscode/scripts/requirements-native.txt
+          npm ci --prefix extensions/vscode --ignore-scripts
+          python -m unittest tests.editor.test_distribution tests.editor.test_runtime_install tests.editor.test_windows_filesystem -v
+      - name: Build and probe host VSIX; assemble reviewed local companion
+        shell: bash
+        run: |
+          python extensions/vscode/scripts/native_candidates.py build --target '${{ matrix.target }}' --recipe inputs/recipe.json --evidence inputs/evidence.json --output candidates
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: native-candidate-${{ matrix.target }}
+          path: candidates/*
+          if-no-files-found: error
+          retention-days: 7
+  aggregate:
+    needs: native
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          pattern: native-candidate-*
+          merge-multiple: true
+          path: candidates
+      - name: Verify all six exact-commit candidates
+        shell: bash
+        run: |
+          version=$(python -c 'import json; print(json.load(open("extensions/vscode/package.json"))["version"])')
+          python extensions/vscode/scripts/native_candidates.py aggregate --output candidates --commit "$GITHUB_SHA" --version "$version"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: thread-release-inventory
+          path: candidates/*
+          if-no-files-found: error
+          retention-days: 7

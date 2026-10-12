@@ -21,7 +21,7 @@ Human-in-the-loop is part of the first version. Present a recommendation with a 
 - Local Ollama is the first adapter target. Qwen3.5-9B and Qwen3.5-4B are model candidates, not benchmarked defaults. Exact artifacts, licenses/notices, quantizations, hardware, and runtime compatibility must be checked before release.
 - The user selected repository understanding, debugging assistance, writing features and document summaries as the immediate VS Code workflows. Bounded experimental implementations exist; full semantic verification and autonomous debugger operation do not. Durable memory remains planned.
 - SPEC.md's latency, context, tool, and accuracy numbers are proposed gates or starting limits. They are not measured results or guarantees about a user's machine.
-- Hosted provider/model selection, minimum hardware/OS, repository license, retention settings, and final cost/latency budgets remain open.
+- Hosted provider/model selection, minimum hardware/OS, retention settings, and final cost/latency budgets remain open.
 
 ## Delivery boundaries
 
@@ -30,3 +30,5 @@ M1 uses one local provider and a complete human-decision cycle. Hosted/private a
 Local inference and offline operation are distinct: offline rules must cover every model role, tool, and data destination. Product runtime permissions are enforced in code and cannot be granted by retrieved text, skills, or an LLM's own assessment.
 
 The user has explicitly requested public installation through a published VS Code extension. Deliver a clearly labeled preview while full release gates remain incomplete; public packaging must use the owner-selected license and a confirmed Marketplace identity. A public code repository or CI artifact alone is not a Marketplace release.
+
+The owner approved MIT for Thread-authored code/documentation and version 0.2.1 for the next preview on 2026-10-11. Preserve independent third-party terms and keep publication/platform validation gates separate from this license decision.

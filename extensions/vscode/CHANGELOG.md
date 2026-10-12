@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.1 — MIT preview preparation (not published)
+
+- Apply the owner-selected MIT license to Thread-authored code and documentation; retain separate third-party license terms and notices.
+- Prepare native backend selection, consented cross-platform local setup and offline companion import. Windows editor activation and broader installation/inference certification remain gated.
+- Add inactive release automation and tested recovery boundaries; six-host build-only CI passes without publishing credentials or artifact uploads.
+- Align Python and extension metadata at 0.2.1; this prepared source version is not a Marketplace upload or completed release.
+
 ## 0.2.0 — Managed local AI setup
 
 - Offer a confirmed runtime/model download when local AI is unavailable, with progress, cancellation, alternatives and recovery guidance.

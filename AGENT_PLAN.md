@@ -3,7 +3,7 @@
 Status: experimental VS Code developer workflows and the exact-field CLI are implemented; full verification, model benchmarks and public release gates remain pending.
 
 The owner now requires minimal manual prerequisites on Windows, macOS and Linux with online and offline installation modes. Native backend launch/build configuration, pinned runtime acquisition, transactional companion import and Windows handle-relative access are implemented. A maintained portable Mac native build and one real offline import/inference trial passed; Windows/Linux native checks and public companion readiness remain pending; see [distribution progress](docs/distribution-modes.md).
-Updated: 2026-09-24. The user also requested public extension distribution; prepare a labeled preview while publisher identity, license and account authentication are resolved.
+Updated: 2026-09-24. The user also requested public extension distribution; prepare a labeled preview while publisher identity and account authentication are verified; the owner now selected MIT and next preview 0.2.1, while distribution gates remain.
 
 ## Goal
 
@@ -87,4 +87,4 @@ Numerical targets are proposed acceptance criteria, not measured speed or reliab
 
 ## Open planning decisions
 
-Finalize the three real tasks, minimum supported hardware/OS, acceptable latency/cost, action policy and data retention, repository license, and the first optional hosted integration. Benchmark candidate models before choosing defaults when that work is requested. The scaffold source is on GitHub; broader agent behavior and a package/agent release remain pending. The [public README](README.md) and [workflow guide](docs/workflows.md) explain current usage and the planned paths.
+Finalize the three real tasks, minimum supported hardware/OS, acceptable latency/cost, action policy and data retention, and the first optional hosted integration. Benchmark candidate models before choosing defaults when that work is requested. The scaffold source is on GitHub; broader agent behavior and a package/agent release remain pending. The [public README](README.md) and [workflow guide](docs/workflows.md) explain current usage and the planned paths.

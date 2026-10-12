@@ -42,7 +42,6 @@ def inspect_package(package: Path, manifest: dict, target: str, license_text: by
             "extension/readme.md",
             "extension/changelog.md",
             "extension/PRIVACY.md",
-            "extension/LICENSE",
             "extension/python/bridge.py",
             "extension/out/extension.js",
         }
@@ -53,7 +52,10 @@ def inspect_package(package: Path, manifest: dict, target: str, license_text: by
             for n in names
         ):
             raise ValueError("VSIX contains development or private-state files.")
-        if archive.read("extension/LICENSE") != license_text:
+        license_names = [
+            name for name in names if name in {"extension/LICENSE", "extension/LICENSE.txt"}
+        ]
+        if len(license_names) != 1 or archive.read(license_names[0]) != license_text:
             raise ValueError("Packaged license differs from the selected project license.")
         packaged = json.loads(archive.read("extension/package.json"))
         for key in ("name", "publisher", "version", "license", "preview"):

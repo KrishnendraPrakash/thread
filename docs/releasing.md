@@ -1,10 +1,10 @@
 # Release readiness
 
-The source repository is published at [KrishnendraPrakash/thread](https://github.com/KrishnendraPrakash/thread). The user has now requested public VS Code distribution. Preview packaging and a manual build workflow are configured; a live Marketplace listing still requires the owner-selected license, confirmed publisher identity and authenticated upload. See [the publishing guide](publishing.md). This authorization does not mean the M6 general-release gates have passed.
+The source repository is published at [KrishnendraPrakash/thread](https://github.com/KrishnendraPrakash/thread). The user has now requested public VS Code distribution. Preview packaging and a manual build workflow are configured; the owner selected MIT and next preview 0.2.1; new package publication still requires validated production artifacts and an authorized authenticated upload. See [the publishing guide](publishing.md). This authorization does not mean the M6 general-release gates have passed.
 
 Before publishing a general release (the experimental preview remains explicitly limited):
 
-- Confirm the release package name and select the repository license. The source repository URL is established; no license grant or license classifier is invented by the scaffold.
+- The owner selected MIT for Thread-authored code/documentation; the next preview version is 0.2.1. Preserve all independent third-party licenses and complete native notice review.
 - Finish the intended runtime milestone and record acceptance outcomes separately from packaging checks.
 - Pin a tested model artifact/quantization/runtime and retain relevant model/dependency notices.
 - Verify installation from a fresh checkout and a built distribution on declared supported platforms.

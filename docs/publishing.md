@@ -2,14 +2,14 @@
 
 A Marketplace listing makes Thread searchable and installable from VS Code. Thread does not need a hosted server: each user runs automatically detected Python 3.9+ and local inference. Managed setup can download/start Ollama and a starter model on supported Macs after confirmation. A GitHub code push alone does not create a Marketplace listing.
 
-The owner has requested public distribution. The release candidate remains an experimental preview; full quality/M1/M6 gates are incomplete. Marketplace account setup and the project's license decision must be completed before this repository's public-package command will proceed. The publisher ID is `Krishnendra`, supplied by the owner from the Marketplace upload screen. The extension ID is `Krishnendra.thread-agent`; this is separate from the GitHub repository owner `KrishnendraPrakash`.
+The owner has requested public distribution. The release candidate remains an experimental preview; full quality/M1/M6 gates are incomplete. The owner selected MIT and next preview 0.2.1. Public packaging still requires the remaining notices/platform/signing gates and reviewed artifacts. The publisher ID is `Krishnendra`, supplied by the owner from the Marketplace upload screen. The extension ID is `Krishnendra.thread-agent`; this is separate from the GitHub repository owner `KrishnendraPrakash`.
 
 ## One-time owner setup
 
 1. Sign in to [Marketplace publisher management](https://marketplace.visualstudio.com/manage) with your Microsoft account.
 2. Create a publisher, or select one you already own. Record its exact **ID**. A GitHub username is not automatically a Marketplace publisher. The ID cannot be renamed after creation.
 3. Set `publisher` in `extensions/vscode/package.json` to that exact ID. Confirm the same publisher will own the extension before the first upload; its public extension ID is `publisher.thread-agent`.
-4. Choose the project's license. Add the actual license text as root `LICENSE`, and set the extension manifest's `license` field accordingly. The current `UNLICENSED` value is intentionally not silently changed. Packaging copies the selected root license and retains bundled dependency notices.
+4. The owner selected MIT: root `LICENSE` and both package metadata files record it. Packaging copies the selected root license and retains bundled dependency notices.
 5. Read the public README, changelog, privacy document and known limits. The initially tested editor platform is **macOS Apple Silicon (`darwin-arm64`)**. Other macOS/Linux package targets are available to build, but need their own installation/editor validation before being advertised as tested. Windows and web packages are not offered.
 
 No credentials need to be pasted into chat, code, README files or commit messages. Manual upload through the signed-in Marketplace page avoids configuring a command-line token for the first release.
@@ -30,9 +30,9 @@ npm run package:preview --prefix extensions/vscode -- --publisher YOUR_PUBLISHER
 
 Replace `YOUR_PUBLISHER_ID` with the actual ID; do not use that literal placeholder. The check verifies local configuration, not Marketplace identity ownership. The packaging command uses the pre-release channel, checks manifest/target/license consistency and dependency notices, and writes:
 
-- `artifacts/thread-agent-0.2.0-darwin-arm64.vsix`
-- `artifacts/thread-agent-0.2.0-darwin-arm64.vsix.sha256`
-- `artifacts/thread-agent-0.2.0-darwin-arm64.release.json`
+- `artifacts/thread-agent-0.2.1-darwin-arm64.vsix`
+- `artifacts/thread-agent-0.2.1-darwin-arm64.vsix.sha256`
+- `artifacts/thread-agent-0.2.1-darwin-arm64.release.json`
 
 Versioned names follow package.json if the version changes. The release record contains the commit, dirty-worktree indicator, package identity and SHA-256. Build from a clean checkout for an attributable public artifact. Test the **exact packaged VSIX** in a fresh VS Code profile, including local setup and the four workflows, before upload. Install it through **Extensions → … → Install from VSIX…**. Do not substitute the older generic local-development VSIX for this checked release package.
 
@@ -55,7 +55,7 @@ Only after that verification should README installation instructions point users
 The checked package can also be published with the repository's installed vsce:
 
 ```bash
-extensions/vscode/node_modules/.bin/vsce publish --azure-credential --packagePath artifacts/thread-agent-0.2.0-darwin-arm64.vsix --pre-release
+extensions/vscode/node_modules/.bin/vsce publish --azure-credential --packagePath artifacts/thread-agent-0.2.1-darwin-arm64.vsix --pre-release
 ```
 
 This requires a configured Microsoft Entra identity with permission on the publisher. It is not configured by this repository. The [official publishing guide](https://code.visualstudio.com/api/working-with-extensions/publishing-extension) documents Microsoft Entra authentication and the browser-upload route. It currently states that global Azure DevOps PATs retire on December 1, 2026; do not build a new long-term publishing pipeline around copied PATs. Do not pass tokens in command arguments or commit them.
