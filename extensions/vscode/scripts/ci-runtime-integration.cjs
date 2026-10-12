@@ -72,7 +72,14 @@ async function cleanup(endpoint, proxy) {
   runtime.stop();
   await new Promise(resolve=>setTimeout(resolve,500));
   for(const process of ownedProcesses()) {
-    if(target==='win32-x64') cp.execFileSync('taskkill.exe',['/PID',String(process.pid),'/T','/F'],{timeout:30000,stdio:'ignore'});
+    if(target==='win32-x64') {
+      try {cp.execFileSync('taskkill.exe',['/PID',String(process.pid),'/T','/F'],{timeout:30000,stdio:'ignore'});}
+      catch(error) {
+        // The server can finish exiting between CIM enumeration and taskkill.
+        // Accept only verified absence; a still-owned process remains failure.
+        if(ownedProcesses().some(item=>item.pid===process.pid)) throw error;
+      }
+    }
     else {try {global.process.kill(process.pid,'SIGKILL');}catch(error){if(error.code!=='ESRCH')throw error;}}
   }
   await new Promise(resolve=>setTimeout(resolve,500));
@@ -137,12 +144,12 @@ async function main() {
     let result,error;
     try {result=await backend.call(native,extension,requestValue,650000);}catch(failure){error=String(failure.message);}
     assert.equal(fs.readFileSync(file,'utf8'),text);assert.deepEqual(fs.readdirSync(source),['app.py']);
-    assert.equal(wire.length,1,'One unchanged production chat request must reach the real runtime.');
-    const response=JSON.parse(wire[0].response_utf8);
+    const response=wire.length===1 ? JSON.parse(wire[0].response_utf8) : {};
     record('production-structured-request.json',{native_request:requestValue,wire,
       backend_accepted:!!result,backend_error:error,result,source_unchanged:true,
       done:response.done,done_reason:response.done_reason,eval_count:response.eval_count,
       semantic_verification:'not_performed',release_gate_passed:false});
+    assert.equal(wire.length,1,'One unchanged production chat request must reach the real runtime; backend error: '+error);
     const after=await request(endpoint,'/api/ps');assert.ok(after.models.every(model=>model.size_vram===0));
     console.log('THREAD_REAL_RUNTIME_INTEGRATION_COMPLETED: '+target+'; structured acceptance recorded separately from smoke and model quality');
   } finally {await cleanup(endpoint,proxy);}
