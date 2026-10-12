@@ -2,20 +2,20 @@
 
 Thread 0.2.1 uses a **local model you supply** for repository questions, diagnosis, reviewed changes and document summaries. No model weights, including Llama, are distributed or downloaded by Thread. No paid API account is required.
 
-The release scope retains six native VSIX targets: macOS ARM64/x64, Linux ARM64/x64 and Windows ARM64/x64. Native packages contain the Python/backend dependencies, not Ollama or models. Release checks remain incomplete; Windows activation is still gated. Source changes do not update the existing Marketplace listing.
+The immediate 0.2.1 package is a universal **Python-source VSIX**, using the existing Marketplace stable channel with an experimental preview label. Install Python 3.9+ separately; no Python/native runtime, Ollama or models are bundled. Windows activation remains gated. The six-target native work is preserved as a separate future release effort. Source changes do not update the Marketplace listing.
 
 ## Dependencies — what you need
 
 | Component | Requirement |
 | --- | --- |
 | VS Code | 1.95+ |
-| Backend | Included in matching native VSIX; legacy/development package needs Python 3.9+ |
-| Ollama | Your existing local server; optional explicitly confirmed runtime-only installation on supported profiles |
+| Backend | **Python 3.9+ must already be installed**; Thread discovers it automatically |
+| Ollama | Your existing local server; optional explicitly confirmed runtime-only installation on Apple Silicon macOS 14+ |
 | Model | Your installed local completion model; supply it separately under its own terms |
 
 ## Start using Thread
 
-1. Install the matching VSIX and open a trusted local project.
+1. Install Python 3.9+, install the universal source VSIX, and open a trusted local project.
 2. Run **Thread: Setup Local Model** and select an installed model.
 3. If setup needs attention, **Use existing Ollama (Recommended)** connects to port 11434 without downloads. **More options** provides setup details and explicit installed-model name entry; **Cancel** makes no setup change.
 4. **Install local runtime only** offers a pinned Ollama download after size/location/terms confirmation. It never obtains model weights. Supply your own Ollama model store in the shown Thread storage location, or import your own offline bundle, then rerun setup.

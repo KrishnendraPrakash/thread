@@ -1,0 +1,17 @@
+flowchart TD
+    A[Reviewed current main source] --> B[Compile and explicit source-only staging]
+    B --> C[One universal stable-channel VSIX with preview label]
+    C --> D[Validate identity bytes licenses safe archive and Python prerequisite]
+    D --> E[Probe extracted source backend]
+    E --> F{Explicit main dispatch?}
+    F -->|No| G[Receipt logs only; no binary artifact or authentication]
+    F -->|Yes| H[Retain candidate and receipt in repository Actions for 7 days]
+    H --> I{Publish or access check requested?}
+    I -->|No| J[Dry-run completed]
+    I -->|Yes| K[Existing owner environment approval]
+    K --> L[Recheck same bytes; existing OIDC identity rights probe]
+    L --> M{Publish requested?}
+    M -->|No| N[Read-only access check completed]
+    M -->|Yes| O[Upload same packagePath with durable receipt]
+    O --> P[Verify exact stable universal Marketplace listing and digest]
+    O --> Q[Uncertain outcome pauses for owner reconciliation]

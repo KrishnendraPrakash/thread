@@ -1,5 +1,8 @@
 # Marketplace automation preparation
 
+Immediate owner-approved 0.2.1 publication uses the [source-only universal upload workflow](source-vsix-upload.md): stable channel with experimental preview label, external Python 3.9+, no newly bundled native/model assets, default dry-run and existing protected OIDC review. The native preparation below is preserved for a separately reviewed future release; its gates are not the source-only artifact validator.
+
+
 This is a local preparation, not active publishing. The owner requested that the agent prepare automation; account grants, subscription selection, workflow activation, push/merge and uploads remain separate actions. The existing listing is `Krishnendra.thread-agent`, publicly version 0.2.0 in the owner's screenshot; the publisher role is Owner. Update that existing extension with a new reviewed version. Do not create a second publisher or extension.
 
 ## Prepared BYO 0.2.1 files and limits

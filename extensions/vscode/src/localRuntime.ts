@@ -42,10 +42,16 @@ export function ollamaJson(endpoint: string, route: string, payload?: object, si
   });
 }
 
+export function runtimeSetupSupported(sourceOnly: boolean, platform: string, arch: string, darwinMajor: number, offline = false): boolean {
+  const target = `${platform}-${arch}`;
+  if (!(BACKEND_TARGETS as readonly string[]).includes(target) || (platform === 'darwin' && darwinMajor < 23)) { return false; }
+  return !sourceOnly || offline || target === 'darwin-arm64';
+}
+
 export class LocalRuntime {
   private server?: ChildProcess;
   endpoint = 'http://127.0.0.1:11434';
-  constructor(readonly directory: string, private offline?: OfflineInstallation) {}
+  constructor(readonly directory: string, private offline?: OfflineInstallation, private sourceOnly = false) {}
   get storageDirectory(): string { return this.offline?.directory ?? this.directory; }
   setOffline(installation: OfflineInstallation): void { this.stop(); this.offline = installation; }
   get installed(): boolean {
@@ -55,7 +61,7 @@ export class LocalRuntime {
       return marker.version === RUNTIME_VERSION && (marker.target === `${process.platform}-${process.arch}` || (!marker.target && process.platform === 'darwin'));
     } catch { return false; }
   }
-  get supported(): boolean { return (BACKEND_TARGETS as readonly string[]).includes(`${process.platform}-${process.arch}`) && (process.platform !== 'darwin' || Number(os.release().split('.')[0]) >= 23); }
+  get supported(): boolean { return runtimeSetupSupported(this.sourceOnly, process.platform, process.arch, Number(os.release().split('.')[0]), !!this.offline); }
   get downloadBytes(): number {
     return process.platform === 'darwin' ? 160042307 : process.platform === 'linux'
       ? (process.arch === 'arm64' ? 1549684612 : 1427703051)
