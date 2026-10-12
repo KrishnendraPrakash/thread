@@ -40,7 +40,8 @@ async function main() {
     extensionDevelopmentPath: installed,
     extensionTestsPath: path.join(extension, process.env.THREAD_TEST_POSITIVE === '1' ? 'out/test/windowsPositiveHost.js' : 'out/test/windowsInstalledHost.js'),
     extensionTestsEnv: { ...hostEnvironment, ELECTRON_RUN_AS_NODE: undefined, THREAD_INSTALLED_VERSION: manifest.version,
-      THREAD_INSTALLED_LICENSE_SHA: expectedLicense, THREAD_INSTALLED_PATH: installed },
+      THREAD_INSTALLED_LICENSE_SHA: expectedLicense, THREAD_INSTALLED_PATH: installed,
+      THREAD_SOURCE_NOTICE_SHA: crypto.createHash('sha256').update(fs.readFileSync(path.join(extension, 'notices/pathspec-0.12.1-SOURCE.txt'))).digest('hex') },
     launchArgs: [workspace, '--user-data-dir='+profile, '--extensions-dir='+extensions,
       '--disable-extensions', '--disable-telemetry', '--disable-gpu'] };
   await runTests(options);

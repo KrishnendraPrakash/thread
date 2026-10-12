@@ -5,6 +5,7 @@ import * as assert from 'node:assert/strict';
 import * as path from 'node:path';
 import { readFileSync, realpathSync, writeFileSync } from 'node:fs';
 import { createServer } from 'node:http';
+import { createHash } from 'node:crypto';
 
 export async function run(): Promise<void> {
   assert.equal(process.platform, 'win32'); assert.equal(vscode.workspace.isTrusted, true);
@@ -21,6 +22,8 @@ export async function run(): Promise<void> {
   const Agent = loaded.exports.Agent;
   const root = vscode.workspace.workspaceFolders![0].uri.fsPath;
   const app = path.join(root, 'app.py');
+  const notice = readFileSync(path.join(extension.extensionPath, 'native/win32-x64/thread-backend/notices/pathspec-0.12.1-SOURCE.txt'));
+  assert.equal(createHash('sha256').update(notice).digest('hex'), process.env.THREAD_SOURCE_NOTICE_SHA);
   const original = { pick: installedAPI.window.showQuickPick, input: installedAPI.window.showInputBox,
     info: installedAPI.window.showInformationMessage, warning: installedAPI.window.showWarningMessage,
     error: installedAPI.window.showErrorMessage, setup: Agent.prototype.setup, review: Agent.prototype.review };
@@ -82,7 +85,7 @@ export async function run(): Promise<void> {
     await new Promise<void>((resolve, reject) => { server.once('error', reject); server.listen(11434, '127.0.0.1', resolve); });
     picks.push('fixture:local'); await command('setup');
     assert.equal(agent.detectedPython.bundled, true);
-    assert.equal(realpathSync(agent.detectedPython.executable), realpathSync(path.join(extension.extensionPath, 'native/win32-x64/thread-backend/thread-backend.exe')));
+    assert.equal(realpathSync(agent.detectedPython.executable).toLowerCase(), realpathSync(path.join(extension.extensionPath, 'native/win32-x64/thread-backend/thread-backend.exe')).toLowerCase());
     assert.equal(vscode.workspace.getConfiguration('thread').inspect<string>('model')!.globalValue, 'fixture:local');
     await vscode.window.showTextDocument(await vscode.workspace.openTextDocument(app));
     await feature([{ path: 'app.py', old_text: 'value = 1', new_text: 'value = 2' }]);
@@ -97,8 +100,9 @@ export async function run(): Promise<void> {
     await vscode.workspace.applyEdit(dirty);
     await review('diff', 'file', 'apply'); assert.ok(errors.pop()!.includes('Save or revert'));
     unchanged('value = 1\n');
-    await vscode.window.showTextDocument(document);
-    await vscode.commands.executeCommand('workbench.action.files.revert');
+    const restore = new vscode.WorkspaceEdit();
+    restore.replace(document.uri, new vscode.Range(document.positionAt(0), document.positionAt(document.getText().length)), 'value = 1\n');
+    await vscode.workspace.applyEdit(restore); await document.save();
     assert.equal(document.isDirty, false);
     // Disk changes invalidate the native proposal without dispatching an editor edit.
     writeFileSync(app, 'value = 3\n');
