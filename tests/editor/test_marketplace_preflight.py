@@ -267,6 +267,15 @@ class MarketplacePreflightTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "Packaged publisher mismatch"):
                 MODULE.inventory(root, root, "a" * 40, "0.2.1")
 
+    def test_utf8_source_is_valid_on_all_native_hosts(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            self.release_fixture(root)
+            (root / "extensions/vscode/src/extension.ts").write_text(
+                "// enabled synthetic fixture — “Unicode” λ\n", encoding="utf-8"
+            )
+            self.assertEqual(MODULE.readiness(root)["version"], "0.2.1")
+
     def test_companion_waiver_is_bound_to_exact_scope_and_other_gates_stay_required(self):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)

@@ -108,7 +108,7 @@ def package_native(root, target, manifest, temp):
     )
     shutil.copytree(extension / "native" / target, stage / "native" / target)
     shutil.copy2(root / "LICENSE", stage / "LICENSE")
-    staged = json.loads((stage / "package.json").read_text())
+    staged = json.loads((stage / "package.json").read_text(encoding="utf-8"))
     staged.get("scripts", {}).pop("vscode:prepublish", None)
     (stage / "package.json").write_text(json.dumps(staged, indent=2))
     name = f"thread-agent-{manifest['version']}-{target}"
@@ -135,7 +135,9 @@ def package_native(root, target, manifest, temp):
 
 
 def aggregate(root, folder, commit, version):
-    records = [json.loads(p.read_text()) for p in sorted(folder.glob("*.candidate.json"))]
+    records = [
+        json.loads(p.read_text(encoding="utf-8")) for p in sorted(folder.glob("*.candidate.json"))
+    ]
     if len(records) != 6 or {r.get("target") for r in records} != TARGETS:
         raise ValueError("Aggregation requires exactly six native candidate records.")
     if any(r.get("commit") != commit or r.get("version") != version for r in records):
@@ -186,7 +188,7 @@ def main():
             args.root,
             args.target,
             None,
-            json.loads(args.evidence.read_text()),
+            json.loads(args.evidence.read_text(encoding="utf-8")),
             args.output,
         )
     else:

@@ -59,8 +59,8 @@ def verify_packaged_license(archive, license_text):
 
 
 def readiness(root: Path) -> dict:
-    policy = json.loads((root / "release/marketplace-policy.json").read_text())
-    manifest = json.loads((root / "extensions/vscode/package.json").read_text())
+    policy = json.loads((root / "release/marketplace-policy.json").read_text(encoding="utf-8"))
+    manifest = json.loads((root / "extensions/vscode/package.json").read_text(encoding="utf-8"))
     if (
         policy.get("schema") != 1
         or policy.get("publisher") != "Krishnendra"
@@ -94,7 +94,7 @@ def readiness(root: Path) -> dict:
         raise ValueError("Packaged model provisioning must be user-supplied.")
     if manifest.get("preview") is not True:
         raise ValueError("Prepared automation supports the preview channel only.")
-    source = (root / "extensions/vscode/src/extension.ts").read_text()
+    source = (root / "extensions/vscode/src/extension.ts").read_text(encoding="utf-8")
     if "if (process.platform === 'win32')" in source:
         raise ValueError("Windows editor activation remains gated; six-target publication blocked.")
     return manifest
@@ -104,7 +104,7 @@ def inventory(root: Path, folder: Path, commit: str, version: str) -> dict:
     manifest = readiness(root)
     if not re.fullmatch(r"[0-9a-f]{40}", commit) or version != manifest["version"]:
         raise ValueError("Exact source commit and matching version are required.")
-    record = json.loads((folder / "release.json").read_text())
+    record = json.loads((folder / "release.json").read_text(encoding="utf-8"))
     if (
         record.get("schema") != 1
         or record.get("commit") != commit

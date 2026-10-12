@@ -25,21 +25,20 @@ def main():
         or os.environ.get("THREAD_PRIVATE_PACKAGE_CI") != "github-hosted"
     ):
         raise ValueError("Private package proof requires the approved host-native GitHub runner.")
-    policy = json.loads((ROOT / "release/marketplace-policy.json").read_text())
-    manifest = json.loads((ROOT / "extensions/vscode/package.json").read_text())
+    policy = json.loads((ROOT / "release/marketplace-policy.json").read_text(encoding="utf-8"))
+    manifest = json.loads((ROOT / "extensions/vscode/package.json").read_text(encoding="utf-8"))
     if (
         policy["distribution_scope"] != BYO_SCOPE
         or manifest.get("threadModelProvisioning") != "user-supplied"
     ):
         raise ValueError("Private proof must match the approved BYO scope.")
-    if (
-        "if (process.platform === 'win32')"
-        not in (ROOT / "extensions/vscode/src/extension.ts").read_text()
-    ):
+    if "if (process.platform === 'win32')" not in (
+        ROOT / "extensions/vscode/src/extension.ts"
+    ).read_text(encoding="utf-8"):
         raise ValueError("This approved private check preserves the production Windows guard.")
     native = ROOT / "extensions/vscode/native" / args.target / "thread-backend"
     metadata = inventory(native)
-    provenance = json.loads((native / "notices/provenance.json").read_text())
+    provenance = json.loads((native / "notices/provenance.json").read_text(encoding="utf-8"))
     for row in metadata["files"]:
         print(json.dumps({"native_file": row}), flush=True)
     print(json.dumps({"native_notice_provenance": provenance}), flush=True)

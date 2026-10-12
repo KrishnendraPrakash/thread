@@ -112,7 +112,9 @@ def collect_notices(directory, work):
         record["missing"].append("Version-specific pathspec source access notice")
     sources = [("CPython", Path(get_path("stdlib")))]
     python_library = None
-    analysis = ast.literal_eval((work / "work/thread-backend/Analysis-00.toc").read_text())
+    analysis = ast.literal_eval(
+        (work / "work/thread-backend/Analysis-00.toc").read_text(encoding="utf-8")
+    )
     record["binary_inventory"] = collected_binaries(analysis, directory)
     for group in analysis:
         if isinstance(group, list):
