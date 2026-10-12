@@ -5,12 +5,26 @@ on:
     branches:
       - windows-positive-candidate
   workflow_dispatch:
+    inputs:
+      validation_suite:
+        description: Explicitly choose the approved validation scope
+        type: choice
+        default: installed-profile
+        options:
+          - installed-profile
+          - runtime-integration
 
 permissions:
   contents: read
 
 jobs:
+  runtime-integration:
+    if: github.event_name == 'workflow_dispatch' && inputs.validation_suite == 'runtime-integration'
+    uses: ./.github/workflows/runtime-integration-x64.yml
+    permissions:
+      contents: read
   native:
+    if: github.event_name != 'workflow_dispatch' || inputs.validation_suite != 'runtime-integration'
     strategy:
       fail-fast: false
       matrix:

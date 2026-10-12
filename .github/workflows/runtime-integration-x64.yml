@@ -1,0 +1,55 @@
+name: Private real runtime integration x64
+
+# Called only by the existing registered manual dispatcher with an explicit suite.
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  runtime:
+    if: github.event.repository.private == false
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: windows-2025
+            target: win32-x64
+          - runner: ubuntu-22.04
+            target: linux-x64
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 45
+    env:
+      PYTHONPATH: src
+      THREAD_RUNTIME_CI_ENVIRONMENT: ${{ runner.environment }}
+      THREAD_RUNTIME_WORK: ${{ runner.temp }}/thread-runtime-integration
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: '3.12'
+      - name: Stop before runtime/model downloads if actual free storage is insufficient
+        run: python extensions/vscode/scripts/ci_runtime_integration.py preflight --target ${{ matrix.target }} --work "${{ env.THREAD_RUNTIME_WORK }}"
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: '22'
+          package-manager-cache: false
+      - name: Use only existing approved native/editor build dependencies
+        run: python -m pip install -e ".[editor]" -r extensions/vscode/scripts/requirements-native.txt
+      - name: Build and probe the actual host-native backend
+        run: |
+          python extensions/vscode/scripts/freeze.py --target ${{ matrix.target }}
+          python extensions/vscode/scripts/check_native.py
+          npm ci --prefix extensions/vscode --ignore-scripts
+          npm run compile --prefix extensions/vscode
+      - name: Acquire and extract the exact runtime through the actual native installer
+        run: node extensions/vscode/scripts/ci-runtime-integration.cjs install "${{ env.THREAD_RUNTIME_WORK }}" ${{ matrix.target }}
+      - name: Inventory target binaries and stop for any additional vendor agreement before execution
+        run: python extensions/vscode/scripts/ci_runtime_integration.py audit --target ${{ matrix.target }} --work "${{ env.THREAD_RUNTIME_WORK }}"
+      - name: Acquire only the approved manifest and exact config/model/license blobs
+        run: python extensions/vscode/scripts/ci_runtime_integration.py model --target ${{ matrix.target }} --work "${{ env.THREAD_RUNTIME_WORK }}"
+      - name: Run owned CPU completion and unchanged production request, then clean up owned processes
+        run: node extensions/vscode/scripts/ci-runtime-integration.cjs run "${{ env.THREAD_RUNTIME_WORK }}" ${{ matrix.target }}
