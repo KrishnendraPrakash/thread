@@ -1,5 +1,8 @@
 # Publish the Thread VS Code preview
 
+Immediate owner-approved 0.2.1 publication uses the [source-only universal upload workflow](source-vsix-upload.md): stable channel with experimental preview label, external Python 3.9+, no newly bundled native/model assets, default dry-run and existing protected OIDC review. The native preparation below is preserved for a separately reviewed future release; its gates are not the source-only artifact validator.
+
+
 A Marketplace listing makes Thread searchable and installable from VS Code. Thread does not need a hosted server: each user runs automatically detected Python 3.9+ and local inference. Managed setup can download/start Ollama and a starter model on supported Macs after confirmation. A GitHub code push alone does not create a Marketplace listing.
 
 The owner has requested public distribution. The release candidate remains an experimental preview; full quality/M1/M6 gates are incomplete. The owner selected MIT and next preview 0.2.1. Public packaging still requires the remaining notices/platform/signing gates and reviewed artifacts. The publisher ID is `Krishnendra`, supplied by the owner from the Marketplace upload screen. The extension ID is `Krishnendra.thread-agent`; this is separate from the GitHub repository owner `KrishnendraPrakash`.

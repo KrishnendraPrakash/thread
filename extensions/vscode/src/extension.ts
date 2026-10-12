@@ -53,7 +53,7 @@ export class Agent implements vscode.WebviewViewProvider, vscode.Disposable {
   private taskExecutions = new Set<vscode.TaskExecution>();
   private taskListener: vscode.Disposable;
   constructor(private context: vscode.ExtensionContext) {
-    this.managed = new LocalRuntime(path.join(context.globalStorageUri.fsPath, 'local-runtime'), context.globalState.get<OfflineInstallation>('offlineInstallation'));
+    this.managed = new LocalRuntime(path.join(context.globalStorageUri.fsPath, 'local-runtime'), context.globalState.get<OfflineInstallation>('offlineInstallation'), context.extension?.packageJSON.threadDistribution === 'source-vsix');
     this.managedMode = context.globalState.get<boolean>('managedRuntime', false);
     this.result = context.workspaceState.get<Result>('lastResult');
     if (this.result?.decision === 'applying') { this.result.decision = 'uncertain'; }
@@ -265,7 +265,7 @@ export class Agent implements vscode.WebviewViewProvider, vscode.Disposable {
       });
     } catch (error) {
       this.managed.stop();
-      this.managed = new LocalRuntime(path.join(this.context.globalStorageUri.fsPath, 'local-runtime'), previous);
+      this.managed = new LocalRuntime(path.join(this.context.globalStorageUri.fsPath, 'local-runtime'), previous, this.context.extension?.packageJSON.threadDistribution === 'source-vsix');
       this.managedMode = previousManagedMode;
       if (installation) { await rm(installation.directory, { recursive: true, force: true }); }
       await this.context.globalState.update('offlineInstallation', previous);

@@ -4,6 +4,8 @@
 
 Thread is a local AI assistant inside **Visual Studio Code (VS Code)**, the app you use to open and edit code. Ask where something happens, get help investigating a bug, review a suggested change, or summarize a document. Thread 0.2.1 uses a **model you supply**, running on your computer through **Ollama**; the main workflow needs no paid AI account or API key.
 
+**Next publication scope:** automate the existing universal Python-source VSIX upload as 0.2.1, with MIT, stable Marketplace channel and experimental preview label. Python 3.9+ remains a user prerequisite. The source workflow stages only approved source/assets, defaults to dry-run and publishes the reviewed exact bytes only after the protected main approval. Native packaging work is preserved separately. [Source upload workflow](docs/source-vsix-upload.md).
+
 > [!IMPORTANT]
 > **Experimental developer preview.** Answers and generated code can be wrong. Thread shows source excerpts and asks you to review changes. The new bundled-backend and offline paths are development candidates, not a finished release for every operating system.
 

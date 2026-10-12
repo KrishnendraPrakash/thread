@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "publisher": "Krishnendra",
+  "extension": "thread-agent",
+  "version": "0.2.1",
+  "distribution": "source-vsix",
+  "target": "universal",
+  "channel": "stable",
+  "preview": true,
+  "project_license": "MIT",
+  "python_requirement": ">=3.9",
+  "models": "user-supplied",
+  "dependencies": {
+    "pathspec": "0.12.1",
+    "pypdf": "6.19.0"
+  }
+}
