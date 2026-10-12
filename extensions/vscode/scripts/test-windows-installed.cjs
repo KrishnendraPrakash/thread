@@ -77,6 +77,7 @@ exports.activate = async () => {
           result.ok ? resolve() : reject(Error(result.error));
         });
       });
+      console.log('THREAD_WINDOWS_'+phase.toUpperCase()+'_PHASE_PASSED: installed fixture assertions completed');
     }
     console.log('THREAD_WINDOWS_REAL_PROFILE_RELOAD_PASSED: ordinary isolated storage across two launches; no extensionTestsPath');
   }
