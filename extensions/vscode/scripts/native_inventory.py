@@ -4,6 +4,22 @@ import hashlib
 from pathlib import Path, PurePosixPath
 
 
+def native_build_environment(target, environment, python_base, executable):
+    """Keep Windows binary discovery independent of ambient JDK/Git DLL copies."""
+    result = dict(environment)
+    if target.startswith("win32-"):
+        windows = Path(environment["SystemRoot"])
+        paths = [
+            Path(executable).parent,
+            python_base,
+            python_base / "DLLs",
+            windows / "System32",
+            windows,
+        ]
+        result["PATH"] = ";".join(dict.fromkeys(str(path) for path in paths))
+    return result
+
+
 def omit_windows_os_images(analysis, payload, windows_root):
     """Omit OS API-set/UCRT copies; supported Windows 10+ supplies these centrally.
 

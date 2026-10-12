@@ -128,6 +128,9 @@ def collect_bound_notices(inventory, output, folder, target, python_version):
                     "complete_distribution_review": False,
                 }
             )
+    if notices and (folder / "PACKAGING-CHANGES.txt").is_file():
+        changes = folder / "PACKAGING-CHANGES.txt"
+        shutil.copy2(changes, output / "CPython-PACKAGING-CHANGES.txt")
     return notices
 
 

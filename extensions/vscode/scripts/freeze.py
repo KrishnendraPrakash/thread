@@ -19,7 +19,7 @@ from pathlib import Path
 from sysconfig import get_path
 
 from distribution_provenance import collect_distribution_provenance
-from native_inventory import collected_binaries, omit_windows_os_images
+from native_inventory import collected_binaries, native_build_environment, omit_windows_os_images
 from native_notices import (
     collect_bound_notices,
     collect_cpython_core_notices,
@@ -333,7 +333,12 @@ def main():
             str(Path(__file__).with_name("frozen_bridge.py")),
         ],
         cwd=ROOT,
-        env={**os.environ, "PYINSTALLER_CONFIG_DIR": str(work / "cache")},
+        env={
+            **native_build_environment(
+                host_target(), os.environ, Path(sys.base_prefix), sys.executable
+            ),
+            "PYINSTALLER_CONFIG_DIR": str(work / "cache"),
+        },
         check=True,
     )
     materialize_links(output / "thread-backend")

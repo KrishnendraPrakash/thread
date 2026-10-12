@@ -151,3 +151,25 @@ class NativeInventoryTests(unittest.TestCase):
         )
         self.assertEqual(omitted, [])
         self.assertTrue(destination.exists())
+
+    def test_windows_build_discovery_excludes_ambient_jdk_and_preserves_parent(self):
+        original = {
+            "SystemRoot": "/fixture/Windows",
+            "PATH": "/fixture/Java/bin;/fixture/Git/bin",
+            "KEEP": "value",
+        }
+        result = MODULE.native_build_environment(
+            "win32-x64", original, Path("/fixture/Python"), "/fixture/Python/python.exe"
+        )
+        self.assertNotIn("Java", result["PATH"])
+        self.assertNotIn("Git", result["PATH"])
+        self.assertIn("/fixture/Windows/System32", result["PATH"])
+        self.assertIn("/fixture/Python/DLLs", result["PATH"])
+        self.assertEqual(result["KEEP"], "value")
+        self.assertIn("Java", original["PATH"])
+        self.assertEqual(
+            MODULE.native_build_environment(
+                "linux-x64", original, Path("/fixture/Python"), "/fixture/Python/python"
+            ),
+            original,
+        )
