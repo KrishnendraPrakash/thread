@@ -67,3 +67,42 @@ class NativeInventoryTests(unittest.TestCase):
             MODULE.collected_binaries(
                 [[("redirect/binary.so", str(self.source), "BINARY")]], self.payload
             )
+
+    def test_windows_omits_only_os_origin_api_set_and_ucrt_payloads(self):
+        windows = self.root / "Windows"
+        system = windows / "System32/downlevel"
+        system.mkdir(parents=True)
+        vendor = self.root / "vendor"
+        vendor.mkdir()
+        items = []
+        for name, parent in [
+            ("api-ms-win-crt-fixture.dll", system),
+            ("ucrtbase.dll", system),
+            ("vcruntime140.dll", system),
+            ("api-ms-win-core-vendor.dll", vendor),
+        ]:
+            source = parent / name
+            source.write_bytes(b"synthetic native bytes never executed")
+            destination = self.payload / "_internal" / name
+            destination.write_bytes(source.read_bytes())
+            items.append((name, str(source), "BINARY"))
+        filtered, omitted = MODULE.omit_windows_os_images([items], self.payload, windows)
+        self.assertEqual(
+            {row["source_name"] for row in omitted}, {"api-ms-win-crt-fixture.dll", "ucrtbase.dll"}
+        )
+        self.assertEqual(len(MODULE.collected_binaries(filtered, self.payload)["entries"]), 2)
+        self.assertTrue((self.payload / "_internal/vcruntime140.dll").is_file())
+        self.assertTrue((self.payload / "_internal/api-ms-win-core-vendor.dll").is_file())
+        self.assertTrue((system / "ucrtbase.dll").is_file())
+
+    def test_windows_omission_validates_entire_payload_before_any_delete(self):
+        system = self.root / "Windows/System32"
+        system.mkdir(parents=True)
+        source = system / "ucrtbase.dll"
+        source.write_bytes(b"synthetic bytes")
+        destination = self.payload / "_internal/ucrtbase.dll"
+        destination.write_bytes(source.read_bytes())
+        toc = [[("ucrtbase.dll", str(source), "BINARY"), ("../unsafe.dll", str(source), "BINARY")]]
+        with self.assertRaisesRegex(ValueError, "Unsafe"):
+            MODULE.omit_windows_os_images(toc, self.payload, system.parent)
+        self.assertTrue(destination.is_file())

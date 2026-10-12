@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "scope": "OpenSSL 3.0.16 LICENSE and AUTHORS for exact Mac Python distribution shared libraries; excludes other static components",
+  "scope": "OpenSSL 3.0.16 LICENSE/AUTHORS for exact Mac and Windows Python distribution shared libraries; other static components excluded",
   "prefix": "OpenSSL-3.0.16-",
   "complete_distribution_review": false,
   "bindings": [
@@ -95,6 +95,98 @@
       "evidence_commit": "50eec6cd8ad18ca69853f14ba48666801480f57e",
       "build_recipe": "https://github.com/python/cpython/blob/0cc81280367df838c4b199f8f0378837165071c2/Mac/BuildScript/build-installer.py",
       "dependency_source_sha256": "57e03c50feab5d31b152af2b764f10379aecd8ee92f16c985983ce4a99f7ef86"
+    },
+    {
+      "component": "OpenSSL 3.0.16",
+      "target": "win32-x64",
+      "python": "3.12.10",
+      "source_name": "libcrypto-3.dll",
+      "source_sha256": "ccfffddcd3defb8d899026298af9af43bc186130f8483d77e97c93233d5f27d7",
+      "notices": [
+        {
+          "file": "LICENSE.txt",
+          "sha256": "7d5450cb2d142651b8afa315b5f238efc805dad827d91ba367d8516bc9d49e7a",
+          "source": "https://raw.githubusercontent.com/openssl/openssl/fa1e5dfb142bb1c26c3c38a10aafa7a095df52e5/LICENSE.txt"
+        },
+        {
+          "file": "AUTHORS.md",
+          "sha256": "5076ca441daef7fb35e904c2ac070880c7b3d58300a5a6aecac41e8f525f4412",
+          "source": "https://raw.githubusercontent.com/openssl/openssl/fa1e5dfb142bb1c26c3c38a10aafa7a095df52e5/AUTHORS.md"
+        }
+      ],
+      "evidence_run": 38247810107,
+      "evidence_job": 114806032152,
+      "evidence_commit": "9d9516e388a0be96b7ffe514a95387b22283b6fb",
+      "runtime_observation": "OpenSSL 3.0.16 11 Feb 2025"
+    },
+    {
+      "component": "OpenSSL 3.0.16",
+      "target": "win32-x64",
+      "python": "3.12.10",
+      "source_name": "libssl-3.dll",
+      "source_sha256": "007142039f04d04e0ed607bda53de095e5bc6a8a10d26ecedde94ea7d2d7eefe",
+      "notices": [
+        {
+          "file": "LICENSE.txt",
+          "sha256": "7d5450cb2d142651b8afa315b5f238efc805dad827d91ba367d8516bc9d49e7a",
+          "source": "https://raw.githubusercontent.com/openssl/openssl/fa1e5dfb142bb1c26c3c38a10aafa7a095df52e5/LICENSE.txt"
+        },
+        {
+          "file": "AUTHORS.md",
+          "sha256": "5076ca441daef7fb35e904c2ac070880c7b3d58300a5a6aecac41e8f525f4412",
+          "source": "https://raw.githubusercontent.com/openssl/openssl/fa1e5dfb142bb1c26c3c38a10aafa7a095df52e5/AUTHORS.md"
+        }
+      ],
+      "evidence_run": 38247810107,
+      "evidence_job": 114806032152,
+      "evidence_commit": "9d9516e388a0be96b7ffe514a95387b22283b6fb",
+      "runtime_observation": "OpenSSL 3.0.16 11 Feb 2025"
+    },
+    {
+      "component": "OpenSSL 3.0.16",
+      "target": "win32-arm64",
+      "python": "3.12.10",
+      "source_name": "libcrypto-3-arm64.dll",
+      "source_sha256": "4eaf3b735293049c56a9df102deade3eea149da4f00e88e29a036b25090e1682",
+      "notices": [
+        {
+          "file": "LICENSE.txt",
+          "sha256": "7d5450cb2d142651b8afa315b5f238efc805dad827d91ba367d8516bc9d49e7a",
+          "source": "https://raw.githubusercontent.com/openssl/openssl/fa1e5dfb142bb1c26c3c38a10aafa7a095df52e5/LICENSE.txt"
+        },
+        {
+          "file": "AUTHORS.md",
+          "sha256": "5076ca441daef7fb35e904c2ac070880c7b3d58300a5a6aecac41e8f525f4412",
+          "source": "https://raw.githubusercontent.com/openssl/openssl/fa1e5dfb142bb1c26c3c38a10aafa7a095df52e5/AUTHORS.md"
+        }
+      ],
+      "evidence_run": 38247810107,
+      "evidence_job": 114806032439,
+      "evidence_commit": "9d9516e388a0be96b7ffe514a95387b22283b6fb",
+      "runtime_observation": "OpenSSL 3.0.16 11 Feb 2025"
+    },
+    {
+      "component": "OpenSSL 3.0.16",
+      "target": "win32-arm64",
+      "python": "3.12.10",
+      "source_name": "libssl-3-arm64.dll",
+      "source_sha256": "9b890affcd1f00596d6c2915986c3e0f80c1c1e82f1c40e7c72b5f63dfe6748d",
+      "notices": [
+        {
+          "file": "LICENSE.txt",
+          "sha256": "7d5450cb2d142651b8afa315b5f238efc805dad827d91ba367d8516bc9d49e7a",
+          "source": "https://raw.githubusercontent.com/openssl/openssl/fa1e5dfb142bb1c26c3c38a10aafa7a095df52e5/LICENSE.txt"
+        },
+        {
+          "file": "AUTHORS.md",
+          "sha256": "5076ca441daef7fb35e904c2ac070880c7b3d58300a5a6aecac41e8f525f4412",
+          "source": "https://raw.githubusercontent.com/openssl/openssl/fa1e5dfb142bb1c26c3c38a10aafa7a095df52e5/AUTHORS.md"
+        }
+      ],
+      "evidence_run": 38247810107,
+      "evidence_job": 114806032439,
+      "evidence_commit": "9d9516e388a0be96b7ffe514a95387b22283b6fb",
+      "runtime_observation": "OpenSSL 3.0.16 11 Feb 2025"
     }
   ]
 }

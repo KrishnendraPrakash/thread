@@ -125,6 +125,7 @@ class NativeNoticeTests(unittest.TestCase):
                     "source_name": binding["source_name"],
                     "source_sha256": binding["source_sha256"],
                     "payload_sha256": "a" * 64,
+                    "destination": "_internal/fixture",
                 }
                 result = MODULE.collect_cpython_core_notices(
                     {"entries": [entry]}, output, folder, binding["target"], binding["python"]

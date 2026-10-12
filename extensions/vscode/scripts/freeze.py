@@ -19,7 +19,7 @@ from pathlib import Path
 from sysconfig import get_path
 
 from distribution_provenance import collect_distribution_provenance
-from native_inventory import collected_binaries
+from native_inventory import collected_binaries, omit_windows_os_images
 from native_notices import (
     collect_bound_notices,
     collect_cpython_core_notices,
@@ -170,7 +170,7 @@ def collect_notices(directory, work):
         collect_bound_notices(
             record["binary_inventory"],
             output,
-            ROOT / "extensions/vscode/notices/openssl-macos-ci",
+            ROOT / "extensions/vscode/notices/openssl-python-ci",
             host_target(),
             sys.version.split()[0],
         )
@@ -186,6 +186,36 @@ def collect_notices(directory, work):
         output,
         host_target(),
     )
+    ubuntu_notices = collect_bound_notices(
+        record["binary_inventory"],
+        output,
+        ROOT / "extensions/vscode/notices/ubuntu-ci",
+        host_target(),
+        sys.version.split()[0],
+    )
+    record["notices"].extend(ubuntu_notices)
+    covered_ubuntu = {Path(item["payload_destination"]).name for item in ubuntu_notices}
+    record["missing"] = [item for item in record["missing"] if item not in covered_ubuntu]
+    if sys.platform == "win32":
+        if sys.getwindowsversion().major < 10:
+            raise ValueError("Native Windows packaging requires Windows 10 or later.")
+        analysis, omitted = omit_windows_os_images(
+            analysis,
+            directory,
+            Path(os.environ["SystemRoot"]),
+        )
+        record["omitted_windows_os_images"] = omitted
+        record["binary_inventory"] = collected_binaries(analysis, directory)
+        omitted_names = {Path(item["destination"]).name for item in omitted}
+        record["missing"] = [item for item in record["missing"] if item not in omitted_names]
+        for image in distribution_report["images"]:
+            image["included_in_payload"] = image["destination"] not in {
+                item["destination"] for item in omitted
+            }
+        (output / "distribution-provenance.json").write_text(
+            json.dumps(distribution_report, indent=2) + "\n",
+            encoding="utf-8",
+        )
     record["distribution_provenance"] = {
         "file": "distribution-provenance.json",
         "images": len(distribution_report["images"]),

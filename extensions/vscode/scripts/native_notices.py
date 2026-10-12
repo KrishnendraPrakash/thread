@@ -77,10 +77,10 @@ def notice_text_candidate(path):
 
 
 def collect_bound_notices(inventory, output, folder, target, python_version):
-    """Bind core terms to recorded exact source hashes; no dependency closure claim."""
+    """Bind retained terms to recorded exact source hashes; no dependency closure claim."""
     profile = json.loads((folder / "bindings.json").read_text(encoding="utf-8"))
     if profile.get("schema") != 1:
-        raise ValueError("Unsupported CPython core notice bindings.")
+        raise ValueError("Unsupported exact-image notice bindings.")
     notices = []
     for entry in inventory["entries"]:
         matches = [
@@ -92,7 +92,7 @@ def collect_bound_notices(inventory, output, folder, target, python_version):
             and binding["source_sha256"] == entry["source_sha256"]
         ]
         if len(matches) > 1:
-            raise ValueError("Ambiguous CPython core notice binding.")
+            raise ValueError("Ambiguous exact-image notice binding.")
         if not matches:
             continue
         binding = matches[0]
@@ -109,10 +109,10 @@ def collect_bound_notices(inventory, output, folder, target, python_version):
         for document in documents:
             name = document["file"]
             if not isinstance(name, str) or Path(name).name != name or "\\" in name:
-                raise ValueError("CPython core notice filenames must be basenames.")
+                raise ValueError("Bound notice filenames must be basenames.")
             notice = folder / name
             if notice.is_symlink() or not notice.is_file() or digest(notice) != document["sha256"]:
-                raise ValueError("CPython core notice missing or changed.")
+                raise ValueError("Bound notice missing or changed.")
             destination = profile.get("prefix", "CPython-core-") + name
             shutil.copy2(notice, output / destination)
             notices.append(
@@ -123,6 +123,7 @@ def collect_bound_notices(inventory, output, folder, target, python_version):
                     "sha256": document["sha256"],
                     "source": document["source"],
                     "payload_sha256": entry["payload_sha256"],
+                    "payload_destination": entry["destination"],
                     "scope": profile["scope"],
                     "complete_distribution_review": False,
                 }

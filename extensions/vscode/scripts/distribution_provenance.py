@@ -96,7 +96,7 @@ def linux_evidence(source, output, texts):
                 set(re.findall(r"/usr/share/common-licenses/([A-Za-z0-9.+-]+)", notice["text"]))
             ):
                 common = retain_text(
-                    Path("/usr/share/common-licenses") / name,
+                    Path("/usr/share/common-licenses") / name.rstrip("."),
                     output,
                     texts,
                     "Ubuntu common license " + name,

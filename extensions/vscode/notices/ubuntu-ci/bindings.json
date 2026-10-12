@@ -1,0 +1,652 @@
+{
+  "schema": 1,
+  "scope": "Exact Ubuntu shared-library notice/source-access bindings only; incorporated build/patch attribution remains separate",
+  "prefix": "Ubuntu-",
+  "complete_distribution_review": false,
+  "bindings": [
+    {
+      "component": "libbz2.so.1.0.4 Ubuntu distribution notice",
+      "target": "linux-x64",
+      "python": "3.12.15",
+      "source_name": "libbz2.so.1.0.4",
+      "source_sha256": "54d16979912ab62282350dd2dc5dceb5b73b13e27bb02792087aff752d16f6e9",
+      "notices": [
+        {
+          "file": "832ed535ff3c3d025a8d2348eb1b697b89addcf2eaadbc17650262040b9145e2.txt",
+          "sha256": "832ed535ff3c3d025a8d2348eb1b697b89addcf2eaadbc17650262040b9145e2",
+          "source": "https://launchpad.net/ubuntu/+source/bzip2/1.0.8-5ubuntu0.1",
+          "origin": "Ubuntu installed package libbz2-1.0:amd64"
+        },
+        {
+          "file": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643.txt",
+          "sha256": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643",
+          "source": "https://launchpad.net/ubuntu/+source/bzip2/1.0.8-5ubuntu0.1",
+          "origin": "Ubuntu common license GPL-2"
+        }
+      ],
+      "packages": [
+        {
+          "package": "libbz2-1.0:amd64",
+          "version": "1.0.8-5ubuntu0.1",
+          "source_package": "bzip2",
+          "source_version": "1.0.8-5ubuntu0.1",
+          "source_access": "https://launchpad.net/ubuntu/+source/bzip2/1.0.8-5ubuntu0.1",
+          "copyright_sha256": "832ed535ff3c3d025a8d2348eb1b697b89addcf2eaadbc17650262040b9145e2",
+          "referenced_license_sha256": []
+        }
+      ],
+      "evidence_run": 38247810107,
+      "evidence_job": 114806032250,
+      "evidence_commit": "9d9516e388a0be96b7ffe514a95387b22283b6fb",
+      "review_scope": "Retain exact installed package copyright and referenced license text; not an exhaustive source/build attribution or redistribution approval"
+    },
+    {
+      "component": "libcrypto.so.3 Ubuntu distribution notice",
+      "target": "linux-x64",
+      "python": "3.12.15",
+      "source_name": "libcrypto.so.3",
+      "source_sha256": "7cc817ff1841b59516d684f357bc0c3fc2cc52c3fa9b4ffb8ce8bdc215f02915",
+      "notices": [
+        {
+          "file": "6a7da622fe0637a334d2a8fc470852d2ffb77d9a2b2f930f854e32a41ad6ef35.txt",
+          "sha256": "6a7da622fe0637a334d2a8fc470852d2ffb77d9a2b2f930f854e32a41ad6ef35",
+          "source": "https://launchpad.net/ubuntu/+source/openssl/3.0.2-0ubuntu1.30",
+          "origin": "Ubuntu installed package libssl3:amd64"
+        },
+        {
+          "file": "b7fd9b73ea99602016a326e0b62e6646060d18febdd065ceca8bb482208c3d88.txt",
+          "sha256": "b7fd9b73ea99602016a326e0b62e6646060d18febdd065ceca8bb482208c3d88",
+          "source": "https://launchpad.net/ubuntu/+source/openssl/3.0.2-0ubuntu1.30",
+          "origin": "Ubuntu common license Artistic"
+        },
+        {
+          "file": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30.txt",
+          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+          "source": "https://launchpad.net/ubuntu/+source/openssl/3.0.2-0ubuntu1.30",
+          "origin": "Ubuntu common license Apache-2.0"
+        },
+        {
+          "file": "d77d235e41d54594865151f4751e835c5a82322b0e87ace266567c3391a4b912.txt",
+          "sha256": "d77d235e41d54594865151f4751e835c5a82322b0e87ace266567c3391a4b912",
+          "source": "https://launchpad.net/ubuntu/+source/openssl/3.0.2-0ubuntu1.30",
+          "origin": "Ubuntu common license GPL-1"
+        }
+      ],
+      "packages": [
+        {
+          "package": "libssl3:amd64",
+          "version": "3.0.2-0ubuntu1.30",
+          "source_package": "openssl",
+          "source_version": "3.0.2-0ubuntu1.30",
+          "source_access": "https://launchpad.net/ubuntu/+source/openssl/3.0.2-0ubuntu1.30",
+          "copyright_sha256": "6a7da622fe0637a334d2a8fc470852d2ffb77d9a2b2f930f854e32a41ad6ef35",
+          "referenced_license_sha256": [
+            "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+            "b7fd9b73ea99602016a326e0b62e6646060d18febdd065ceca8bb482208c3d88",
+            "d77d235e41d54594865151f4751e835c5a82322b0e87ace266567c3391a4b912"
+          ]
+        }
+      ],
+      "evidence_run": 38247810107,
+      "evidence_job": 114806032250,
+      "evidence_commit": "9d9516e388a0be96b7ffe514a95387b22283b6fb",
+      "review_scope": "Retain exact installed package copyright and referenced license text; not an exhaustive source/build attribution or redistribution approval"
+    },
+    {
+      "component": "libffi.so.8.1.0 Ubuntu distribution notice",
+      "target": "linux-x64",
+      "python": "3.12.15",
+      "source_name": "libffi.so.8.1.0",
+      "source_sha256": "247da4d5d34a91cadcdd6282be4c4644fcb8af001334d2b8a82ecda435418cbf",
+      "notices": [
+        {
+          "file": "7258c8acc378030d8dbe1fcdf394e915769fa31dcbaf3d2991d9a79891f3bcdc.txt",
+          "sha256": "7258c8acc378030d8dbe1fcdf394e915769fa31dcbaf3d2991d9a79891f3bcdc",
+          "source": "https://launchpad.net/ubuntu/+source/libffi/3.4.2-4",
+          "origin": "Ubuntu installed package libffi8:amd64"
+        },
+        {
+          "file": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903.txt",
+          "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903",
+          "source": "https://launchpad.net/ubuntu/+source/libffi/3.4.2-4",
+          "origin": "Ubuntu common license GPL"
+        }
+      ],
+      "packages": [
+        {
+          "package": "libffi8:amd64",
+          "version": "3.4.2-4",
+          "source_package": "libffi",
+          "source_version": "3.4.2-4",
+          "source_access": "https://launchpad.net/ubuntu/+source/libffi/3.4.2-4",
+          "copyright_sha256": "7258c8acc378030d8dbe1fcdf394e915769fa31dcbaf3d2991d9a79891f3bcdc",
+          "referenced_license_sha256": [
+            "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903"
+          ]
+        }
+      ],
+      "evidence_run": 38247810107,
+      "evidence_job": 114806032250,
+      "evidence_commit": "9d9516e388a0be96b7ffe514a95387b22283b6fb",
+      "review_scope": "Retain exact installed package copyright and referenced license text; not an exhaustive source/build attribution or redistribution approval"
+    },
+    {
+      "component": "liblzma.so.5.2.5 Ubuntu distribution notice",
+      "target": "linux-x64",
+      "python": "3.12.15",
+      "source_name": "liblzma.so.5.2.5",
+      "source_sha256": "7fa51c1500cb9fcc4c7d69b7fe0a6d7203cfe6af64373f6c411c5445ef1b402c",
+      "notices": [
+        {
+          "file": "a2dc8fac0f496e1c58aff67018cf0c6b88336316afa5642f9335b71642e28aa8.txt",
+          "sha256": "a2dc8fac0f496e1c58aff67018cf0c6b88336316afa5642f9335b71642e28aa8",
+          "source": "https://launchpad.net/ubuntu/+source/xz-utils/5.2.5-2ubuntu1.1",
+          "origin": "Ubuntu installed package liblzma5:amd64"
+        },
+        {
+          "file": "dc626520dcd53a22f727af3ee42c770e56c97a64fe3adb063799d8ab032fe551.txt",
+          "sha256": "dc626520dcd53a22f727af3ee42c770e56c97a64fe3adb063799d8ab032fe551",
+          "source": "https://launchpad.net/ubuntu/+source/xz-utils/5.2.5-2ubuntu1.1",
+          "origin": "Ubuntu common license LGPL-2.1"
+        },
+        {
+          "file": "b7993225104d90ddd8024fd838faf300bea5e83d91203eab98e29512acebd69c.txt",
+          "sha256": "b7993225104d90ddd8024fd838faf300bea5e83d91203eab98e29512acebd69c",
+          "source": "https://launchpad.net/ubuntu/+source/xz-utils/5.2.5-2ubuntu1.1",
+          "origin": "Ubuntu common license LGPL-2"
+        },
+        {
+          "file": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643.txt",
+          "sha256": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643",
+          "source": "https://launchpad.net/ubuntu/+source/xz-utils/5.2.5-2ubuntu1.1",
+          "origin": "Ubuntu common license GPL-2"
+        }
+      ],
+      "packages": [
+        {
+          "package": "liblzma5:amd64",
+          "version": "5.2.5-2ubuntu1.1",
+          "source_package": "xz-utils",
+          "source_version": "5.2.5-2ubuntu1.1",
+          "source_access": "https://launchpad.net/ubuntu/+source/xz-utils/5.2.5-2ubuntu1.1",
+          "copyright_sha256": "a2dc8fac0f496e1c58aff67018cf0c6b88336316afa5642f9335b71642e28aa8",
+          "referenced_license_sha256": [
+            "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643",
+            "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903",
+            "b7993225104d90ddd8024fd838faf300bea5e83d91203eab98e29512acebd69c",
+            "dc626520dcd53a22f727af3ee42c770e56c97a64fe3adb063799d8ab032fe551"
+          ]
+        }
+      ],
+      "evidence_run": 38247810107,
+      "evidence_job": 114806032250,
+      "evidence_commit": "9d9516e388a0be96b7ffe514a95387b22283b6fb",
+      "review_scope": "Retain exact installed package copyright and referenced license text; not an exhaustive source/build attribution or redistribution approval"
+    },
+    {
+      "component": "libssl.so.3 Ubuntu distribution notice",
+      "target": "linux-x64",
+      "python": "3.12.15",
+      "source_name": "libssl.so.3",
+      "source_sha256": "51fc92556f11ddce62f3f988d3fe973fab8fb4742032e61a713688581c924262",
+      "notices": [
+        {
+          "file": "6a7da622fe0637a334d2a8fc470852d2ffb77d9a2b2f930f854e32a41ad6ef35.txt",
+          "sha256": "6a7da622fe0637a334d2a8fc470852d2ffb77d9a2b2f930f854e32a41ad6ef35",
+          "source": "https://launchpad.net/ubuntu/+source/openssl/3.0.2-0ubuntu1.30",
+          "origin": "Ubuntu installed package libssl3:amd64"
+        },
+        {
+          "file": "b7fd9b73ea99602016a326e0b62e6646060d18febdd065ceca8bb482208c3d88.txt",
+          "sha256": "b7fd9b73ea99602016a326e0b62e6646060d18febdd065ceca8bb482208c3d88",
+          "source": "https://launchpad.net/ubuntu/+source/openssl/3.0.2-0ubuntu1.30",
+          "origin": "Ubuntu common license Artistic"
+        },
+        {
+          "file": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30.txt",
+          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+          "source": "https://launchpad.net/ubuntu/+source/openssl/3.0.2-0ubuntu1.30",
+          "origin": "Ubuntu common license Apache-2.0"
+        },
+        {
+          "file": "d77d235e41d54594865151f4751e835c5a82322b0e87ace266567c3391a4b912.txt",
+          "sha256": "d77d235e41d54594865151f4751e835c5a82322b0e87ace266567c3391a4b912",
+          "source": "https://launchpad.net/ubuntu/+source/openssl/3.0.2-0ubuntu1.30",
+          "origin": "Ubuntu common license GPL-1"
+        }
+      ],
+      "packages": [
+        {
+          "package": "libssl3:amd64",
+          "version": "3.0.2-0ubuntu1.30",
+          "source_package": "openssl",
+          "source_version": "3.0.2-0ubuntu1.30",
+          "source_access": "https://launchpad.net/ubuntu/+source/openssl/3.0.2-0ubuntu1.30",
+          "copyright_sha256": "6a7da622fe0637a334d2a8fc470852d2ffb77d9a2b2f930f854e32a41ad6ef35",
+          "referenced_license_sha256": [
+            "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+            "b7fd9b73ea99602016a326e0b62e6646060d18febdd065ceca8bb482208c3d88",
+            "d77d235e41d54594865151f4751e835c5a82322b0e87ace266567c3391a4b912"
+          ]
+        }
+      ],
+      "evidence_run": 38247810107,
+      "evidence_job": 114806032250,
+      "evidence_commit": "9d9516e388a0be96b7ffe514a95387b22283b6fb",
+      "review_scope": "Retain exact installed package copyright and referenced license text; not an exhaustive source/build attribution or redistribution approval"
+    },
+    {
+      "component": "libuuid.so.1.3.0 Ubuntu distribution notice",
+      "target": "linux-x64",
+      "python": "3.12.15",
+      "source_name": "libuuid.so.1.3.0",
+      "source_sha256": "4472cf91dbc01395761fb45d0f4b25f6241406fe54cbf540c13755a3706a7b17",
+      "notices": [
+        {
+          "file": "2c447817698777e3b2365a5afe2a58ececb85367dfdf0ea2c0df49add90e93eb.txt",
+          "sha256": "2c447817698777e3b2365a5afe2a58ececb85367dfdf0ea2c0df49add90e93eb",
+          "source": "https://launchpad.net/ubuntu/+source/util-linux/2.37.2-4ubuntu3.6",
+          "origin": "Ubuntu installed package libuuid1:amd64"
+        },
+        {
+          "file": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643.txt",
+          "sha256": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643",
+          "source": "https://launchpad.net/ubuntu/+source/util-linux/2.37.2-4ubuntu3.6",
+          "origin": "Ubuntu common license GPL-2"
+        },
+        {
+          "file": "da7eabb7bafdf7d3ae5e9f223aa5bdc1eece45ac569dc21b3b037520b4464768.txt",
+          "sha256": "da7eabb7bafdf7d3ae5e9f223aa5bdc1eece45ac569dc21b3b037520b4464768",
+          "source": "https://launchpad.net/ubuntu/+source/util-linux/2.37.2-4ubuntu3.6",
+          "origin": "Ubuntu common license LGPL"
+        },
+        {
+          "file": "dc626520dcd53a22f727af3ee42c770e56c97a64fe3adb063799d8ab032fe551.txt",
+          "sha256": "dc626520dcd53a22f727af3ee42c770e56c97a64fe3adb063799d8ab032fe551",
+          "source": "https://launchpad.net/ubuntu/+source/util-linux/2.37.2-4ubuntu3.6",
+          "origin": "Ubuntu common license LGPL-2.1"
+        },
+        {
+          "file": "b7993225104d90ddd8024fd838faf300bea5e83d91203eab98e29512acebd69c.txt",
+          "sha256": "b7993225104d90ddd8024fd838faf300bea5e83d91203eab98e29512acebd69c",
+          "source": "https://launchpad.net/ubuntu/+source/util-linux/2.37.2-4ubuntu3.6",
+          "origin": "Ubuntu common license LGPL-2"
+        }
+      ],
+      "packages": [
+        {
+          "package": "libuuid1:amd64",
+          "version": "2.37.2-4ubuntu3.6",
+          "source_package": "util-linux",
+          "source_version": "2.37.2-4ubuntu3.6",
+          "source_access": "https://launchpad.net/ubuntu/+source/util-linux/2.37.2-4ubuntu3.6",
+          "copyright_sha256": "2c447817698777e3b2365a5afe2a58ececb85367dfdf0ea2c0df49add90e93eb",
+          "referenced_license_sha256": [
+            "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643",
+            "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903",
+            "da7eabb7bafdf7d3ae5e9f223aa5bdc1eece45ac569dc21b3b037520b4464768",
+            "b7993225104d90ddd8024fd838faf300bea5e83d91203eab98e29512acebd69c",
+            "dc626520dcd53a22f727af3ee42c770e56c97a64fe3adb063799d8ab032fe551",
+            "da7eabb7bafdf7d3ae5e9f223aa5bdc1eece45ac569dc21b3b037520b4464768"
+          ]
+        }
+      ],
+      "evidence_run": 38247810107,
+      "evidence_job": 114806032250,
+      "evidence_commit": "9d9516e388a0be96b7ffe514a95387b22283b6fb",
+      "review_scope": "Retain exact installed package copyright and referenced license text; not an exhaustive source/build attribution or redistribution approval"
+    },
+    {
+      "component": "libz.so.1.2.11 Ubuntu distribution notice",
+      "target": "linux-x64",
+      "python": "3.12.15",
+      "source_name": "libz.so.1.2.11",
+      "source_sha256": "64c206f0146cc58bbddc4f22054436f4ff278f5a554aa3ce6921ddf7e9133370",
+      "notices": [
+        {
+          "file": "d77204eee882807240f6351c4f5ae2a4bcdb5b773ff77d10647b9b66b826b2fb.txt",
+          "sha256": "d77204eee882807240f6351c4f5ae2a4bcdb5b773ff77d10647b9b66b826b2fb",
+          "source": "https://launchpad.net/ubuntu/+source/zlib/1:1.2.11.dfsg-2ubuntu9.2",
+          "origin": "Ubuntu installed package zlib1g:amd64"
+        }
+      ],
+      "packages": [
+        {
+          "package": "zlib1g:amd64",
+          "version": "1:1.2.11.dfsg-2ubuntu9.2",
+          "source_package": "zlib",
+          "source_version": "1:1.2.11.dfsg-2ubuntu9.2",
+          "source_access": "https://launchpad.net/ubuntu/+source/zlib/1:1.2.11.dfsg-2ubuntu9.2",
+          "copyright_sha256": "d77204eee882807240f6351c4f5ae2a4bcdb5b773ff77d10647b9b66b826b2fb",
+          "referenced_license_sha256": []
+        }
+      ],
+      "evidence_run": 38247810107,
+      "evidence_job": 114806032250,
+      "evidence_commit": "9d9516e388a0be96b7ffe514a95387b22283b6fb",
+      "review_scope": "Retain exact installed package copyright and referenced license text; not an exhaustive source/build attribution or redistribution approval"
+    },
+    {
+      "component": "libbz2.so.1.0.4 Ubuntu distribution notice",
+      "target": "linux-arm64",
+      "python": "3.12.15",
+      "source_name": "libbz2.so.1.0.4",
+      "source_sha256": "ac19913f44443f68f2e3ca29d79caaa785cd257bb424b028234bb4a2e8745c07",
+      "notices": [
+        {
+          "file": "832ed535ff3c3d025a8d2348eb1b697b89addcf2eaadbc17650262040b9145e2.txt",
+          "sha256": "832ed535ff3c3d025a8d2348eb1b697b89addcf2eaadbc17650262040b9145e2",
+          "source": "https://launchpad.net/ubuntu/+source/bzip2/1.0.8-5.1ubuntu0.1",
+          "origin": "Ubuntu installed package libbz2-1.0:arm64"
+        },
+        {
+          "file": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643.txt",
+          "sha256": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643",
+          "source": "https://launchpad.net/ubuntu/+source/bzip2/1.0.8-5.1ubuntu0.1",
+          "origin": "Ubuntu common license GPL-2"
+        }
+      ],
+      "packages": [
+        {
+          "package": "libbz2-1.0:arm64",
+          "version": "1.0.8-5.1ubuntu0.1",
+          "source_package": "bzip2",
+          "source_version": "1.0.8-5.1ubuntu0.1",
+          "source_access": "https://launchpad.net/ubuntu/+source/bzip2/1.0.8-5.1ubuntu0.1",
+          "copyright_sha256": "832ed535ff3c3d025a8d2348eb1b697b89addcf2eaadbc17650262040b9145e2",
+          "referenced_license_sha256": []
+        }
+      ],
+      "evidence_run": 38247810107,
+      "evidence_job": 114806031901,
+      "evidence_commit": "9d9516e388a0be96b7ffe514a95387b22283b6fb",
+      "review_scope": "Retain exact installed package copyright and referenced license text; not an exhaustive source/build attribution or redistribution approval"
+    },
+    {
+      "component": "libcrypto.so.3 Ubuntu distribution notice",
+      "target": "linux-arm64",
+      "python": "3.12.15",
+      "source_name": "libcrypto.so.3",
+      "source_sha256": "b27a2396652ee28629c94d59d667c417dbffdf2dee84e5bf140bd17d3eedb7d9",
+      "notices": [
+        {
+          "file": "6a7da622fe0637a334d2a8fc470852d2ffb77d9a2b2f930f854e32a41ad6ef35.txt",
+          "sha256": "6a7da622fe0637a334d2a8fc470852d2ffb77d9a2b2f930f854e32a41ad6ef35",
+          "source": "https://launchpad.net/ubuntu/+source/openssl/3.0.13-0ubuntu3.16",
+          "origin": "Ubuntu installed package libssl3t64:arm64"
+        },
+        {
+          "file": "b7fd9b73ea99602016a326e0b62e6646060d18febdd065ceca8bb482208c3d88.txt",
+          "sha256": "b7fd9b73ea99602016a326e0b62e6646060d18febdd065ceca8bb482208c3d88",
+          "source": "https://launchpad.net/ubuntu/+source/openssl/3.0.13-0ubuntu3.16",
+          "origin": "Ubuntu common license Artistic"
+        },
+        {
+          "file": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30.txt",
+          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+          "source": "https://launchpad.net/ubuntu/+source/openssl/3.0.13-0ubuntu3.16",
+          "origin": "Ubuntu common license Apache-2.0"
+        },
+        {
+          "file": "d77d235e41d54594865151f4751e835c5a82322b0e87ace266567c3391a4b912.txt",
+          "sha256": "d77d235e41d54594865151f4751e835c5a82322b0e87ace266567c3391a4b912",
+          "source": "https://launchpad.net/ubuntu/+source/openssl/3.0.13-0ubuntu3.16",
+          "origin": "Ubuntu common license GPL-1"
+        }
+      ],
+      "packages": [
+        {
+          "package": "libssl3t64:arm64",
+          "version": "3.0.13-0ubuntu3.16",
+          "source_package": "openssl",
+          "source_version": "3.0.13-0ubuntu3.16",
+          "source_access": "https://launchpad.net/ubuntu/+source/openssl/3.0.13-0ubuntu3.16",
+          "copyright_sha256": "6a7da622fe0637a334d2a8fc470852d2ffb77d9a2b2f930f854e32a41ad6ef35",
+          "referenced_license_sha256": [
+            "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+            "b7fd9b73ea99602016a326e0b62e6646060d18febdd065ceca8bb482208c3d88",
+            "d77d235e41d54594865151f4751e835c5a82322b0e87ace266567c3391a4b912"
+          ]
+        }
+      ],
+      "evidence_run": 38247810107,
+      "evidence_job": 114806031901,
+      "evidence_commit": "9d9516e388a0be96b7ffe514a95387b22283b6fb",
+      "review_scope": "Retain exact installed package copyright and referenced license text; not an exhaustive source/build attribution or redistribution approval"
+    },
+    {
+      "component": "libffi.so.8.1.4 Ubuntu distribution notice",
+      "target": "linux-arm64",
+      "python": "3.12.15",
+      "source_name": "libffi.so.8.1.4",
+      "source_sha256": "9dd873a938c4d7df76912d01f6a28aa4aa73d583bd20485a0dbfe5aa9673a191",
+      "notices": [
+        {
+          "file": "737ff68f0eb104d3b0d96b291c3a8f40a775a3ec2b53f9b2e4bcfe3188bde118.txt",
+          "sha256": "737ff68f0eb104d3b0d96b291c3a8f40a775a3ec2b53f9b2e4bcfe3188bde118",
+          "source": "https://launchpad.net/ubuntu/+source/libffi/3.4.6-1build1",
+          "origin": "Ubuntu installed package libffi8:arm64"
+        },
+        {
+          "file": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986.txt",
+          "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
+          "source": "https://launchpad.net/ubuntu/+source/libffi/3.4.6-1build1",
+          "origin": "Ubuntu common license GPL"
+        }
+      ],
+      "packages": [
+        {
+          "package": "libffi8:arm64",
+          "version": "3.4.6-1build1",
+          "source_package": "libffi",
+          "source_version": "3.4.6-1build1",
+          "source_access": "https://launchpad.net/ubuntu/+source/libffi/3.4.6-1build1",
+          "copyright_sha256": "737ff68f0eb104d3b0d96b291c3a8f40a775a3ec2b53f9b2e4bcfe3188bde118",
+          "referenced_license_sha256": [
+            "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986"
+          ]
+        }
+      ],
+      "evidence_run": 38247810107,
+      "evidence_job": 114806031901,
+      "evidence_commit": "9d9516e388a0be96b7ffe514a95387b22283b6fb",
+      "review_scope": "Retain exact installed package copyright and referenced license text; not an exhaustive source/build attribution or redistribution approval"
+    },
+    {
+      "component": "liblzma.so.5.4.5 Ubuntu distribution notice",
+      "target": "linux-arm64",
+      "python": "3.12.15",
+      "source_name": "liblzma.so.5.4.5",
+      "source_sha256": "47ea0f43683ef829cda43bfe1862c1b06f085fbd813bb58d2d142477f5380139",
+      "notices": [
+        {
+          "file": "a2dc8fac0f496e1c58aff67018cf0c6b88336316afa5642f9335b71642e28aa8.txt",
+          "sha256": "a2dc8fac0f496e1c58aff67018cf0c6b88336316afa5642f9335b71642e28aa8",
+          "source": "https://launchpad.net/ubuntu/+source/xz-utils/5.6.1+really5.4.5-1ubuntu0.3",
+          "origin": "Ubuntu installed package liblzma5:arm64"
+        },
+        {
+          "file": "dc626520dcd53a22f727af3ee42c770e56c97a64fe3adb063799d8ab032fe551.txt",
+          "sha256": "dc626520dcd53a22f727af3ee42c770e56c97a64fe3adb063799d8ab032fe551",
+          "source": "https://launchpad.net/ubuntu/+source/xz-utils/5.6.1+really5.4.5-1ubuntu0.3",
+          "origin": "Ubuntu common license LGPL-2.1"
+        },
+        {
+          "file": "681e386e44a19d7d0674b4320272c90e66b6610b741e7e6305f8219c42e85366.txt",
+          "sha256": "681e386e44a19d7d0674b4320272c90e66b6610b741e7e6305f8219c42e85366",
+          "source": "https://launchpad.net/ubuntu/+source/xz-utils/5.6.1+really5.4.5-1ubuntu0.3",
+          "origin": "Ubuntu common license LGPL-2"
+        },
+        {
+          "file": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643.txt",
+          "sha256": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643",
+          "source": "https://launchpad.net/ubuntu/+source/xz-utils/5.6.1+really5.4.5-1ubuntu0.3",
+          "origin": "Ubuntu common license GPL-2"
+        }
+      ],
+      "packages": [
+        {
+          "package": "liblzma5:arm64",
+          "version": "5.6.1+really5.4.5-1ubuntu0.3",
+          "source_package": "xz-utils",
+          "source_version": "5.6.1+really5.4.5-1ubuntu0.3",
+          "source_access": "https://launchpad.net/ubuntu/+source/xz-utils/5.6.1+really5.4.5-1ubuntu0.3",
+          "copyright_sha256": "a2dc8fac0f496e1c58aff67018cf0c6b88336316afa5642f9335b71642e28aa8",
+          "referenced_license_sha256": [
+            "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643",
+            "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
+            "681e386e44a19d7d0674b4320272c90e66b6610b741e7e6305f8219c42e85366",
+            "dc626520dcd53a22f727af3ee42c770e56c97a64fe3adb063799d8ab032fe551"
+          ]
+        }
+      ],
+      "evidence_run": 38247810107,
+      "evidence_job": 114806031901,
+      "evidence_commit": "9d9516e388a0be96b7ffe514a95387b22283b6fb",
+      "review_scope": "Retain exact installed package copyright and referenced license text; not an exhaustive source/build attribution or redistribution approval"
+    },
+    {
+      "component": "libssl.so.3 Ubuntu distribution notice",
+      "target": "linux-arm64",
+      "python": "3.12.15",
+      "source_name": "libssl.so.3",
+      "source_sha256": "cd89f6e6eea72583e1f1f98f8ea6b0f5e9281d7a0e4262a2e36f648be789d565",
+      "notices": [
+        {
+          "file": "6a7da622fe0637a334d2a8fc470852d2ffb77d9a2b2f930f854e32a41ad6ef35.txt",
+          "sha256": "6a7da622fe0637a334d2a8fc470852d2ffb77d9a2b2f930f854e32a41ad6ef35",
+          "source": "https://launchpad.net/ubuntu/+source/openssl/3.0.13-0ubuntu3.16",
+          "origin": "Ubuntu installed package libssl3t64:arm64"
+        },
+        {
+          "file": "b7fd9b73ea99602016a326e0b62e6646060d18febdd065ceca8bb482208c3d88.txt",
+          "sha256": "b7fd9b73ea99602016a326e0b62e6646060d18febdd065ceca8bb482208c3d88",
+          "source": "https://launchpad.net/ubuntu/+source/openssl/3.0.13-0ubuntu3.16",
+          "origin": "Ubuntu common license Artistic"
+        },
+        {
+          "file": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30.txt",
+          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+          "source": "https://launchpad.net/ubuntu/+source/openssl/3.0.13-0ubuntu3.16",
+          "origin": "Ubuntu common license Apache-2.0"
+        },
+        {
+          "file": "d77d235e41d54594865151f4751e835c5a82322b0e87ace266567c3391a4b912.txt",
+          "sha256": "d77d235e41d54594865151f4751e835c5a82322b0e87ace266567c3391a4b912",
+          "source": "https://launchpad.net/ubuntu/+source/openssl/3.0.13-0ubuntu3.16",
+          "origin": "Ubuntu common license GPL-1"
+        }
+      ],
+      "packages": [
+        {
+          "package": "libssl3t64:arm64",
+          "version": "3.0.13-0ubuntu3.16",
+          "source_package": "openssl",
+          "source_version": "3.0.13-0ubuntu3.16",
+          "source_access": "https://launchpad.net/ubuntu/+source/openssl/3.0.13-0ubuntu3.16",
+          "copyright_sha256": "6a7da622fe0637a334d2a8fc470852d2ffb77d9a2b2f930f854e32a41ad6ef35",
+          "referenced_license_sha256": [
+            "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+            "b7fd9b73ea99602016a326e0b62e6646060d18febdd065ceca8bb482208c3d88",
+            "d77d235e41d54594865151f4751e835c5a82322b0e87ace266567c3391a4b912"
+          ]
+        }
+      ],
+      "evidence_run": 38247810107,
+      "evidence_job": 114806031901,
+      "evidence_commit": "9d9516e388a0be96b7ffe514a95387b22283b6fb",
+      "review_scope": "Retain exact installed package copyright and referenced license text; not an exhaustive source/build attribution or redistribution approval"
+    },
+    {
+      "component": "libuuid.so.1.3.0 Ubuntu distribution notice",
+      "target": "linux-arm64",
+      "python": "3.12.15",
+      "source_name": "libuuid.so.1.3.0",
+      "source_sha256": "c5e4db4464688e9fa7a67c7219a478927de65450bcb2815fec10cb3e1b5bfc0d",
+      "notices": [
+        {
+          "file": "3492fb92cb56cf517d9a899828b4f989038421a38736e49e5525ffbd33196eab.txt",
+          "sha256": "3492fb92cb56cf517d9a899828b4f989038421a38736e49e5525ffbd33196eab",
+          "source": "https://launchpad.net/ubuntu/+source/util-linux/2.39.3-9ubuntu6.6",
+          "origin": "Ubuntu installed package libuuid1:arm64"
+        },
+        {
+          "file": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643.txt",
+          "sha256": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643",
+          "source": "https://launchpad.net/ubuntu/+source/util-linux/2.39.3-9ubuntu6.6",
+          "origin": "Ubuntu common license GPL-2"
+        },
+        {
+          "file": "e3a994d82e644b03a792a930f574002658412f62407f5fee083f2555c5f23118.txt",
+          "sha256": "e3a994d82e644b03a792a930f574002658412f62407f5fee083f2555c5f23118",
+          "source": "https://launchpad.net/ubuntu/+source/util-linux/2.39.3-9ubuntu6.6",
+          "origin": "Ubuntu common license LGPL"
+        },
+        {
+          "file": "dc626520dcd53a22f727af3ee42c770e56c97a64fe3adb063799d8ab032fe551.txt",
+          "sha256": "dc626520dcd53a22f727af3ee42c770e56c97a64fe3adb063799d8ab032fe551",
+          "source": "https://launchpad.net/ubuntu/+source/util-linux/2.39.3-9ubuntu6.6",
+          "origin": "Ubuntu common license LGPL-2.1"
+        },
+        {
+          "file": "681e386e44a19d7d0674b4320272c90e66b6610b741e7e6305f8219c42e85366.txt",
+          "sha256": "681e386e44a19d7d0674b4320272c90e66b6610b741e7e6305f8219c42e85366",
+          "source": "https://launchpad.net/ubuntu/+source/util-linux/2.39.3-9ubuntu6.6",
+          "origin": "Ubuntu common license LGPL-2"
+        }
+      ],
+      "packages": [
+        {
+          "package": "libuuid1:arm64",
+          "version": "2.39.3-9ubuntu6.6",
+          "source_package": "util-linux",
+          "source_version": "2.39.3-9ubuntu6.6",
+          "source_access": "https://launchpad.net/ubuntu/+source/util-linux/2.39.3-9ubuntu6.6",
+          "copyright_sha256": "3492fb92cb56cf517d9a899828b4f989038421a38736e49e5525ffbd33196eab",
+          "referenced_license_sha256": [
+            "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643",
+            "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
+            "e3a994d82e644b03a792a930f574002658412f62407f5fee083f2555c5f23118",
+            "681e386e44a19d7d0674b4320272c90e66b6610b741e7e6305f8219c42e85366",
+            "dc626520dcd53a22f727af3ee42c770e56c97a64fe3adb063799d8ab032fe551",
+            "e3a994d82e644b03a792a930f574002658412f62407f5fee083f2555c5f23118"
+          ]
+        }
+      ],
+      "evidence_run": 38247810107,
+      "evidence_job": 114806031901,
+      "evidence_commit": "9d9516e388a0be96b7ffe514a95387b22283b6fb",
+      "review_scope": "Retain exact installed package copyright and referenced license text; not an exhaustive source/build attribution or redistribution approval"
+    },
+    {
+      "component": "libz.so.1.3 Ubuntu distribution notice",
+      "target": "linux-arm64",
+      "python": "3.12.15",
+      "source_name": "libz.so.1.3",
+      "source_sha256": "e3bc90ee8cce46778c2f46c2a3e580d3b930f7b455910f25ea400a0b797fb9dc",
+      "notices": [
+        {
+          "file": "9e5b96d63773a5d177ba264254390f792be07e41748ebd94730981c6cac31cc6.txt",
+          "sha256": "9e5b96d63773a5d177ba264254390f792be07e41748ebd94730981c6cac31cc6",
+          "source": "https://launchpad.net/ubuntu/+source/zlib/1:1.3.dfsg-3.1ubuntu2.2",
+          "origin": "Ubuntu installed package zlib1g:arm64"
+        }
+      ],
+      "packages": [
+        {
+          "package": "zlib1g:arm64",
+          "version": "1:1.3.dfsg-3.1ubuntu2.2",
+          "source_package": "zlib",
+          "source_version": "1:1.3.dfsg-3.1ubuntu2.2",
+          "source_access": "https://launchpad.net/ubuntu/+source/zlib/1:1.3.dfsg-3.1ubuntu2.2",
+          "copyright_sha256": "9e5b96d63773a5d177ba264254390f792be07e41748ebd94730981c6cac31cc6",
+          "referenced_license_sha256": []
+        }
+      ],
+      "evidence_run": 38247810107,
+      "evidence_job": 114806031901,
+      "evidence_commit": "9d9516e388a0be96b7ffe514a95387b22283b6fb",
+      "review_scope": "Retain exact installed package copyright and referenced license text; not an exhaustive source/build attribution or redistribution approval"
+    }
+  ]
+}

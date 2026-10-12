@@ -4,6 +4,57 @@ import hashlib
 from pathlib import Path, PurePosixPath
 
 
+def omit_windows_os_images(analysis, payload, windows_root):
+    """Omit OS API-set/UCRT copies; supported Windows 10+ supplies these centrally.
+
+    Only matching BINARY entries originating inside Windows system directories are
+    eligible. Validate the entire existing TOC/payload before deleting owned output.
+    Preserve original hashes for audit; caller must probe the resulting package.
+    """
+    import re
+
+    before = collected_binaries(analysis, payload)
+    by_destination = {
+        row["destination"].removeprefix("_internal/"): row for row in before["entries"]
+    }
+    omitted = []
+    filtered = []
+    root = windows_root.resolve(strict=True)
+    for group in analysis:
+        if not isinstance(group, list):
+            filtered.append(group)
+            continue
+        remaining = []
+        for item in group:
+            eligible = False
+            if isinstance(item, tuple) and len(item) == 3 and item[2] == "BINARY":
+                source = Path(item[1]).resolve(strict=True)
+                if root in source.parents:
+                    relative = source.relative_to(root)
+                    eligible = (
+                        relative.parts[0].lower() in {"system32", "syswow64"}
+                        and re.fullmatch(
+                            r"(?:api-ms-win-[a-z0-9-]+|ucrtbase)\.dll", source.name.lower()
+                        )
+                        is not None
+                    )
+            if eligible:
+                row = by_destination[item[0].replace("\\", "/")]
+                omitted.append(
+                    {
+                        **row,
+                        "windows_relative_path": relative.as_posix(),
+                        "reason": "OS component supplied by Windows 10+; no system image redistribution",
+                    }
+                )
+            else:
+                remaining.append(item)
+        filtered.append(remaining)
+    for row in {item["destination"]: item for item in omitted}.values():
+        payload.joinpath(*PurePosixPath(row["destination"]).parts).unlink()
+    return filtered, omitted
+
+
 def digest(path):
     value = hashlib.sha256()
     with path.open("rb") as stream:
