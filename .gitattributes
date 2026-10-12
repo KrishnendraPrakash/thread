@@ -1,0 +1,4 @@
+# Preserve verified upstream notice bytes and identical project-license bytes
+# across native target checkouts; do not apply core.autocrlf conversions.
+LICENSE -text
+extensions/vscode/notices/** -text
