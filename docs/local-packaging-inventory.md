@@ -27,3 +27,6 @@ Acceptance fixtures cover the actual EXTENSION omission, rewritten source/payloa
 
 
 The approved build-only CI now creates a temporary model-free VSIX on each of the six standard hosted targets, probes its actual native backend, verifies BYO package identity/content and prints exact native-file/source/notice inventory metadata. Packages are deleted on the runner; no artifacts, model/Ollama acquisitions, OIDC or publishing are involved. This does not advance ordinary-user, real-inference, complete licensing or signing gates.
+
+
+The later six-host BYO package check supplies current source/payload/file inventory metadata for every target; actual images were discarded. See [six-target receipts](byo-package-checks.md). This advances inventory availability only; complete license mappings and the five production gates remain pending.
