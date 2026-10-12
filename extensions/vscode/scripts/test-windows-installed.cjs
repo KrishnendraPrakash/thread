@@ -3,7 +3,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const os = require('node:os');
 const crypto = require('node:crypto');
-const { spawnSync } = require('node:child_process');
+const { spawn, spawnSync } = require('node:child_process');
 const { runTests } = require('@vscode/test-electron');
 
 async function main() {
@@ -44,10 +44,41 @@ async function main() {
       THREAD_SOURCE_NOTICE_SHA: crypto.createHash('sha256').update(fs.readFileSync(path.join(extension, 'notices/pathspec-0.12.1-SOURCE.txt'))).digest('hex') },
     launchArgs: [workspace, '--user-data-dir='+profile, '--extensions-dir='+extensions,
       '--disable-extensions', '--disable-telemetry', '--disable-gpu'] };
-  await runTests(options);
-  if (process.env.THREAD_TEST_POSITIVE === '1') {
-    options.extensionTestsEnv.THREAD_TEST_PHASE = 'resume';
+  if (process.env.THREAD_TEST_POSITIVE !== '1') {
     await runTests(options);
+  } else {
+    // The pinned SDK host deliberately uses in-memory storage whenever
+    // extensionTestsPath is set. A private development driver uses ordinary
+    // storage in this same disposable profile; no VS Code binary is patched.
+    const driver = path.join(temporary, 'driver'); fs.mkdirSync(driver);
+    fs.writeFileSync(path.join(driver, 'package.json'), JSON.stringify({ name: 'thread-private-driver', publisher: 'thread-fixtures',
+      version: '0.0.0', engines: { vscode: '^1.95.0' }, main: './runner.cjs', activationEvents: ['onStartupFinished'] }));
+    fs.copyFileSync(path.join(extension, 'out/test/windowsPositiveHost.js'), path.join(driver, 'test.js'));
+    fs.writeFileSync(path.join(driver, 'runner.cjs'), `const fs = require('node:fs'); const vscode = require('vscode');
+exports.activate = async () => {
+  try { await require('./test.js').run(); fs.writeFileSync(process.env.THREAD_TEST_REPORT, JSON.stringify({ok:true})); }
+  catch (error) { console.error(error); fs.writeFileSync(process.env.THREAD_TEST_REPORT, JSON.stringify({ok:false,error:String(error.stack || error)})); }
+  finally { await vscode.commands.executeCommand('workbench.action.quit'); }
+};
+`);
+    for (const phase of ['initial', 'resume']) {
+      const report = path.join(temporary, phase+'.json');
+      const environment = { ...options.extensionTestsEnv, THREAD_TEST_PHASE: phase, THREAD_TEST_REPORT: report };
+      delete environment.ELECTRON_RUN_AS_NODE;
+      await new Promise((resolve, reject) => {
+        const child = spawn(code, [...options.launchArgs, '--disable-workspace-trust',
+          '--extensionDevelopmentPath='+installed, '--extensionDevelopmentPath='+driver], { env: environment, shell: false, stdio: 'inherit' });
+        const timer = setTimeout(() => { child.kill(); reject(Error('Private driver timed out: '+phase)); }, 180000);
+        child.once('error', error => { clearTimeout(timer); reject(error); });
+        child.once('close', status => {
+          clearTimeout(timer);
+          if (status !== 0 || !fs.existsSync(report)) { reject(Error('Private driver failed without successful completion: '+phase)); return; }
+          const result = JSON.parse(fs.readFileSync(report, 'utf8'));
+          result.ok ? resolve() : reject(Error(result.error));
+        });
+      });
+    }
+    console.log('THREAD_WINDOWS_REAL_PROFILE_RELOAD_PASSED: ordinary isolated storage across two launches; no extensionTestsPath');
   }
   console.log('THREAD_WINDOWS_INSTALLED_PROFILE_PASSED: '+temporary);
 }
