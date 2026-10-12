@@ -111,7 +111,8 @@ export async function run(): Promise<void> {
     unchanged('value = 3\n');
     await command('clear'); writeFileSync(app, 'value = 1\n');
     await feature([{ path: 'app.py', old_text: 'value = 1', new_text: 'value = 2' },
-      { path: 'new.py', old_text: '', new_text: 'created = True\n' }]);
+      { path: 'new.py', old_text: '', new_text: 'created = True\n' },
+      { path: 'crlf.py', old_text: '', new_text: 'windows = True\r\n' }]);
     // Review both exact native diffs; scripted explicit modal approval.
     const savedPicker = installedAPI.window.showQuickPick;
     let fileIndex = 0;
@@ -119,7 +120,7 @@ export async function run(): Promise<void> {
       if (picks[0] === 'file') { picks.shift(); return items[fileIndex++]; }
       return savedPicker(items);
     };
-    await review('diff', 'file', 'diff', 'file', 'apply');
+    await review('diff', 'file', 'diff', 'file', 'diff', 'file', 'apply');
     installedAPI.window.showQuickPick = savedPicker;
     if (agent.result.decision !== 'applied') {
       console.log('THREAD_POST_EDIT_DIAGNOSIS: '+JSON.stringify({ expected: agent.result.proposal.files.map((file: any) => ({path: file.path, text: file.after})),
@@ -131,7 +132,10 @@ export async function run(): Promise<void> {
     const created = await vscode.workspace.openTextDocument(path.join(root, 'new.py'));
     assert.equal(created.getText(), 'created = True\n');
     await command('review'); assert.ok(errors.pop()!.includes('no pending proposal'));
-    await edited.save(); await created.save();
+    const crlf = await vscode.workspace.openTextDocument(path.join(root, 'crlf.py'));
+    assert.equal(crlf.getText(), 'windows = True\r\n'); assert.equal(crlf.eol, vscode.EndOfLine.CRLF);
+    assert.equal(created.eol, vscode.EndOfLine.LF);
+    await edited.save(); await created.save(); await crlf.save();
     assert.ok(requests >= 3); assert.ok(diffConfirmations >= 4); assert.equal(errors.length, 0);
     await command('clear');
     await feature([{ path: 'app.py', old_text: 'value = 2', new_text: 'value = 4' }]);

@@ -118,3 +118,5 @@ The Windows CI fixture packages two unpublished VSIXs: an unchanged guard contro
 Pathspec 0.12.1 source access is recorded in native notices; other target-specific binary inventories and the final offline companion rebuild/review remain open.
 
 Positive Windows CI exposed a real workspace-identity mismatch between VS Code short paths/drive casing and Python final paths. Review/file-URI and dirty-buffer checks now resolve Windows paths through the native filesystem API on both sides, preserving case-sensitive component distinctions and rejecting different or missing workspaces. The shipped Windows guard remains in place; hosted validation of the correction is pending.
+
+Windows candidate execution also demonstrated LF proposals becoming CRLF in newly created editor buffers. Edits now explicitly preserve consistent proposal line endings; mixed/bare-CR content is rejected before dispatch. Exact post-edit validation and uncertain-outcome handling remain mandatory. The actual installed fixture covers both LF and CRLF creation; CI validation is pending.

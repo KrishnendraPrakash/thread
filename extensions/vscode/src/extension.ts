@@ -419,12 +419,16 @@ export class Agent implements vscode.WebviewViewProvider, vscode.Disposable {
     const opened: { file: FileChange; document: vscode.TextDocument; version: number }[] = [];
     for (const file of proposal.files) {
       const uri = this.fileUri(proposal.root, file.path);
+      const eol = proposalLineEnding(file.after);
       if (file.before === null) { edit.createFile(uri, { overwrite: false, ignoreIfExists: false }); edit.insert(uri, new vscode.Position(0, 0), file.after); }
       else {
         const document = await vscode.workspace.openTextDocument(uri);
         if (document.isDirty || document.getText() !== file.before) { throw new Error('An edit target changed. Regenerate the proposal.'); }
         opened.push({ file, document, version: document.version });
         edit.replace(uri, new vscode.Range(document.positionAt(0), document.positionAt(document.getText().length)), file.after);
+      }
+      if (eol !== undefined) {
+        edit.set(uri, [...edit.get(uri), vscode.TextEdit.setEndOfLine(eol)]);
       }
     }
     result.decision = 'applying'; await this.save();
@@ -488,4 +492,14 @@ export function contained(root: string, filename: string): boolean {
 // never lowercase arbitrary components (Windows directories can be case-sensitive).
 export function workspacePath(filename: string): string {
   return process.platform === 'win32' ? realpathSync.native(filename) : realpathSync(filename);
+}
+
+// Monaco normalizes inserted newlines to the document EOL. Preserve the exact
+// reviewed content explicitly; reject forms the editor cannot represent exactly.
+export function proposalLineEnding(text: string): vscode.EndOfLine | undefined {
+  const remainder = text.replace(/\r\n/g, '');
+  if (remainder.includes('\r') || (text.includes('\r\n') && remainder.includes('\n'))) {
+    throw new Error('Proposal has mixed or bare-CR line endings. Request consistent LF or CRLF content; no edit was dispatched.');
+  }
+  return text.includes('\r\n') ? vscode.EndOfLine.CRLF : text.includes('\n') ? vscode.EndOfLine.LF : undefined;
 }
