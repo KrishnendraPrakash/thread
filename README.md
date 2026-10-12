@@ -217,3 +217,5 @@ Git now preserves project-license and dependency-notice bytes across platform ch
 An approved follow-up adds a real Windows x64 VS Code extension-host test using pinned Microsoft VS Code 1.141.0 and @vscode/test-electron 3.1.0. It installs a private CI-only native VSIX into empty profiles and checks installed metadata/license, activation/commands, native no-Python probing and expected guard rejection. It does not enable positive Windows workflows or publishing. A clean CI profile is not a bare consumer Windows machine.
 
 The pinned Windows Code archive uses a commit-prefix wrapper directory. Test acquisition preserves the verified side-by-side executable/runtime layout before invoking Code; its version, commit and byte digest remain checked.
+
+Installed-host guard observation uses the actual activated module's error handler, preserving its original behavior and the shipped guard. It avoids relying on a separate test extension's notification API facade.

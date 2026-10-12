@@ -28,13 +28,22 @@ export async function run(): Promise<void> {
     assert.ok(commands.includes('thread.'+suffix), 'Missing installed command '+suffix);
   }
   await vscode.commands.executeCommand('thread.sidebar.focus');
-  const errors: string[] = [], window: any = vscode.window;
-  const original = window.showErrorMessage;
-  window.showErrorMessage = async (message: string) => { errors.push(message); return undefined; };
+  assert.equal(vscode.workspace.isTrusted, true, 'Fixture workspace must be trusted before testing the platform guard');
+  // API objects are scoped per extension. Observe the actual already-loaded
+  // installed module, rather than a test API facade or a source Agent class.
+  const installedMain = path.resolve(extension.extensionPath, extension.packageJSON.main).toLowerCase();
+  const loaded = Object.keys(require.cache).find(file => path.resolve(file).toLowerCase() === installedMain);
+  assert.ok(loaded, 'Actual installed activation module must be loaded');
+  const installedAgent = require.cache[loaded]!.exports.Agent;
+  assert.ok(installedAgent);
+  const errors: string[] = [], original = installedAgent.prototype.error;
+  installedAgent.prototype.error = function (error: unknown): void {
+    errors.push(String(error)); original.call(this, error);
+  };
   try {
     await vscode.commands.executeCommand('thread.setup');
-    assert.ok(errors.some(message => /supports macOS and Linux/.test(message)), 'Actual command must retain the Windows guard');
-  } finally { window.showErrorMessage = original; }
+    assert.ok(errors.some(message => /supports macOS and Linux/.test(message)), 'Actual command must retain the Windows guard: '+JSON.stringify(errors));
+  } finally { installedAgent.prototype.error = original; }
   console.log('THREAD_WINDOWS_INSTALLED_HOST_PASSED: exact installed version/license, native no-Python probe, activation/commands/sidebar, expected guarded setup rejection');
   console.log('LIMITS: development-mode test host over installed payload; runner has developer tools/admin rights; no bare-machine or positive setup/edit/inference certification');
 }
