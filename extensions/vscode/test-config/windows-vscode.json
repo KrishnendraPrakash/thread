@@ -1,0 +1,12 @@
+{
+  "schema": 1,
+  "version": "1.141.0",
+  "commit": "2a59476c9bfcb90b3ddc372c36762471b7dfad1c",
+  "platform": "win32-x64-archive",
+  "url": "https://vscode.download.prss.microsoft.com/dbazure/download/stable/2a59476c9bfcb90b3ddc372c36762471b7dfad1c/VSCode-win32-x64-1.141.0.zip",
+  "sha256": "30ef5f55c377452af33009d0a8ac29a15cf8f770782bff42fe987c30da272223",
+  "source": "https://update.code.visualstudio.com/api/update/win32-x64-archive/stable/latest",
+  "test_utility": "@vscode/test-electron@3.1.0",
+  "resolved_at": "2026-10-12",
+  "runtime_directory": "2a59476c9b"
+}

@@ -122,13 +122,15 @@
     "vscode:prepublish": "npm run compile && npm run bundle",
     "package": "vsce package --allow-missing-repository --skip-license --out ../../artifacts/thread-agent-0.2.1.vsix",
     "release:check": "../../.venv/bin/python scripts/release.py check",
-    "package:preview": "../../.venv/bin/python scripts/release.py package"
+    "package:preview": "../../.venv/bin/python scripts/release.py package",
+    "test:windows-installed": "node scripts/test-windows-installed.cjs"
   },
   "devDependencies": {
     "@types/node": "^20.19.0",
     "@types/vscode": "~1.95.0",
-    "typescript": "^5.9.3",
-    "@vscode/vsce": "^3.6.2"
+    "@vscode/test-electron": "3.1.0",
+    "@vscode/vsce": "^3.6.2",
+    "typescript": "^5.9.3"
   },
   "preview": true,
   "homepage": "https://github.com/KrishnendraPrakash/thread#readme",
