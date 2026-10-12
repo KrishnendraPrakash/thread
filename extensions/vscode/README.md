@@ -107,4 +107,4 @@ Git now preserves project-license and dependency-notice bytes across platform ch
 
 The next hosted Windows check installs the actual CI-only native VSIX in empty VS Code profiles and exercises its activation, commands, license and backend. Windows setup still rejects through the shipped guard; positive setup/edit/inference and normal-consumer installation remain unvalidated. No VS Code/test utility, model or CI-only installer is bundled into the public extension by this preparation.
 
-The pinned Windows Code archive uses a commit-prefix wrapper directory. Test acquisition validates and normalizes that verified layout before invoking Code; its version, commit and byte digest remain checked.
+The pinned Windows Code archive uses a commit-prefix wrapper directory. Test acquisition preserves the verified side-by-side executable/runtime layout before invoking Code; its version, commit and byte digest remain checked.

@@ -15,7 +15,7 @@ async function main() {
   const code = path.resolve(process.env.THREAD_TEST_CODE_EXE || '');
   const vsix = path.resolve(process.env.THREAD_TEST_VSIX || '');
   if (!process.env.THREAD_TEST_CODE_EXE || !process.env.THREAD_TEST_VSIX || !fs.existsSync(code) || !fs.existsSync(vsix)) throw Error('Explicit existing Code executable and private VSIX required.');
-  const app = path.join(path.dirname(code), 'resources/app');
+  const app = path.join(path.dirname(code), pin.runtime_directory || '', 'resources/app');
   if (JSON.parse(fs.readFileSync(path.join(app, 'package.json'))).version !== pin.version || JSON.parse(fs.readFileSync(path.join(app, 'product.json'))).commit !== pin.commit) throw Error('Pinned Code metadata mismatch.');
   const temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'thread-wincode-'));
   const profile = path.join(temporary, 'profile'), extensions = path.join(temporary, 'extensions'), workspace = path.join(temporary, 'workspace');
@@ -39,7 +39,7 @@ async function main() {
   await runTests({ vscodeExecutablePath: code, platform: pin.platform,
     extensionDevelopmentPath: installed,
     extensionTestsPath: path.join(extension, 'out/test/windowsInstalledHost.js'),
-    extensionTestsEnv: { ...hostEnvironment, THREAD_INSTALLED_VERSION: manifest.version,
+    extensionTestsEnv: { ...hostEnvironment, ELECTRON_RUN_AS_NODE: undefined, THREAD_INSTALLED_VERSION: manifest.version,
       THREAD_INSTALLED_LICENSE_SHA: expectedLicense, THREAD_INSTALLED_PATH: installed },
     launchArgs: [workspace, '--user-data-dir='+profile, '--extensions-dir='+extensions,
       '--disable-extensions', '--disable-telemetry', '--disable-gpu'] });

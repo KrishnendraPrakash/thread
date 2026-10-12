@@ -18,7 +18,7 @@ SPEC.loader.exec_module(MODULE)
 
 
 class WindowsVSCodeAcquisitionTests(unittest.TestCase):
-    def test_pinned_commit_wrapper_is_normalized_without_guessing(self):
+    def test_pinned_side_by_side_runtime_layout_is_preserved(self):
         import io
 
         with tempfile.TemporaryDirectory() as directory:
@@ -26,7 +26,8 @@ class WindowsVSCodeAcquisitionTests(unittest.TestCase):
             archive = root / "wrapped.zip"
             prefix = "a" * 10
             with zipfile.ZipFile(archive, "w") as source:
-                source.writestr(prefix + "/Code.exe", b"fixture never executed")
+                source.writestr("Code.exe", b"fixture never executed")
+                source.writestr(prefix + "/icudtl.dat", b"fixture ICU data")
                 source.writestr(
                     prefix + "/resources/app/package.json", json.dumps({"version": "fixture"})
                 )
@@ -37,7 +38,7 @@ class WindowsVSCodeAcquisitionTests(unittest.TestCase):
                 "platform": "win32-x64-archive",
                 "commit": "a" * 40,
                 "version": "fixture",
-                "archive_root": prefix,
+                "runtime_directory": prefix,
                 "url": "https://vscode.download.prss.microsoft.com/" + "a" * 40 + "/code.zip",
                 "sha256": hashlib.sha256(archive.read_bytes()).hexdigest(),
             }
@@ -46,7 +47,9 @@ class WindowsVSCodeAcquisitionTests(unittest.TestCase):
             ):
                 result = MODULE.download(root / "code", pin)
             self.assertEqual(result, root / "code/Code.exe")
-            self.assertFalse((root / "code" / prefix).exists())
+            self.assertEqual(
+                (root / "code" / prefix / "icudtl.dat").read_bytes(), b"fixture ICU data"
+            )
 
     def test_traversal_duplicate_and_existing_output_are_rejected(self):
         with tempfile.TemporaryDirectory() as directory:

@@ -76,20 +76,10 @@ def download(output, pin):
         if digest.hexdigest() != pin["sha256"]:
             raise ValueError("Pinned VS Code archive digest mismatch; nothing extracted.")
         verified_extract(archive, output)
-    archive_root = pin.get("archive_root", "")
-    if archive_root:
-        if archive_root != pin["commit"][:10]:
-            raise ValueError("Archive wrapper must match the pinned commit prefix.")
-        nested = output / archive_root
-        if not nested.is_dir() or nested.is_symlink():
-            raise ValueError("Pinned archive wrapper missing.")
-        for child in nested.iterdir():
-            destination = output / child.name
-            if destination.exists() or destination.is_symlink():
-                raise ValueError("Ambiguous archive wrapper layout.")
-            shutil.move(str(child), destination)
-        nested.rmdir()
-    app = output / "resources/app"
+    runtime_directory = pin.get("runtime_directory", "")
+    if runtime_directory and runtime_directory != pin["commit"][:10]:
+        raise ValueError("Runtime directory must match the pinned commit prefix.")
+    app = output / runtime_directory / "resources/app"
     if (
         json.loads((app / "package.json").read_text())["version"] != pin["version"]
         or json.loads((app / "product.json").read_text())["commit"] != pin["commit"]
