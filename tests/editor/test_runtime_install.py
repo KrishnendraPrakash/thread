@@ -102,6 +102,73 @@ class RuntimeInstallTests(unittest.TestCase):
                     installer.unpack(archive, out)
         self.assertFalse((self.root / "escape").exists())
 
+    def link_archive(self, links, regular=True):
+        archive = self.root / "links.tar"
+        with tarfile.open(archive, "w") as output:
+            for name, destination in links:
+                item = tarfile.TarInfo(name)
+                item.type = tarfile.SYMTYPE
+                item.linkname = destination
+                output.addfile(item)
+            if regular:
+                item = tarfile.TarInfo("lib/versioned.so.1.2")
+                item.size = 7
+                output.addfile(item, io.BytesIO(b"fixture"))
+        return archive
+
+    def test_internal_forward_link_chain_becomes_independent_regular_copies(self):
+        archive = self.link_archive(
+            [
+                ("lib/unversioned.so", "versioned.so.1"),
+                ("lib/versioned.so.1", "versioned.so.1.2"),
+            ]
+        )
+        destination = self.root / "output"
+        destination.mkdir()
+        installer.unpack(archive, destination)
+        for name in ("unversioned.so", "versioned.so.1", "versioned.so.1.2"):
+            output = destination / "lib" / name
+            self.assertEqual(output.read_bytes(), b"fixture")
+            self.assertFalse(output.is_symlink())
+        (destination / "lib/versioned.so.1.2").write_bytes(b"changed")
+        self.assertEqual((destination / "lib/unversioned.so").read_bytes(), b"fixture")
+
+    def test_link_chains_cannot_resolve_cycles_missing_directories_or_escapes(self):
+        cases = [
+            [("lib/a", "b"), ("lib/b", "a")],
+            [("lib/a", "missing")],
+            [("lib/a", ".")],
+            [("lib/a", "b"), ("lib/b", "../../escape")],
+            [("lib/a", "/outside")],
+        ]
+        for index, links in enumerate(cases):
+            with self.subTest(links=links):
+                archive = self.link_archive(links)
+                destination = self.root / f"output{index}"
+                destination.mkdir()
+                with self.assertRaises(ValueError):
+                    installer.unpack(archive, destination)
+                self.assertFalse((destination / "lib/a").exists())
+
+    def test_link_copy_bytes_and_resolution_depth_remain_bounded(self):
+        archive = self.link_archive(
+            [
+                ("lib/a", "b"),
+                ("lib/b", "versioned.so.1.2"),
+            ]
+        )
+        destination = self.root / "budget"
+        destination.mkdir()
+        with self.assertRaisesRegex(ValueError, "copies exceed"):
+            installer.unpack(archive, destination, limit=20)
+        links = [(f"lib/l{i}", f"l{i + 1}") for i in range(65)]
+        links.append(("lib/l65", "versioned.so.1.2"))
+        archive = self.link_archive(links)
+        destination = self.root / "depth"
+        destination.mkdir()
+        with self.assertRaisesRegex(ValueError, "resolution limit"):
+            installer.unpack(archive, destination)
+
     def test_checksum_failure_never_installs_and_releases_lock(self):
         content = self.archive()
 

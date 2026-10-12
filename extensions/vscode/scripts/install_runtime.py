@@ -122,21 +122,36 @@ def unpack(archive, destination, limit=MAX_EXPANDED):
                 links.append((member, target))
             else:
                 raise ValueError("Unsupported runtime archive entry.")
-        for member, target in links:
-            link = PurePosixPath(member.linkname)
-            if link.is_absolute() or "\\" in member.linkname:
-                raise ValueError("Unsafe runtime archive link.")
-            base = target.parent if member.issym() else destination
-            resolved = (base / member.linkname).resolve()
-            if destination.resolve() not in resolved.parents or not resolved.is_file():
+        # Only materialize declared internal file links. Revisit unresolved targets
+        # after their own links have been copied; never create filesystem links.
+        pending = links
+        for _ in range(64):
+            if not pending:
+                break
+            deferred = []
+            for member, target in pending:
+                link = PurePosixPath(member.linkname)
+                if link.is_absolute() or "\\" in member.linkname:
+                    raise ValueError("Unsafe runtime archive link.")
+                base = target.parent if member.issym() else destination
+                resolved = (base / member.linkname).resolve()
+                if destination.resolve() not in resolved.parents:
+                    raise ValueError("Runtime link must reference an extracted internal file.")
+                if not resolved.is_file():
+                    deferred.append((member, target))
+                    continue
+                target.parent.mkdir(parents=True, exist_ok=True)
+                if target.exists():
+                    raise ValueError("Duplicate runtime archive link.")
+                expanded += resolved.stat().st_size
+                if expanded > limit:
+                    raise ValueError("Runtime link copies exceed extraction limits.")
+                shutil.copy2(resolved, target)
+            if len(deferred) == len(pending):
                 raise ValueError("Runtime link must reference an extracted internal file.")
-            target.parent.mkdir(parents=True, exist_ok=True)
-            if target.exists():
-                raise ValueError("Duplicate runtime archive link.")
-            expanded += resolved.stat().st_size
-            if expanded > limit:
-                raise ValueError("Runtime link copies exceed extraction limits.")
-            shutil.copy2(resolved, target)
+            pending = deferred
+        if pending:
+            raise ValueError("Runtime link chain exceeds the bounded resolution limit.")
 
 
 def install(root):
