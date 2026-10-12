@@ -56,7 +56,7 @@ function request(endpoint, route, value, timeout=120000) {
 function ownedProcesses() {
   const prefix = fs.realpathSync.native(work)+path.sep;
   if (process.platform === 'win32') {
-    const script = "Get-CimInstance Win32_Process | Where-Object { $_.ExecutablePath -and $_.ExecutablePath.StartsWith($env.THREAD_OWNED_TEST_ROOT,[StringComparison]::OrdinalIgnoreCase) } | Select-Object ProcessId,ExecutablePath | ConvertTo-Json -Compress";
+    const script = "$ErrorActionPreference='Stop'; $live=@(Get-CimInstance Win32_Process | Where-Object { $_.ExecutablePath -and $_.ExecutablePath.StartsWith($env.THREAD_OWNED_TEST_ROOT,[StringComparison]::OrdinalIgnoreCase) } | ForEach-Object { $item=$_; try { $owned=[System.Diagnostics.Process]::GetProcessById($item.ProcessId); try { if (-not $owned.HasExited) { $item | Select-Object ProcessId,ExecutablePath } } finally { $owned.Dispose() } } catch [System.ArgumentException] { } }); ConvertTo-Json -InputObject $live -Compress";
     const text = cp.execFileSync('powershell.exe',['-NoProfile','-NonInteractive','-Command',script],
       {encoding:'utf8',timeout:30000,env:{...process.env,THREAD_OWNED_TEST_ROOT:prefix}}).trim();
     return text ? [].concat(JSON.parse(text)).map(item=>({pid:item.ProcessId,executable:item.ExecutablePath})) : [];
@@ -73,11 +73,18 @@ async function cleanup(endpoint, proxy) {
   await new Promise(resolve=>setTimeout(resolve,500));
   for(const process of ownedProcesses()) {
     if(target==='win32-x64') {
-      try {cp.execFileSync('taskkill.exe',['/PID',String(process.pid),'/T','/F'],{timeout:30000,stdio:'ignore'});}
+      try {cp.execFileSync('taskkill.exe',['/PID',String(process.pid),'/T','/F'],{timeout:30000,encoding:'utf8',stdio:'pipe'});}
       catch(error) {
         // The server can finish exiting between CIM enumeration and taskkill.
         // Accept only verified absence; a still-owned process remains failure.
-        if(ownedProcesses().some(item=>item.pid===process.pid)) throw error;
+        console.log(JSON.stringify({cleanup_termination_pid:process.pid,
+          stdout:String(error.stdout ?? '').slice(0,2000),stderr:String(error.stderr ?? '').slice(0,2000)}));
+        let stillOwned=ownedProcesses().some(item=>item.pid===process.pid);
+        for(let retry=0; stillOwned && retry<10; retry++) {
+          await new Promise(resolve=>setTimeout(resolve,1000));
+          stillOwned=ownedProcesses().some(item=>item.pid===process.pid);
+        }
+        if(stillOwned) throw error;
       }
     }
     else {try {global.process.kill(process.pid,'SIGKILL');}catch(error){if(error.code!=='ESRCH')throw error;}}
